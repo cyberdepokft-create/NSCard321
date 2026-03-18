@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NS Card – TCG shop</title>
+      <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#0b1730">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="home">
+  <a href="#main" class="skip-link">Ugrás a tartalomra</a>
+  <div class="page-shell">
+    <div class="bg-orbs" aria-hidden="true">
+      <div class="aurora one"></div><div class="aurora two"></div><div class="aurora three"></div><div class="aurora four"></div>
+      <div class="sparkle s1"></div><div class="sparkle s2"></div><div class="sparkle s3"></div><div class="sparkle s4"></div><div class="sparkle s5"></div><div class="sparkle s6"></div>
+    </div>
+    <div class="bg-faces" aria-hidden="true">
+      <img class="bg-face" src="face-yellow.svg" alt=""><img class="bg-face" src="face-blue.svg" alt=""><img class="bg-face" src="face-rose.svg" alt="">
+      <img class="bg-face" src="face-yellow.svg" alt=""><img class="bg-face" src="face-blue.svg" alt=""><img class="bg-face" src="face-rose.svg" alt="">
+    </div>
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    <aside class="mobile-drawer" id="mobileDrawer" aria-label="Mobil menü">
+      <div class="mobile-head mobile-head--simple"><button class="icon-btn" id="closeMenuBtn" aria-label="Menü bezárása">✕</button></div>
+      <div class="mobile-search">
+        <input class="search-input" type="search" data-mobile-query placeholder="Keresés termékre vagy szettre...">
+        <button class="search-btn" type="button" data-mobile-search-go aria-label="Keresés indítása">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 1 1-14 0a7 7 0 0 1 14 0Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <nav class="mobile-links" aria-label="Mobil navigáció">
+        <a href="index.html" data-nav-key="home">Kezdőlap</a>
+        <a href="products.html" data-nav-key="products">Termékek</a>
+        <a href="checkout.html" data-nav-key="checkout">Pénztár</a>
+        <a href="index.html#kapcsolat" data-nav-key="contact">Kapcsolat</a>
+      </nav>
+    </aside>
+    <div class="cart-overlay" id="cartOverlay"></div>
+    <aside class="cart-drawer" id="cartDrawer" aria-label="Kosár">
+      <div class="cart-head"><h3>Kosár</h3><button class="icon-btn" id="closeCartBtn" aria-label="Kosár bezárása">✕</button></div>
+      <div class="cart-body" id="cartItems"></div>
+      <div class="cart-foot">
+        <div class="sum-row"><span>Részösszeg</span><strong id="cartSubtotal">0 Ft</strong></div>
+        <div class="sum-row"><span>Szállítás</span><strong>1 290 Ft</strong></div>
+        <div class="sum-row total"><span>Végösszeg</span><strong id="cartTotal">0 Ft</strong></div>
+        <div class="notice">A népszerű termékek gyorsan fogynak — ha megtaláltad a kedvenced, érdemes most kosárba tenni és továbblépni a rendeléshez.</div>
+        <button class="btn btn-secondary" id="cartGoCheckout">Tovább a pénztárhoz</button>
+      </div>
+    </aside>
+    <div class="toast" id="toast">A termék bekerült a kosárba</div>
+    <header class="site-header">
+      <div class="container header-row">
+        <a class="brand" href="index.html" aria-label="NS Card kezdőlap"><img src="logo-nscard.png" alt="NS Card logó"></a>
+        <nav class="desktop-nav" aria-label="Fő navigáció">
+          <a href="index.html" data-nav-key="home">Kezdőlap</a>
+          <a href="products.html" data-nav-key="products">Termékek</a>
+          <a href="checkout.html" data-nav-key="checkout">Pénztár</a>
+            <a href="index.html#kapcsolat" data-nav-key="contact">Kapcsolat</a>
+        </nav>
+        <div class="search-wrap">
+          <input class="search-input" type="search" data-global-query placeholder="Keresés termékre, szettre vagy kulcsszóra...">
+          <button class="search-btn" type="button" data-search-go aria-label="Keresés indítása">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 1 1-14 0a7 7 0 0 1 14 0Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="header-actions">
+          <button class="cart-button" type="button" data-open-cart><span>Kosár</span><span class="cart-count" data-cart-count>0</span></button>
+          <button class="menu-toggle" type="button" data-open-menu aria-label="Menü megnyitása">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+    <main id="main">
+<section class="hero"><div class="container"><div class="hero-grid">
+<div class="hero-copy">
+<span class="pill">⚡ Kiemelt ajánlatok</span>
+<h1>Most kezded, vagy már gyűjtöd?</h1>
+<p>Az <b>NS Card</b> olyan kártya csomagokat válogat egy helyre, amelyek már ránézésre is megadják a bontás izgalmát. Erős kezdőlapi ajánlatok, gyors keresés, látványos termékkártyák és egy olyan hangulat, amely végig azt sugallja: itt minden a következő nagy húzásról szól.</p>
+<div class="hero-actions"><a class="btn btn-primary" href="products.html">Vásárlás most</a><a class="btn btn-secondary" href="products.html">Kiemelt termékek</a><a class="btn btn-ghost" href="#kapcsolat">Kapcsolat</a></div>
+<div class="hero-mini">
+<div class="mini-card"><strong>Friss kínálat</strong><span>Booster pakkok, gyűjtői csomagok és prémiumabb ajánlatok egy helyen.</span></div>
+<div class="mini-card"><strong>Gyors keresés</strong><span>Írd be a kedvenc szetted nevét, és ugorj rögtön a releváns találatokhoz.</span></div>
+<div class="mini-card"><strong>Gyors döntés</strong><span>Átlátható kártyák, tiszta árak segítenek választani.</span></div>
+</div></div>
+<div class="hero-stage">
+<div class="hero-badges"><span>Játékos, mégis komoly hangulat</span></div>
+<div class="hero-glow" aria-hidden="true"></div><div class="orbit-ring" aria-hidden="true"></div>
+<img class="face-burst" src="face-yellow.svg" alt=""><img class="face-float one" src="face-blue.svg" alt=""><img class="face-float two" src="face-rose.svg" alt=""><img class="face-float three" src="face-yellow.svg" alt="">
+<div class="hero-pack a"><img src="pack-electric.svg" alt="Evolving Skies booster"></div>
+<div class="hero-pack b"><img src="pack-stellar.svg" alt="Brilliant Stars booster"></div>
+<div class="hero-pack c"><img src="pack-frost.svg" alt="Chilling Reign booster"></div>
+<div class="hero-pack d"><img src="pack-crown.svg" alt="Crown Zenith elite"></div>
+<div class="hero-spark"><span>⚡ Bonts ma is valami izgalmasat</span><span>🛒 Tedd kosárba a kedvenceidet</span><span>🎯 Találd meg a hozzád illő terméket</span></div>
+</div></div></div></section>
+<section class="section"><div class="container"><div class="featured-marquee-wrap"><div class="marquee-strip section-marquee home-featured-marquee" aria-hidden="true"><div class="hero-chip-row">
+<span class="hero-chip">Találd meg a következő kedvenced</span><span class="hero-chip">Kiemelt termékek minden gyűjtőnek</span><span class="hero-chip">Gyors kosár • tiszta árak • látványos kínálat</span><span class="hero-chip">Új ajánlatok minden héten</span><span class="hero-chip">Friss készlet • népszerű kiadások</span>
+<span class="hero-chip">Találd meg a következő kedvenced</span><span class="hero-chip">Kiemelt termékek minden gyűjtőnek</span><span class="hero-chip">Gyors kosár • tiszta árak • látványos kínálat</span><span class="hero-chip">Új ajánlatok minden héten</span><span class="hero-chip">Friss készlet • népszerű kiadások</span>
+</div></div></div><div class="section-head"><div><h2 class="section-title">A legnépszerűbb termékek most</h2><p class="section-copy">Ezek azok a csomagok, amelyeket a legtöbben választanak, amikor biztosan jó alapra akarnak építeni. Kezdő rendeléshez, ajándékba vagy saját bontásra is erős döntések.</p></div><a class="btn btn-ghost" href="products.html">Teljes kínálat</a></div><div class="grid" data-home-grid></div></div></section>
+<section class="section"><div class="container"><div class="feature-grid">
+<div class="feature-card"><strong>Gyors áttekinthetőség</strong><p>Az árak, készletjelzések és a fő ajánlatok rögtön láthatók, így kevesebb kattintással jutsz el a döntésig.</p></div>
+<div class="feature-card"><strong>Átlátható kínálat</strong><p>Gyorsan átnézhető kategóriák, jól látható árak és egyszerű választás segítenek megtalálni a neked való terméket.</p></div>
+<div class="feature-card"><strong>Gyűjtőbarát felépítés</strong><p>Az oldal minden blokkja úgy lett kialakítva, hogy gyorsan átlásd a kínálatot, könnyen összehasonlítsd a termékeket és pár kattintással kosárba tedd a kedvenceidet.</p></div>
+</div></div></section>
+<section class="section" id="kapcsolat"><div class="container"><div class="section-head"><div><h2 class="section-title">Kapcsolat</h2><p class="section-copy">Kérdésed van a kínálattal kapcsolatban, különlegesebb pakkot keresel, vagy nagyobb rendelést állítanál össze? Írj nekünk, és segítünk megtalálni a hozzád illő választást.</p></div></div>
+<div class="contact-layout"><div class="contact-stack">
+<div class="contact-card"><span>Segítünk választani</span><strong>Nem tudod, melyik pakk lenne a legjobb?</strong><p>Írd meg, milyen stílusú bontást keresel, és segítünk olyan csomagot találni, amely árban, hangulatban és tartalomban is illik hozzád.</p></div>
+<div class="contact-card"><span>Gyors válasz</span><strong>Kérj visszajelzést a rendelésed előtt</strong><p>Ha biztosra mennél, még a kosár véglegesítése előtt is kérhetsz tanácsot a választott pakkokról.</p></div>
+</div>
+<form class="contact-form"><div class="form-grid">
+<input class="field" type="text" placeholder="Neved"><input class="field" type="email" placeholder="E-mail címed">
+<input class="field full" type="text" placeholder="Melyik pakk vagy szett érdekel?">
+<textarea class="full" rows="6" placeholder="Írd meg röviden, mire lenne szükséged: ajándék, saját bontás, ritkább kiadás, magasabb értékű csomag vagy több darabos rendelés."></textarea>
+</div><div class="hero-actions" style="margin-top:16px;"><button class="btn btn-primary" type="button" data-demo-send>Üzenet küldése</button></div><div class="form-note">Kérdezz bátran — a megfelelő pakk kiválasztása sokszor már az első jó döntésnél eldől.</div></form>
+</div></div></section>
+</main>
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-panel">
+          <div>
+            <h3>NS Card – ahol a bontás élménye már a kezdőlapon elindul</h3>
+            <p>Keresd meg a kedvenc szettedet, válogass a kiemelt pakkok közül, és építsd fel azt a kosarat, amit a következő bontásnál a legszívesebben látnál magad előtt.</p>
+          </div>
+          <div class="footer-tags"><span>Gyors keresés</span><span>Kiemelt ajánlatok</span><span>Rendelésre kész kínálat</span><span>Gyűjtői hangulat</span></div>
+        </div>
+      </div>
+    </footer>
+  </div>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

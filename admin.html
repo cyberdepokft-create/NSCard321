@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NS Card – Admin</title>
+      <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#0b1730">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="admin">
+  <a href="#main" class="skip-link">Ugrás a tartalomra</a>
+  <div class="page-shell">
+    <div class="bg-orbs" aria-hidden="true">
+      <div class="aurora one"></div><div class="aurora two"></div><div class="aurora three"></div><div class="aurora four"></div>
+      <div class="sparkle s1"></div><div class="sparkle s2"></div><div class="sparkle s3"></div><div class="sparkle s4"></div><div class="sparkle s5"></div><div class="sparkle s6"></div>
+    </div>
+    <div class="bg-faces" aria-hidden="true">
+      <img class="bg-face" src="face-yellow.svg" alt=""><img class="bg-face" src="face-blue.svg" alt=""><img class="bg-face" src="face-rose.svg" alt="">
+      <img class="bg-face" src="face-yellow.svg" alt=""><img class="bg-face" src="face-blue.svg" alt=""><img class="bg-face" src="face-rose.svg" alt="">
+    </div>
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    <aside class="mobile-drawer" id="mobileDrawer" aria-label="Mobil menü">
+      <div class="mobile-head mobile-head--simple"><button class="icon-btn" id="closeMenuBtn" aria-label="Menü bezárása">✕</button></div>
+      <div class="mobile-search">
+        <input class="search-input" type="search" data-mobile-query placeholder="Keresés termékre vagy szettre...">
+        <button class="search-btn" type="button" data-mobile-search-go aria-label="Keresés indítása">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 1 1-14 0a7 7 0 0 1 14 0Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <nav class="mobile-links" aria-label="Mobil navigáció">
+        <a href="index.html" data-nav-key="home">Kezdőlap</a>
+        <a href="products.html" data-nav-key="products">Termékek</a>
+        <a href="checkout.html" data-nav-key="checkout">Pénztár</a>
+        <a href="index.html#kapcsolat" data-nav-key="contact">Kapcsolat</a>
+      </nav>
+    </aside>
+    <div class="cart-overlay" id="cartOverlay"></div>
+    <aside class="cart-drawer" id="cartDrawer" aria-label="Kosár">
+      <div class="cart-head"><h3>Kosár</h3><button class="icon-btn" id="closeCartBtn" aria-label="Kosár bezárása">✕</button></div>
+      <div class="cart-body" id="cartItems"></div>
+      <div class="cart-foot">
+        <div class="sum-row"><span>Részösszeg</span><strong id="cartSubtotal">0 Ft</strong></div>
+        <div class="sum-row"><span>Szállítás</span><strong>1 290 Ft</strong></div>
+        <div class="sum-row total"><span>Végösszeg</span><strong id="cartTotal">0 Ft</strong></div>
+        <div class="notice">Az admin felület mellett a webshop kosarát is eléred, így rögtön ellenőrizheted a kirakatoldali működést.</div>
+        <button class="btn btn-secondary" id="cartGoCheckout">Tovább a pénztárhoz</button>
+      </div>
+    </aside>
+    <div class="toast" id="toast">A módosítás mentve lett</div>
+    <header class="site-header">
+      <div class="container header-row">
+        <a class="brand" href="index.html" aria-label="NS Card kezdőlap"><img src="logo-nscard.png" alt="NS Card logó"></a>
+        <nav class="desktop-nav" aria-label="Fő navigáció">
+          <a href="index.html" data-nav-key="home">Kezdőlap</a>
+          <a href="products.html" data-nav-key="products">Termékek</a>
+          <a href="checkout.html" data-nav-key="checkout">Pénztár</a>
+            <a href="index.html#kapcsolat" data-nav-key="contact">Kapcsolat</a>
+        </nav>
+        <div class="search-wrap">
+          <input class="search-input" type="search" data-global-query placeholder="Gyors keresés a kirakatoldalhoz...">
+          <button class="search-btn" type="button" data-search-go aria-label="Keresés indítása">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 1 1-14 0a7 7 0 0 1 14 0Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="header-actions">
+          <button class="cart-button" type="button" data-open-cart><span>Kosár</span><span class="cart-count" data-cart-count>0</span></button>
+          <button class="menu-toggle" type="button" data-open-menu aria-label="Menü megnyitása">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </div>
+    </header>
+    <main id="main">
+      <section class="section" style="padding-top:34px;">
+        <div class="container">
+        <div class="admin-auth-shell reveal" data-admin-auth-panel>
+            <div class="admin-auth-card">
+              <span class="pill">🔐 Admin belépés</span>
+              <h1 class="section-title" style="margin-top:16px;">Webshop admin belépés</h1>
+              <p class="section-copy">Az admin felület nem jelenik meg a menüsorban. Belépés után termékeket kezelhetsz, több képet tölthetsz fel, majd a publikus catalog.json fájlt GitHubra is kiküldheted. A bolt ezután közvetlenül is tudja olvasni a GitHub katalógust, így a frissítés gyorsabban megjelenik minden eszközön.</p>
+              <form id="adminLoginForm" class="admin-login-form" autocomplete="off">
+                <div>
+                  <label class="admin-label" for="adminUsername">Felhasználónév</label>
+                  <input class="field" id="adminUsername" name="adminUsername" type="text" placeholder="Add meg a felhasználónevet" required>
+                </div>
+                <div>
+                  <label class="admin-label" for="adminPassword">Jelszó</label>
+                  <input class="field" id="adminPassword" name="adminPassword" type="password" placeholder="Add meg a jelszót" required>
+                </div>
+                <div class="admin-login-actions">
+                  <button class="btn btn-primary" type="submit">Belépés az adminba</button>
+                  <a class="btn btn-ghost" href="index.html">Vissza a webshophoz</a>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div data-admin-app hidden>
+            <div class="admin-topbar reveal">
+              <div>
+                <span class="pill">🛠️ Admin vezérlőpult</span>
+                <p class="admin-subtle" style="margin:10px 0 0;">Közvetlen link: <strong>admin.html</strong> vagy Netlify-n az <strong>/admin</strong> útvonal.</p>
+              </div>
+              <div class="admin-topbar-actions">
+                <a class="btn btn-ghost" href="index.html" target="_blank" rel="noopener">Webshop megnyitása</a>
+                <button class="btn btn-ghost" type="button" data-admin-refresh>Termékek frissítése</button>
+                <button class="btn btn-secondary" type="button" data-admin-logout>Kijelentkezés</button>
+              </div>
+            </div>
+          <div class="section-head">
+            <div>
+              <span class="pill">🔐 Webshop admin felület</span>
+              <h1 class="section-title" style="margin-top:16px;">Termékek kezelése egy helyről</h1>
+              <p class="section-copy">Innen tudod kezelni a teljes katalógust: új termék felvitele, meglévők szerkesztése, duplikálása, törlése, valamint JSON export és import. Mentéskor helyi vázlat készül, GitHub publikálással pedig a catalog.json frissül. A beállított élő GitHub-forrás miatt a bolt közvetlenül is képes frissülni, így nem kell minden módosításnál külön Netlify buildre várni.</p>
+            </div>
+          </div>
+
+          <div class="admin-layout">
+            <div class="admin-main">
+              <div class="admin-summary">
+                <div class="stat-card reveal"><span>Összes termék</span><strong data-stat-total>0</strong><small>aktív a katalógusban</small></div>
+                <div class="stat-card reveal"><span>Alacsony készlet</span><strong data-stat-low>0</strong><small>5 db alatt vagy azon</small></div>
+                <div class="stat-card reveal"><span>Akciós tételek</span><strong data-stat-sale>0</strong><small>sale jelöléssel</small></div>
+                <div class="stat-card reveal"><span>Összes készlet</span><strong data-stat-stock>0</strong><small>darab a kínálatban</small></div>
+              </div>
+
+              <section class="admin-card reveal">
+                <div class="admin-card-head">
+                  <div>
+                    <span class="pill">➕ Termék felvitel</span>
+                    <h2 data-form-heading>Új termék létrehozása</h2>
+                    <p class="admin-subtle">Használd ezt az űrlapot új termék hozzáadásához vagy egy meglévő módosításához.</p>
+                  </div>
+                  <button class="btn btn-ghost" type="button" data-form-reset>Űrlap ürítése</button>
+                </div>
+
+                <form id="adminProductForm" class="admin-form" autocomplete="off">
+                  <div class="admin-form-grid">
+                    <div>
+                      <label class="admin-label" for="productName">Termék neve</label>
+                      <input class="field" id="productName" name="productName" type="text" placeholder="Pl. Scarlet & Violet booster" required>
+                    </div>
+                    <div>
+                      <label class="admin-label" for="category">Kategória</label>
+                      <select class="select" id="category" name="category" required></select>
+                    </div>
+                    <div>
+                      <label class="admin-label" for="productSet">Szett / sorozat</label>
+                      <input class="field" id="productSet" name="productSet" type="text" placeholder="Pl. Scarlet & Violet Base">
+                    </div>
+                    <div>
+                      <label class="admin-label" for="badge">Badge felirat</label>
+                      <input class="field" id="badge" name="badge" type="text" placeholder="Pl. Új, Top, Akció">
+                    </div>
+                    <div class="full">
+                      <label class="admin-label" for="line">Rövid kiemelt sor</label>
+                      <input class="field" id="line" name="line" type="text" placeholder="Pl. Erős nyitó ajánlat kezdőknek">
+                    </div>
+                    <div>
+                      <label class="admin-label" for="price">Aktuális ár (Ft)</label>
+                      <input class="field" id="price" name="price" type="number" min="0" step="10" placeholder="1490" required>
+                    </div>
+                    <div>
+                      <label class="admin-label" for="oldPrice">Régi ár (Ft, opcionális)</label>
+                      <input class="field" id="oldPrice" name="oldPrice" type="number" min="0" step="10" placeholder="1690">
+                    </div>
+                    <div>
+                      <label class="admin-label" for="stock">Készlet (db)</label>
+                      <input class="field" id="stock" name="stock" type="number" min="0" step="1" placeholder="12" required>
+                    </div>
+                    <div>
+                      <label class="admin-label" for="availability">Elérhetőség</label>
+                      <select class="select" id="availability" name="availability"></select>
+                    </div>
+                    <div>
+                      <label class="admin-label" for="artPreset">Termékkép</label>
+                      <select class="select" id="artPreset" name="artPreset"></select>
+                    </div>
+                    <div class="full is-hidden" data-custom-art-wrap>
+                      <label class="admin-label" for="customArt">Egyedi kép URL vagy relatív útvonal</label>
+                      <input class="field" id="customArt" name="customArt" type="text" placeholder="https://... vagy sajat-termek.png">
+                    </div>
+                    <div class="full">
+                      <label class="admin-label" for="productImageFile">Képek feltöltése fájlból (opcionális)</label>
+                      <input class="field file-field" id="productImageFile" name="productImageFile" type="file" accept="image/*" multiple data-product-image-file>
+                      <div class="admin-upload-row">
+                        <div class="admin-image-preview" data-art-preview><span>Nincs kiválasztott kép</span></div>
+                        <div class="admin-upload-actions">
+                          <div class="admin-subtle" data-image-count>Nincs kiválasztott kép</div>
+                          <button class="btn btn-ghost" type="button" data-clear-image-upload>Kiválasztott képek törlése</button>
+                        </div>
+                      </div>
+                      <p class="admin-subtle" style="margin:8px 0 0;">Maximum 5 kép tölthető fel. A rendszer az első képet használja fő képként, de a mentés előtt bármelyik feltöltött képet beállíthatod elsődlegesnek.</p>
+                    </div>
+                    <div>
+                      <label class="admin-label" for="artA">Kiemelő szín</label>
+                      <input class="field color-field" id="artA" name="artA" type="color" value="#1fd8a0">
+                    </div>
+                    <div>
+                      <label class="admin-label" for="artB">Háttér szín</label>
+                      <input class="field color-field" id="artB" name="artB" type="color" value="#081126">
+                    </div>
+                    <div class="full">
+                      <label class="admin-label" for="description">Leírás</label>
+                      <textarea id="description" name="description" rows="5" placeholder="Írd le röviden, miért lehet jó választás ez a termék."></textarea>
+                    </div>
+                    <div class="full">
+                      <span class="admin-label">Jelölések</span>
+                      <div class="admin-checks" data-flag-wrap></div>
+                    </div>
+                  </div>
+                  <div class="admin-actions">
+                    <button class="btn btn-primary" type="submit" data-submit-label>Termék mentése</button>
+                    <button class="btn btn-secondary" type="button" data-cancel-edit hidden>Szerkesztés megszakítása</button>
+                  </div>
+                </form>
+              </section>
+            </div>
+
+            <aside class="admin-side">
+              <section class="admin-card reveal">
+                <h3>Gyors műveletek</h3>
+                <p class="admin-subtle">Exportáld a publikus catalog.json fájlt, tölts vissza JSON-ból, vagy állítsd vissza az alap demo kínálatot.</p>
+                <div class="admin-stack">
+                  <button class="btn btn-secondary" type="button" data-export-json>catalog.json letöltése</button>
+                  <button class="btn btn-ghost" type="button" data-open-import-file>JSON fájl betöltése</button>
+                  <input type="file" accept="application/json" data-import-file hidden>
+                  <textarea class="field admin-json" rows="7" data-import-json placeholder='Ide beilleszthetsz egy tömböt is, pl. [{"id":1,"name":"..."}]'></textarea>
+                  <button class="btn btn-primary" type="button" data-import-apply>Beillesztett JSON alkalmazása</button>
+                  <button class="btn btn-ghost danger-soft" type="button" data-reset-defaults>Alap katalógus visszaállítása</button>
+                </div>
+                <div class="notice">Ez a verzió kétlépcsős: mentéskor helyi vázlat készül, GitHub publikáláskor pedig a gyökérben lévő <strong>catalog.json</strong> frissül. Így nem kell mappát feltöltened: ebben a csomagban minden fontos fájl a gyökérben van, és elég az egyetlen publikus adatfájlt frissíteni.</div>
+              </section>
+
+              <section class="admin-card reveal">
+                <h3>GitHub + Netlify szinkron</h3>
+                <p class="admin-subtle">Itt adod meg, melyik repó gyökerében lévő <strong>catalog.json</strong> fájlt frissítse az admin. A teljes webshop gyökérszintű fájlstruktúrára van átalakítva. A Netlify build beállításait ez a csomag már előre megadja a <strong>netlify.toml</strong> fájlban, de a biztos <strong>main</strong> branch-es induláshoz az alábbi 1-klikkes Netlify linket érdemes használni. Az élő szinkron ettől függetlenül a GitHub-on frissített <strong>catalog.json</strong> fájlt is közvetlenül olvassa. A Build Hook továbbra is opcionális.</p>
+                <div class="admin-stack" data-github-form>
+                  <div>
+                    <label class="admin-label" for="githubOwner">GitHub tulajdonos</label>
+                    <input class="field" id="githubOwner" name="githubOwner" type="text" placeholder="pl. felhasznalonev">
+                  </div>
+                  <div>
+                    <label class="admin-label" for="githubRepo">Repo neve</label>
+                    <input class="field" id="githubRepo" name="githubRepo" type="text" placeholder="pl. ns-card-shop">
+                  </div>
+                  <div class="admin-inline-grid">
+                    <div>
+                      <label class="admin-label" for="githubBranch">Branch</label>
+                      <input class="field" id="githubBranch" name="githubBranch" type="text" placeholder="main">
+                    </div>
+                    <div>
+                      <label class="admin-label" for="githubPath">Publikus fájl</label>
+                      <input class="field" id="githubPath" name="githubPath" type="text" value="catalog.json">
+                    </div>
+                  </div>
+                  <div>
+                    <label class="admin-label" for="githubToken">GitHub token</label>
+                    <input class="field" id="githubToken" name="githubToken" type="password" placeholder="PAT token (repo contents write)">
+                  </div>
+                  <div class="admin-inline-grid">
+                    <div>
+                      <label class="admin-label" for="deployPresetCommand">Automatikus Netlify build parancs</label>
+                      <input class="field" id="deployPresetCommand" type="text" readonly>
+                    </div>
+                    <div>
+                      <label class="admin-label" for="deployPresetPublish">Automatikus publish mappa</label>
+                      <input class="field" id="deployPresetPublish" type="text" readonly>
+                    </div>
+                  </div>
+                  <div class="admin-inline-grid">
+                    <div>
+                      <label class="admin-label" for="deployPresetBase">Automatikus base directory</label>
+                      <input class="field" id="deployPresetBase" type="text" readonly>
+                    </div>
+                    <div>
+                      <label class="admin-label" for="deployPresetBranch">Automatikus production branch</label>
+                      <input class="field" id="deployPresetBranch" type="text" readonly>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="admin-label" for="netlifyDeployLink">Netlify 1-klikk deploy link</label>
+                    <input class="field" id="netlifyDeployLink" type="url" readonly placeholder="Add meg fent a GitHub owner + repo mezőket, és a link automatikusan elkészül.">
+                  </div>
+                  <div class="admin-actions">
+                    <button class="btn btn-secondary" type="button" data-copy-netlify-deploy-link>Netlify link másolása</button>
+                    <button class="btn btn-primary" type="button" data-open-netlify-deploy>Netlify megnyitása előre kitöltve</button>
+                  </div>
+                  <div class="notice">A sima Netlify Git-import űrlapon a <strong>Branch to deploy</strong> mezőt a repó önmagában nem tudja kötelezően kitölteni. Ez a gomb a hivatalos Netlify <strong>start/deploy</strong> linket nyitja meg, ami a megadott branch-et (alapból <strong>main</strong>) és a base directory-t (<strong>.</strong>) előre beállítja.</div>
+                  <div class="notice">Automatikus, profibb mód: Netlify-ban állítsd be a <strong>GITHUB_TOKEN</strong>, <strong>GITHUB_OWNER</strong>, <strong>GITHUB_REPO</strong> környezeti változókat (opcionálisan <strong>GITHUB_BRANCH</strong>, <strong>GITHUB_PATH</strong>, <strong>NETLIFY_BUILD_HOOK</strong>). Így mentéskor az admin külön gombnyomás nélkül próbálja publikálni a katalógust.</div>
+                  <div>
+                    <label class="admin-label" for="githubBuildHook">Netlify Build Hook (opcionális)</label>
+                    <input class="field" id="githubBuildHook" name="githubBuildHook" type="url" placeholder="https://api.netlify.com/build_hooks/...">
+                  </div>
+                  <label class="check-pill admin-toggle-line">
+                    <input type="checkbox" id="githubAutoPublish" name="githubAutoPublish">
+                    <span>Automatikus GitHub publikálás mentés után</span>
+                  </label>
+                  <div class="admin-actions">
+                    <button class="btn btn-secondary" type="button" data-save-github>GitHub kapcsolat mentése</button>
+                    <button class="btn btn-primary" type="button" data-publish-github>Publikálás most (tartalék)</button>
+                  </div>
+                  <div class="admin-publish-status" data-github-status></div>
+                </div>
+              </section>
+            </aside>
+          </div>
+
+          <section class="admin-card reveal">
+            <div class="admin-card-head admin-card-head--stack">
+              <div>
+                <span class="pill">📦 Katalógus lista</span>
+                <h2>Meglévő termékek kezelése</h2>
+                <p class="admin-subtle">Kereshetsz név alapján, vagy szűrhetsz kategóriára. A szerkesztés gomb azonnal visszatölti az adatokat az űrlapba.</p>
+              </div>
+              <div class="admin-toolbar">
+                <input class="field" type="search" data-admin-search placeholder="Keresés név, szett vagy badge alapján...">
+                <select class="select" data-admin-filter aria-label="Admin kategória szűrő"></select>
+              </div>
+            </div>
+            <div class="admin-product-list" data-admin-list></div>
+          </section>
+          </div>
+        </div>
+      </section>
+    </main>
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-panel">
+          <div>
+            <h3>NS Card – admin, ami gyorsan kezelhető</h3>
+            <p>Ezzel a felülettel külön fejlesztői belenyúlás nélkül is tudsz termékeket felvinni, több képet kezelni, készletet módosítani, majd a publikus catalog.json fájlt GitHubra publikálni.</p>
+          </div>
+          <div class="footer-tags"><span>Kliensoldali mentés</span><span>GitHub sync</span><span>Többképes termék</span><span>Gyors szerkesztés</span></div>
+        </div>
+      </div>
+    </footer>
+  </div>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

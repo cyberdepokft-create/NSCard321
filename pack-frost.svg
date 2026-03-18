@@ -1,0 +1,15 @@
+<svg width="420" height="560" viewBox="0 0 420 560" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#c5a3ff"/><stop offset="100%" stop-color="#4a34ba"/></linearGradient></defs>
+<rect x="18" y="18" width="384" height="524" rx="36" fill="url(#g)"/>
+<rect x="18" y="18" width="384" height="524" rx="36" stroke="rgba(255,255,255,.48)" stroke-width="6"/>
+<circle cx="308" cy="112" r="96" fill="rgba(255,255,255,.14)"/>
+<circle cx="106" cy="432" r="106" fill="rgba(255,255,255,.08)"/>
+<path d="M82 226c30-64 88-108 156-108c58 0 108 30 136 80c-28 14-60 22-92 22c-62 0-118-30-152-76c-14 28-30 56-48 82Z" fill="rgba(255,255,255,.16)"/>
+<path d="M116 302l30-54l18 34l26-48l28 60l18-24l40 68H92l24-36Z" fill="rgba(255,255,255,.22)"/>
+<rect x="44" y="44" width="140" height="40" rx="20" fill="rgba(6,16,31,.44)"/>
+<text x="114" y="70" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="800" fill="white">NS CARD</text>
+<text x="210" y="208" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="46" font-weight="900" fill="#d4fbff" stroke="#102142" stroke-width="3">Chilling</text>
+<text x="210" y="258" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="46" font-weight="900" fill="#d4fbff" stroke="#102142" stroke-width="3">Reign</text>
+<rect x="82" y="452" width="256" height="46" rx="23" fill="rgba(6,16,31,.48)"/>
+<text x="210" y="481" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="20" font-weight="800" fill="white">BOOSTER</text>
+</svg>

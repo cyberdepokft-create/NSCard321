@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NS Card – Sikeres fizetés</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="64x64" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="site.webmanifest">
+  <meta name="theme-color" content="#0b1730">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-page="success">
+  <a href="#main" class="skip-link">Ugrás a tartalomra</a>
+  <div class="page-shell">
+    <div class="bg-orbs" aria-hidden="true">
+      <div class="aurora one"></div><div class="aurora two"></div><div class="aurora three"></div><div class="aurora four"></div>
+      <div class="sparkle s1"></div><div class="sparkle s2"></div><div class="sparkle s3"></div><div class="sparkle s4"></div><div class="sparkle s5"></div><div class="sparkle s6"></div>
+    </div>
+    <header class="site-header">
+      <div class="container header-row">
+        <a class="brand" href="index.html" aria-label="NS Card kezdőlap"><img src="logo-nscard.png" alt="NS Card logó"></a>
+        <nav class="desktop-nav" aria-label="Fő navigáció">
+          <a href="index.html">Kezdőlap</a>
+          <a href="products.html">Termékek</a>
+          <a href="checkout.html">Pénztár</a>
+          <a href="index.html#kapcsolat">Kapcsolat</a>
+        </nav>
+      </div>
+    </header>
+    <main id="main"><section class="section" style="padding-top:34px;"><div class="container">
+      <div class="checkout-main" style="max-width:780px;margin:0 auto;">
+        <span class="pill">✅ Fizetés visszaigazolás</span>
+        <h1 class="section-title" style="margin-top:16px;">Köszönjük a rendelést!</h1>
+        <p class="section-copy">Lekérdezzük a Stripe fizetés állapotát, és ha minden rendben van, automatikusan kiürítjük a helyi kosaradat.</p>
+        <div class="checkout-status is-loading" id="successStatus" aria-live="polite">Fizetési állapot ellenőrzése...</div>
+        <div class="hero-actions checkout-actions" style="margin-top:18px;">
+          <a class="btn btn-primary" href="products.html">Vissza a termékekhez</a>
+          <a class="btn btn-secondary" href="index.html">Kezdőlap</a>
+        </div>
+      </div>
+    </div></section></main>
+  </div>
+  <script>
+    (() => {
+      const STORE_KEY = 'ns-card-cart-v3';
+      const CHECKOUT_FORM_KEY = 'ns-card-checkout-form-v1';
+      const statusEl = document.getElementById('successStatus');
+      const fmtFt = value => new Intl.NumberFormat('hu-HU').format(Number(value) || 0) + ' Ft';
+      const esc = value => String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+      const setStatus = (html, variant) => {
+        statusEl.className = 'checkout-status' + (variant ? ' is-' + variant : '');
+        statusEl.innerHTML = html;
+      };
+
+      const sessionId = new URLSearchParams(window.location.search).get('session_id');
+      if (!sessionId) {
+        setStatus('A visszaigazoló azonosító hiányzik, de a termékek oldalára bármikor visszatérhetsz.', 'error');
+        return;
+      }
+
+      fetch('/api/checkout-session?session_id=' + encodeURIComponent(sessionId), {
+        headers: { Accept: 'application/json' }
+      })
+        .then(async response => ({ ok: response.ok, data: await response.json().catch(() => ({})) }))
+        .then(({ ok, data }) => {
+          if (!ok) throw new Error(data && data.error ? data.error : 'Nem sikerült ellenőrizni a fizetést.');
+          const paid = data.payment_status === 'paid' || data.status === 'complete';
+          if (paid) {
+            try {
+              localStorage.removeItem(STORE_KEY);
+              localStorage.removeItem(CHECKOUT_FORM_KEY);
+            } catch {}
+            const name = esc(data.customer_name || 'Vásárló');
+            const amount = fmtFt(data.amount_total);
+            const shippingMethod = data.shipping_method ? '<br><small>Szállítás: ' + esc(data.shipping_method) + '</small>' : '';
+            setStatus('<strong>Sikeres fizetés.</strong><br>Köszönjük, ' + name + '! A Stripe visszaigazolta a ' + esc(amount) + ' összegű rendelést.' + shippingMethod, 'success');
+            return;
+          }
+          setStatus('A fizetés állapota még nem végleges: ' + esc(data.payment_status || data.status || 'ismeretlen') + '.', 'info');
+        })
+        .catch(error => {
+          setStatus(esc(error && error.message ? error.message : 'Nem sikerült lekérdezni a fizetési állapotot.'), 'error');
+        });
+    })();
+  </script>
+</body>
+</html>

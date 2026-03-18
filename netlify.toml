@@ -1,0 +1,39 @@
+[build]
+  base = "."
+  publish = "."
+  command = "echo 'NS Card static site ready'"
+
+[functions]
+  directory = "functions"
+
+
+[[redirects]]
+  from = "/admin"
+  to = "/admin.html"
+  status = 200
+
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/catalog.json"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/sync-config.json"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+
+[[redirects]]
+  from = "/api/create-checkout-session"
+  to = "/.netlify/functions/create-checkout-session"
+  status = 200
+
+[[redirects]]
+  from = "/api/checkout-session"
+  to = "/.netlify/functions/checkout-session"
+  status = 200
