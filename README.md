@@ -38,3 +38,12 @@ A szövegek listája a `public/assets/js/texts.js` fájlban van (a forrás a fej
 - **Kuponkódok** (Beállítások → Kuponkódok): százalékos, fix összegű vagy ingyenes szállítás, minimum rendelési értékkel. A kártyás fizetésnél a szerver is ellenőrzi.
 - **Oldalak** menü: ÁSZF, adatkezelési tájékoztató, szállítás és elállás, rólunk (sablonnal), az impresszum a cégadatokból készül. Ha az ÁSZF vagy az adatkezelés ki van töltve, a pénztárban kötelező elfogadni.
 - **Keresőoptimalizálás**: schema.org adatok, kanonikus címek, `/sitemap.xml` (Pages Function), a termékoldal címét és megosztási képét a szerver írja be (`functions/product.js`).
+
+### 4.3 újdonságok
+
+- **Kategóriák**: képes csempék a kezdőlapon (az első kategória a nagy csempe – a sorrend az adminban állítható), színes fejléc a kategória oldalon, képes szűrő gombok, képes kategóriák a menüben és a keresőben. Adminban kategóriánként szín, borítókép, rövid leírás és elrejtés.
+- **Kezdőlap**: „Folytasd, ahol abbahagytad” sáv, Gyakori kérdések (saját kérdések az Oldalak menüben, különben automatikus).
+- **Termékoldal**: napi feladási határidő visszaszámlálással (Beállítások → Szállítás), alacsony készlet jelző, „Szólj, ha megérkezik” gomb.
+- **Mobil**: rács / lista nézet váltó a terméklistán, „vissza a tetejére” gomb.
+- **Alkalmazásként telepíthető** (service worker, `public/sw.js`), gyorsabb ismételt betöltés.
+- **Admin**: kategóriák szerinti készlet-összesítő az Áttekintésben.

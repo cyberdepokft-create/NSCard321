@@ -24,3 +24,10 @@
 /admin.html
   X-Robots-Tag: noindex, nofollow
   X-Frame-Options: DENY
+
+/sw.js
+  Cache-Control: no-cache
+  Service-Worker-Allowed: /
+
+/site.webmanifest
+  Cache-Control: public, max-age=86400

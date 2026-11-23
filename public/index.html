@@ -19,8 +19,8 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="preload" href="/assets/fonts/archivo-black.woff" as="font" type="font/woff" crossorigin>
   <link rel="preload" href="/assets/fonts/dm-sans.woff" as="font" type="font/woff" crossorigin>
-  <link rel="stylesheet" href="/assets/css/shop.css?v=4.2.0">
-  <script src="/assets/js/theme-boot.js?v=4.2.0"></script>
+  <link rel="stylesheet" href="/assets/css/shop.css?v=4.3.0">
+  <script src="/assets/js/theme-boot.js?v=4.3.0"></script>
   <link rel="canonical" href="https://www.nscard.hu/">
   <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "OnlineStore", "@id": "https://www.nscard.hu/#store", "name": "NS Card", "url": "https://www.nscard.hu/", "logo": "https://www.nscard.hu/img/brand/logo.webp", "image": "https://www.nscard.hu/img/brand/og.jpg", "currenciesAccepted": "HUF", "areaServed": "HU"}, {"@type": "WebSite", "@id": "https://www.nscard.hu/#site", "url": "https://www.nscard.hu/", "name": "NS Card", "inLanguage": "hu", "publisher": {"@id": "https://www.nscard.hu/#store"}, "potentialAction": {"@type": "SearchAction", "target": "https://www.nscard.hu/products?q={search_term_string}", "query-input": "required name=search_term_string"}}]}</script>
 </head>
@@ -78,6 +78,7 @@
   </aside>
   <div class="added" role="status" aria-live="polite" data-added></div>
   <div class="toast" role="status" aria-live="polite" data-toast></div>
+  <button class="to-top" type="button" data-to-top aria-label="Vissza az oldal tetejére"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 14 6-6 6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   <nav class="tabbar" aria-label="Gyors menü">
     <a href="/" aria-current="page"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5h-5v5H5a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span data-t="nav.home">Kezdőlap</span></a>
     <a href="/products"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="7.5" y="3" width="11" height="15" rx="2" stroke="currentColor" stroke-width="2" transform="rotate(10 13 10.5)"/><rect x="4" y="6" width="11" height="15" rx="2" stroke="currentColor" stroke-width="2" fill="var(--ink-2, #0b1a44)"/></svg><span data-t="nav.products">Termékek</span></a>
@@ -137,8 +138,15 @@
 
       <section class="section-tight" data-section="categories" aria-labelledby="cats-title">
         <div class="wrap">
-          <div class="sec-head"><h2 class="display" id="cats-title" data-t="cats.title">Kategóriák</h2><a class="link-more" href="/products"><span data-t="link.all">Összes termék</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
-          <div class="cat-rail" data-cat-rail></div>
+          <div class="sec-head"><div><h2 class="display" id="cats-title" data-t="cats.title">Kategóriák</h2><p data-t="cats.text">Válaszd ki, mit bontanál legközelebb.</p></div><a class="link-more" href="/products"><span data-t="link.all">Összes termék</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
+          <div class="cat-grid" data-cat-grid></div>
+        </div>
+      </section>
+
+      <section class="section-tight" data-section="recent" aria-labelledby="recent-home-title" hidden>
+        <div class="wrap">
+          <div class="sec-head"><h2 class="display" id="recent-home-title" data-t="recent.home">Folytasd, ahol abbahagytad</h2></div>
+          <div class="recent-rail" data-recent-home></div>
         </div>
       </section>
 
@@ -167,6 +175,13 @@
             <li><h3 data-t="steps.2">Add meg a szállítási adatokat</h3><p data-step-ship>Házhozszállítás vagy csomagautomata.</p></li>
             <li><h3 data-t="steps.3">Fizess, ahogy neked kényelmes</h3><p data-step-pay>A rendelésről visszaigazolást küldünk e-mailben.</p></li>
           </ol>
+        </div>
+      </section>
+
+      <section class="section" id="gyik" data-section="faq" aria-labelledby="faq-title" hidden>
+        <div class="wrap faq-wrap">
+          <div class="sec-head"><div><h2 class="display" id="faq-title" data-t="faq.title">Gyakori kérdések</h2><p data-t="faq.text">Ha nem találod a választ, írj nekünk bátran.</p></div></div>
+          <div class="faq" data-faq></div>
         </div>
       </section>
 
@@ -219,8 +234,8 @@
       <div class="foot-bottom"><span>© <span data-year>2026</span> NS Card</span><nav class="foot-legal" data-foot-legal aria-label="Jogi információk"></nav><span data-t="footer.note">Az árak forintban értendők.</span></div>
     </div>
   </footer>
-  <script src="/assets/js/texts.js?v=4.2.0" defer></script>
-  <script src="/assets/js/store.js?v=4.2.0" defer></script>
-  <script src="/assets/js/shop.js?v=4.2.0" defer></script>
+  <script src="/assets/js/texts.js?v=4.3.0" defer></script>
+  <script src="/assets/js/store.js?v=4.3.0" defer></script>
+  <script src="/assets/js/shop.js?v=4.3.0" defer></script>
 </body>
 </html>

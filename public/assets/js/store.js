@@ -61,7 +61,9 @@
     companyName: "",
     companyAddress: "",
     taxNumber: "",
-    regNumber: ""
+    regNumber: "",
+    dispatchCutoff: 14,
+    deliveryText: "1–3 munkanap"
   });
 
   const INFO_PAGES = [
@@ -96,6 +98,13 @@
 
   function categories() {
     return (current?.settings?.categories || DEFAULT_CATEGORIES).filter(c => !c.hidden);
+  }
+  const CAT_TINTS = ["#ff7a1f", "#45aaff", "#3ccb76", "#b56aff", "#ffb02e", "#ff5d8f", "#2fd3ff", "#e7b743"];
+  function categoryMeta(value) {
+    const list = current?.settings?.categories || DEFAULT_CATEGORIES;
+    const i = Math.max(0, list.findIndex(c => c.value === value));
+    const c = list[i] || {};
+    return { ...c, color: c.color || CAT_TINTS[i % CAT_TINTS.length] };
   }
   function categoryLabel(value, short = false) {
     const c = (current?.settings?.categories || DEFAULT_CATEGORIES).find(item => item.value === value)
@@ -175,6 +184,8 @@
     s.categories = sanitizeCategories(r.categories);
     s.coupons = sanitizeCoupons(r.coupons);
     s.pages = sanitizePages(r.pages);
+    s.faq = sanitizeFaq(r.faq);
+    s.dispatchCutoff = Math.min(23, Math.max(0, s.dispatchCutoff));
     s.texts = sanitizeTexts(r.texts, r);
     s.theme = sanitizeTheme(r.theme);
     return s;
@@ -204,6 +215,9 @@
       if (body) out[pg.key] = { body };
     }
     return out;
+  }
+  function sanitizeFaq(raw) {
+    return (Array.isArray(raw) ? raw : []).slice(0, 24).map(x => ({ q: String(x?.q || "").trim().slice(0, 160), a: String(x?.a || "").trim().slice(0, 1200) })).filter(x => x.q && x.a);
   }
   function couponDiscount(coupon, subtotal) {
     if (!coupon || !subtotal) return 0;
@@ -315,11 +329,13 @@
 
   const SECTION_LIST = [
     { id: "ticker", label: "Futó sáv" },
-    { id: "pack", label: "Csomagbontó" },
     { id: "categories", label: "Kategóriák" },
+    { id: "recent", label: "Folytasd, ahol abbahagytad" },
+    { id: "pack", label: "Csomagbontó" },
     { id: "featured", label: "Kiemelt termékek" },
     { id: "soon", label: "Hamarosan érkezik" },
     { id: "steps", label: "Így rendelhetsz" },
+    { id: "faq", label: "Gyakori kérdések" },
     { id: "contact", label: "Kapcsolat" }
   ];
 
@@ -437,7 +453,10 @@
       let value = String(c?.value || "").trim().toLowerCase() || slugify(label);
       if (!label || !value || seen.has(value)) continue;
       seen.add(value);
-      out.push({ value, label, hidden: !!c?.hidden });
+      const color = /^#[0-9a-f]{6}$/i.test(String(c?.color || "")) ? String(c.color).toLowerCase() : "";
+      const image = String(c?.image || "").trim().slice(0, 600);
+      const desc = String(c?.desc || "").trim().slice(0, 160);
+      out.push({ value, label, hidden: !!c?.hidden, color, image, desc });
     }
     return out.length ? out : DEFAULT_CATEGORIES.map(c => ({ value: c.value, label: c.label, hidden: false }));
   }
@@ -666,7 +685,7 @@
     get CATEGORIES() { return categories(); },
     FONTS, PRESETS, SECTION_LIST, THEME_DEFAULTS, TEXT_GROUPS, TEXT_DEFAULTS,
     t, sanitizeTheme, sanitizeTexts, themeVars, applyTheme, setPreview,
-    INFO_PAGES, sanitizeCoupons, sanitizePages, couponDiscount, findCoupon, mdToHtml, favorites, recent,
+    categoryMeta, CAT_TINTS, sanitizeFaq, INFO_PAGES, sanitizeCoupons, sanitizePages, couponDiscount, findCoupon, mdToHtml, favorites, recent,
     store, clone, fmtFt, esc, int, categoryLabel, categories, imageUrl, slugify,
     sanitizeProduct, sanitizeCatalog, sanitizeSettings, sanitizeCategories, sanitizePayload, buildPayload,
     normalizeRemote, rawUrl, resolveRemote, setLocalRemote, fetchWithTimeout, fetchPublished,

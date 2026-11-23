@@ -442,6 +442,16 @@
     if (!todo.length) todo.push({ cls: "ok", text: "Minden rendben, nincs teendő." });
     $("[data-todo]").innerHTML = todo.map(t => `<li class="${t.cls}"><span>${esc(t.text)}</span>${t.btn ? `<button class="btn btn-ghost" type="button" data-act="${t.act}">${t.btn}</button>` : "<span></span>"}</li>`).join("");
 
+    const cb = $("[data-cat-break]");
+    if (cb) {
+      const rowsData = cats().map((c, i) => {
+        const items = visible.filter(p => p.category === c.value);
+        return { c, color: c.color || N.CAT_TINTS[i % N.CAT_TINTS.length], n: items.length, stock: items.reduce((a, p) => a + p.stock, 0), value: items.reduce((a, p) => a + p.price * p.stock, 0) };
+      }).filter(r => r.n);
+      const max = Math.max(1, ...rowsData.map(r => r.value));
+      cb.innerHTML = rowsData.length ? rowsData.map(r => `<div class="cb-row" style="--c:${esc(r.color)}"><b>${esc(r.c.label)}</b><div class="cb-bar"><i style="width:${Math.max(3, r.value / max * 100)}%"></i></div><small>${r.n} termék · ${r.stock} db · ${fmtFt(r.value)}</small></div>`).join("") : '<p class="muted">Még nincs termék.</p>';
+    }
+
     const lowList = visible.filter(p => ["low", "out"].includes(statusOf(p).key)).sort((a, b) => a.stock - b.stock).slice(0, 8);
     $("[data-lowstock]").innerHTML = lowList.length ? lowList.map(p => `
       <div class="mini-row">
@@ -579,22 +589,50 @@
     const list = cats();
     $("[data-cat-count]").textContent = `${list.length} kategória`;
     rows.innerHTML = list.map((c, i) => {
-      const count = products().filter(p => p.category === c.value).length;
+      const items = products().filter(p => p.category === c.value);
+      const meta = N.categoryMeta(c.value);
+      const color = c.color || N.CAT_TINTS[i % N.CAT_TINTS.length];
+      const imgs = [...new Set(items.flatMap(p => p.images.slice(0, 2)).filter(src => !/^data:/.test(src)))].slice(0, 10);
+      const thumb = c.image || imgs[0] || "";
+      const open = state.catOpen === c.value;
       return `
-      <div class="cat-row">
-        <div class="order-btns">
-          <button type="button" data-cat-move="${i}" data-d="-1" aria-label="Feljebb" ${i === 0 ? "disabled" : ""}>${ICON.up}</button>
-          <button type="button" data-cat-move="${i}" data-d="1" aria-label="Lejjebb" ${i === list.length - 1 ? "disabled" : ""}>${ICON.down}</button>
+      <div class="cat-item${open ? " open" : ""}" style="--c:${esc(color)}">
+        <div class="cat-row">
+          <div class="order-btns">
+            <button type="button" data-cat-move="${i}" data-d="-1" aria-label="Feljebb" ${i === 0 ? "disabled" : ""}>${ICON.up}</button>
+            <button type="button" data-cat-move="${i}" data-d="1" aria-label="Lejjebb" ${i === list.length - 1 ? "disabled" : ""}>${ICON.down}</button>
+          </div>
+          <span class="cat-swatch">${thumb ? `<img src="${esc(imageUrl(thumb))}" alt="">` : ""}</span>
+          <label class="sr-only" for="cat-${i}">Kategória neve</label>
+          <input class="input" id="cat-${i}" value="${esc(c.label)}" maxlength="40" data-cat-label="${i}">
+          <span class="meta">${items.length} termék${c.hidden ? " · rejtett" : ""}</span>
+          <div class="row-menu">
+            <button type="button" data-cat-open="${esc(c.value)}" aria-expanded="${open}" aria-label="Megjelenés szerkesztése" title="Szín, borítókép, leírás">${ICON.edit}</button>
+            <button type="button" data-cat-filter="${esc(c.value)}" aria-label="Termékek megnyitása" title="Termékek megnyitása">${ICON.eye}</button>
+            <button class="danger" type="button" data-cat-del="${i}" aria-label="Törlés" title="Törlés">${ICON.trash}</button>
+          </div>
         </div>
-        <label class="sr-only" for="cat-${i}">Kategória neve</label>
-        <input class="input" id="cat-${i}" value="${esc(c.label)}" maxlength="40" data-cat-label="${i}">
-        <span class="meta">${count} termék</span>
-        <div class="row-menu">
-          <button type="button" data-cat-filter="${esc(c.value)}" aria-label="Termékek megnyitása" title="Termékek megnyitása">${ICON.eye}</button>
-          <button class="danger" type="button" data-cat-del="${i}" aria-label="Törlés" title="Törlés">${ICON.trash}</button>
-        </div>
+        ${open ? `<div class="cat-more">
+          <div class="form-grid">
+            <div class="field"><label for="cc-${i}">Szín</label><div class="color-line"><input type="color" id="cc-${i}" value="${esc(color)}" data-cat-color="${i}"><button class="btn btn-ghost btn-sm" type="button" data-cat-color-auto="${i}" ${c.color ? "" : "disabled"}>Automatikus</button></div></div>
+            <div class="field"><label for="cd-${i}">Rövid leírás (nem kötelező)</label><input class="input" id="cd-${i}" maxlength="160" value="${esc(c.desc || "")}" placeholder="pl. Egy-egy booster a gyors bontáshoz" data-cat-desc="${i}"></div>
+            <div class="field full"><span class="label">Borítókép</span><div class="cover-pick">
+              <button type="button" data-cat-cover="${i}" data-src="" aria-pressed="${!c.image}">Automa&shy;tikus</button>
+              ${imgs.map(src => `<button type="button" data-cat-cover="${i}" data-src="${esc(src)}" aria-pressed="${c.image === src}" aria-label="Borítókép választása"><img src="${esc(imageUrl(src))}" alt=""></button>`).join("")}
+            </div><span class="hint">Automatikus: a kategória termékeinek képeiből készül a csempe.</span></div>
+          </div>
+          <label class="toggle"><input type="checkbox" data-cat-hidden="${i}" ${c.hidden ? "checked" : ""}><span class="switch"></span><span><strong>Elrejtés a boltból</strong><small>A kategória és a termékei nem jelennek meg a menüben és a szűrőkben.</small></span></label>
+        </div>` : ""}
       </div>`;
     }).join("");
+  }
+
+  function setCat(i, patch) {
+    const c = cats()[i];
+    if (!c) return;
+    Object.assign(c, patch);
+    state.draft.settings.categories = N.sanitizeCategories(cats());
+    saveDraft();
   }
 
   function renameCategory(i, label) {
@@ -686,6 +724,7 @@
     raw.theme = state.draft.settings.theme;
     raw.coupons = state.draft.settings.coupons;
     raw.pages = state.draft.settings.pages;
+    raw.faq = state.draft.settings.faq;
     state.draft.settings = N.sanitizeSettings(raw);
     saveDraft();
     renderStatus();
@@ -1029,16 +1068,34 @@ A termék átvételétől számított 14 napon belül indoklás nélkül elállh
 
   function pageFilled(key) { return !!state.draft.settings.pages?.[key]?.body; }
 
-  function renderPages() {
+  function renderPageItems() {
     const list = $("[data-pages-list]");
     if (!list) return;
     const s = state.draft.settings;
     if (!state.pageKey) state.pageKey = "aszf";
-    const items = [...N.INFO_PAGES.map(pg => ({ key: pg.key, label: pg.label, on: pageFilled(pg.key) })), { key: "impresszum", label: "Impresszum", on: !!(s.companyName || s.email), auto: true }];
-    list.innerHTML = `<div class="page-items">${items.map(it => `<button type="button" class="page-item" data-page-key="${it.key}" aria-pressed="${state.pageKey === it.key}"><span><b>${esc(it.label)}</b><small>${it.auto ? "Automatikus, a cégadatokból" : it.on ? "Kitöltve, látszik a boltban" : "Üres, nem látszik"}</small></span><i class="pill ${it.on ? "in" : "hidden"}">${it.on ? "Aktív" : "Üres"}</i></button>`).join("")}</div>`;
+    const items = [...N.INFO_PAGES.map(pg => ({ key: pg.key, label: pg.label, on: pageFilled(pg.key) })), { key: "faq", label: "Gyakori kérdések", on: !!s.faq?.length, faq: true }, { key: "impresszum", label: "Impresszum", on: !!(s.companyName || s.email), auto: true }];
+    list.innerHTML = `<div class="page-items">${items.map(it => `<button type="button" class="page-item" data-page-key="${it.key}" aria-pressed="${state.pageKey === it.key}"><span><b>${esc(it.label)}</b><small>${it.auto ? "Automatikus, a cégadatokból" : it.faq ? (it.on ? "Saját kérdések a kezdőlapon" : "Automatikus kérdések a beállításokból") : it.on ? "Kitöltve, látszik a boltban" : "Üres, nem látszik"}</small></span><i class="pill ${it.on ? "in" : "hidden"}">${it.on ? "Aktív" : "Üres"}</i></button>`).join("")}</div>`;
+  }
+
+  function renderPages() {
+    const list = $("[data-pages-list]");
+    if (!list) return;
+    const s = state.draft.settings;
+    renderPageItems();
 
     const key = state.pageKey;
     const ed = $("[data-page-editor]");
+    const fe = $("[data-faq-editor]");
+    ed.classList.toggle("faq-mode", key === "faq");
+    fe.hidden = key !== "faq";
+    if (key === "faq") {
+      ed.classList.remove("auto");
+      $("[data-page-title]").textContent = "Gyakori kérdések";
+      $("[data-page-meta]").textContent = s.faq?.length ? `${s.faq.length} kérdés – a kezdőlap „Gyakori kérdések” részében jelennek meg.` : "Amíg nincs saját kérdés, a bolt a szállítási és fizetési beállításokból automatikusan összeállítja őket.";
+      $("[data-page-open]").href = "/#gyik";
+      renderFaqEditor();
+      return;
+    }
     const body = $("[data-page-body]");
     const meta = N.INFO_PAGES.find(pg => pg.key === key);
     $("[data-page-open]").href = `/info?p=${key}`;
@@ -1059,6 +1116,29 @@ A termék átvételétől számított 14 napon belül indoklás nélkül elállh
     $("[data-page-preview]").innerHTML = text ? N.mdToHtml(text) : '<p class="muted">Az előnézet itt jelenik meg.</p>';
   }
 
+  const FAQ_ICON = { up: ICON.up, down: ICON.down, del: ICON.trash };
+  function renderFaqEditor() {
+    const fe = $("[data-faq-editor]");
+    const list = state.draft.settings.faq || [];
+    fe.innerHTML = list.map((x, i) => `
+      <div class="faq-item">
+        <div class="fields">
+          <label class="sr-only" for="fq-${i}">Kérdés</label><input class="input" id="fq-${i}" maxlength="160" placeholder="Kérdés" value="${esc(x.q)}" data-faq-q="${i}">
+          <label class="sr-only" for="fa-${i}">Válasz</label><textarea class="textarea" id="fa-${i}" maxlength="1200" placeholder="Válasz" data-faq-a="${i}">${esc(x.a)}</textarea>
+        </div>
+        <div class="tools">
+          <button type="button" data-faq-move="${i}" data-d="-1" aria-label="Feljebb" ${i === 0 ? "disabled" : ""}>${FAQ_ICON.up}</button>
+          <button type="button" data-faq-move="${i}" data-d="1" aria-label="Lejjebb" ${i === list.length - 1 ? "disabled" : ""}>${FAQ_ICON.down}</button>
+          <button type="button" data-faq-del="${i}" aria-label="Törlés">${FAQ_ICON.del}</button>
+        </div>
+      </div>`).join("") + `<div class="row-actions"><button class="btn btn-primary btn-sm" type="button" data-faq-add>Kérdés hozzáadása</button>${list.length ? "" : '<span class="hint">Az első saját kérdéssel az automatikus kérdések helyére a sajátjaid kerülnek.</span>'}</div>`;
+  }
+  let faqT = 0;
+  function saveFaq(rerender) {
+    clearTimeout(faqT);
+    faqT = setTimeout(() => { saveDraft(); renderPagesList(); }, rerender ? 0 : 600);
+  }
+
   let pageSaveT = 0;
   function setPageBody(key, text) {
     const pages = { ...(state.draft.settings.pages || {}) };
@@ -1070,7 +1150,7 @@ A termék átvételétől számított 14 napon belül indoklás nélkül elállh
     clearTimeout(pageSaveT);
     pageSaveT = setTimeout(() => { saveDraft(); renderPagesList(); }, 600);
   }
-  function renderPagesList() { if (state.view === "oldalak") { const ae = document.activeElement; renderPages(); if (ae?.matches?.("[data-page-body]")) ae.focus(); } }
+  function renderPagesList() { if (state.view === "oldalak") renderPageItems(); }
 
   /* ---------------- Kuponok ---------------- */
   const CP_TYPES = { percent: "Százalék", fixed: "Fix összeg", ship: "Ingyenes szállítás" };
@@ -1381,6 +1461,28 @@ A termék átvételétől számított 14 napon belül indoklás nélkül elállh
       ta.scrollTop = 0;
       toast("Sablon beszúrva. Töltsd ki a szögletes zárójeles részeket.");
     });
+    const fe = $("[data-faq-editor]");
+    fe?.addEventListener("input", e => {
+      const el = e.target;
+      const list = state.draft.settings.faq || (state.draft.settings.faq = []);
+      if (el.dataset.faqQ !== undefined) list[Number(el.dataset.faqQ)].q = el.value;
+      else if (el.dataset.faqA !== undefined) list[Number(el.dataset.faqA)].a = el.value;
+      else return;
+      saveFaq(false);
+    });
+    fe?.addEventListener("click", e => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      const list = state.draft.settings.faq || (state.draft.settings.faq = []);
+      if (b.matches("[data-faq-add]")) { list.push({ q: "", a: "" }); renderFaqEditor(); $(`#fq-${list.length - 1}`)?.focus(); return; }
+      if (b.matches("[data-faq-del]")) { list.splice(Number(b.dataset.faqDel), 1); renderFaqEditor(); saveFaq(true); return; }
+      if (b.matches("[data-faq-move]")) {
+        const i = Number(b.dataset.faqMove), k = i + Number(b.dataset.d);
+        if (k < 0 || k >= list.length) return;
+        [list[i], list[k]] = [list[k], list[i]];
+        renderFaqEditor(); saveFaq(true);
+      }
+    });
     $$('input[name="pg-view"]').forEach(r => r.addEventListener("change", () => { $("[data-page-split]").dataset.view = r.value; }));
     $("[data-cp-add]")?.addEventListener("submit", e => { e.preventDefault(); addCoupon(e.currentTarget); });
     $("#cp-type")?.addEventListener("change", e => {
@@ -1631,7 +1733,20 @@ A termék átvételétől számított 14 napon belül indoklás nélkül elállh
 
     $("[data-settings-form]").addEventListener("submit", onSettingsSubmit);
     $("[data-cat-add]").addEventListener("submit", e => { e.preventDefault(); if (addCategory(e.currentTarget.label.value)) e.currentTarget.reset(); });
-    document.addEventListener("change", e => { if (e.target.matches("[data-cat-label]")) renameCategory(Number(e.target.dataset.catLabel), e.target.value); });
+    document.addEventListener("change", e => {
+      const el = e.target;
+      if (el.matches("[data-cat-label]")) renameCategory(Number(el.dataset.catLabel), el.value);
+      else if (el.matches("[data-cat-color]")) { setCat(Number(el.dataset.catColor), { color: el.value }); renderCategories(); }
+      else if (el.matches("[data-cat-desc]")) { setCat(Number(el.dataset.catDesc), { desc: el.value }); toast("Leírás mentve."); }
+      else if (el.matches("[data-cat-hidden]")) { setCat(Number(el.dataset.catHidden), { hidden: el.checked }); renderCategories(); }
+    });
+    document.addEventListener("click", e => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      if (b.matches("[data-cat-open]")) { state.catOpen = state.catOpen === b.dataset.catOpen ? null : b.dataset.catOpen; renderCategories(); }
+      else if (b.matches("[data-cat-color-auto]")) { setCat(Number(b.dataset.catColorAuto), { color: "" }); renderCategories(); }
+      else if (b.matches("[data-cat-cover]")) { setCat(Number(b.dataset.catCover), { image: b.dataset.src || "" }); renderCategories(); }
+    });
     document.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.matches("[data-cat-label]")) { e.preventDefault(); e.target.blur(); } });
     $("[data-gh-form]").addEventListener("submit", onGhSubmit);
     $("[data-import-file]").addEventListener("change", e => { const f = e.target.files[0]; if (f) importJson(f); e.target.value = ""; });

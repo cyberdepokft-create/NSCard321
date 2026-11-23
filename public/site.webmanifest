@@ -6,8 +6,66 @@
   "background_color": "#061230",
   "theme_color": "#061230",
   "icons": [
-    { "src": "/favicon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/favicon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+    {
+      "src": "/favicon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ],
+  "id": "/",
+  "lang": "hu",
+  "dir": "ltr",
+  "scope": "/",
+  "description": "Pokémon TCG boosterek, tin dobozok, Elite Trainer Boxok és kollekciók készletről.",
+  "categories": [
+    "shopping",
+    "entertainment"
+  ],
+  "orientation": "portrait",
+  "shortcuts": [
+    {
+      "name": "Termékek",
+      "short_name": "Termékek",
+      "url": "/products",
+      "icons": [
+        {
+          "src": "/favicon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Kedvencek",
+      "short_name": "Kedvencek",
+      "url": "/products?fav=1",
+      "icons": [
+        {
+          "src": "/favicon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Pénztár",
+      "short_name": "Pénztár",
+      "url": "/checkout",
+      "icons": [
+        {
+          "src": "/favicon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
   ]
 }

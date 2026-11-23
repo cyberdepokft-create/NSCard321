@@ -224,7 +224,7 @@
       cats.hidden = !!q;
       if (!q) {
         const top = N.products().filter(p => N.isBuyable(p) && (p.flags.includes("home") || p.flags.includes("popular"))).slice(0, 4);
-        cats.innerHTML = (list.length ? `<h2>${esc(t("search.popular"))}</h2><div class="chips">${list.map(c => `<a class="chip" href="/products?cat=${esc(c.value)}">${esc(c.label)}</a>`).join("")}</div>` : "")
+        cats.innerHTML = (list.length ? `<h2>${esc(t("search.popular"))}</h2><div class="sheet-cats">${list.map(c => `<a href="/products?cat=${esc(c.value)}" style="--c:${esc(c.color)}">${catThumb(c) ? `<img src="${esc(catThumb(c))}" alt="" loading="lazy">` : ""}<span><b>${esc(c.label)}</b><small>${c.count} termék</small></span></a>`).join("")}</div>` : "")
           + (top.length ? `<h2>${esc(t("featured.title"))}</h2><div class="suggest">${top.map(resultRow).join("")}</div>` : "");
       }
     }
@@ -441,8 +441,15 @@
   /* ---------------- közös: fejléc, lábléc, menü ---------------- */
   function categoriesWithCounts() {
     const list = N.products();
-    return N.CATEGORIES.map(c => ({ ...c, count: list.filter(p => p.category === c.value).length })).filter(c => c.count > 0);
+    return N.CATEGORIES.map(c => {
+      const items = list.filter(p => p.category === c.value);
+      const buy = items.filter(N.isBuyable);
+      const imgs = items.filter(p => p.images[0]).sort((a, b) => (N.isBuyable(b) - N.isBuyable(a)) || (b.price - a.price)).map(p => imageUrl(p.images[0]));
+      const meta = N.categoryMeta(c.value);
+      return { ...c, color: meta.color, count: items.length, inStock: buy.length, from: buy.length ? Math.min(...buy.map(p => p.price)) : 0, cover: c.image ? imageUrl(c.image) : "", imgs: [...new Set(imgs)] };
+    }).filter(c => c.count > 0);
   }
+  const catThumb = c => c.cover || c.imgs[0] || "";
 
   function shipShortLabel() {
     const prices = N.shippingMethods().filter(m => m.value !== "pickup").map(m => m.price);
@@ -466,6 +473,17 @@
     return tx + ".";
   }
 
+  function faqItems(s) {
+    if (s.faq?.length) return s.faq;
+    const items = [{ q: "Mennyi a szállítási díj, és mikor kapom meg?", a: `${shipText(s)}${s.deliveryText ? ` A kézbesítés általában ${s.deliveryText}.` : ""}` }];
+    const pays = payMethods(s);
+    if (pays.length) items.push({ q: "Hogyan fizethetek?", a: `${cap(joinHu(pays))}. A rendelésről e-mailben küldünk visszaigazolást.` });
+    items.push({ q: "Kell regisztrálnom a vásárláshoz?", a: "Nem. A kosár a böngésződben megmarad, a pénztárban csak a szállításhoz szükséges adatokat kérjük." });
+    if (s.pages?.aszf || s.pages?.szallitas) items.push({ q: "Visszaküldhetem a terméket?", a: "Igen, az átvételtől számított 14 napon belül indoklás nélkül elállhatsz a vásárlástól. A részleteket a vásárlási feltételekben találod." });
+    if (s.email) items.push({ q: "Nem találom, amit keresek. Mit tegyek?", a: `Írj nekünk a ${s.email} címre, és utánanézünk, be tudjuk-e szerezni.` });
+    return items;
+  }
+
   function sectionOn(id) {
     const sec = N.settings().theme.sections.find(x => x.id === id);
     return !sec || sec.on;
@@ -479,7 +497,7 @@
     const cats = categoriesWithCounts();
     const favN = N.favorites.list().filter(id => N.byId(id)).length;
     const menuCats = $("[data-menu-cats]");
-    if (menuCats) menuCats.innerHTML = (favN ? `<a href="/products?fav=1"><span>${esc(t("fav.title"))}</span><span>${favN}</span></a>` : "") + (cats.length ? `<p>${esc(t("cats.title"))}</p>${cats.map(c => `<a href="/products?cat=${esc(c.value)}"><span>${esc(c.label)}</span><span>${c.count}</span></a>`).join("")}` : "");
+    if (menuCats) menuCats.innerHTML = (favN ? `<a href="/products?fav=1"><span>${esc(t("fav.title"))}</span><span>${favN}</span></a>` : "") + (cats.length ? `<p>${esc(t("cats.title"))}</p>${cats.map(c => `<a href="/products?cat=${esc(c.value)}" style="--c:${esc(c.color)}">${catThumb(c) ? `<img src="${esc(catThumb(c))}" alt="" loading="lazy">` : ""}<span class="mc-name">${esc(c.label)}</span><span>${c.count}</span></a>`).join("")}` : "") + (installEvt ? `<button class="btn btn-ghost btn-block" type="button" data-install style="margin-top:14px">Telepítés a kezdőképernyőre</button>` : "");
     const footCats = $("[data-foot-cats]");
     if (footCats) footCats.innerHTML = `<li><a href="/products">${esc(t("link.all"))}</a></li>` + cats.map(c => `<li><a href="/products?cat=${esc(c.value)}">${esc(c.label)}</a></li>`).join("");
     const pages = s.pages || {};
@@ -530,6 +548,15 @@
       else if (el.matches("[data-close-search]")) closeSearch();
       else if (el.matches("[data-close]")) closeDrawer();
       else if (el.matches("[data-added-close]")) hideAdded();
+      else if (el.matches("[data-to-top]")) window.scrollTo({ top: 0, behavior: motionOK() ? "smooth" : "auto" });
+      else if (el.matches("[data-view]")) {
+        N.store.set(VIEW_KEY, el.dataset.view);
+        applyViewPref();
+        $$("[data-view]").forEach(b => b.setAttribute("aria-pressed", String(b === el)));
+      } else if (el.matches("[data-install]") && installEvt) {
+        installEvt.prompt();
+        installEvt.userChoice.finally(() => { installEvt = null; renderChrome(); });
+      }
       else if (el.matches("[data-add]")) addToCart(Number(el.dataset.add), 1, el);
       else if (el.matches("[data-fav]")) {
         e.preventDefault();
@@ -649,12 +676,54 @@
     setText("[data-step-pay]", payMethods(s).length ? `${cap(joinHu(payMethods(s)))}. A rendelésről e-mailben küldünk visszaigazolást.` : "A rendelésről e-mailben küldünk visszaigazolást.");
 
     const cats = categoriesWithCounts();
-    const rail = $("[data-cat-rail]");
-    if (rail) rail.innerHTML = cats.map(c => {
-      const sample = list.find(p => p.category === c.value && p.images[0]);
-      return `<a class="cat-tile" href="/products?cat=${esc(c.value)}"><div><strong>${esc(c.label)}</strong><span>${c.count} termék</span></div>${sample ? `<img src="${esc(imageUrl(sample.images[0]))}" alt="" loading="lazy">` : ""}</a>`;
-    }).join("");
+    const grid = $("[data-cat-grid]");
+    if (grid) {
+      // elrendezés: az első kategória a nagy csempe, a többi hézag nélkül tölti ki a rácsot (asztalon 4, mobilon 2 oszlop)
+      const n = cats.length;
+      const layout = cats.map(() => []);
+      if (n === 1) layout[0].push("d-w4", "m-w2");
+      else if (n === 2) layout.forEach(l => l.push("d-w2", "d-h2"));
+      else {
+        layout[0].push("big");
+        const k = Math.min(n - 1, 4);
+        const right = layout.slice(1, 1 + k);
+        if (k === 1) right[0].push("d-w2", "d-h2");
+        if (k === 2) right.forEach(l => l.push("d-w2"));
+        if (k === 3) right[2].push("d-w2");
+        const rest = layout.slice(1 + k), r = rest.length % 4;
+        const tail = rest.slice(rest.length - r);
+        if (r === 1) tail[0].push("d-w4");
+        if (r === 2) tail.forEach(l => l.push("d-w2"));
+        if (r === 3) tail[0].push("d-w2");
+      }
+      if (n > 1 && (n - 1) % 2 === 1) layout[n - 1].push("m-w2");
+      grid.innerHTML = cats.map((c, i) => {
+        const art = c.cover ? `<span class="cat-art cover"><img src="${esc(c.cover)}" alt="" loading="lazy"></span>`
+          : `<span class="cat-art">${c.imgs.slice(0, 3).map(src => `<img src="${esc(src)}" alt="" loading="lazy">`).join("")}</span>`;
+        const cls = layout[i].join(" ");
+        return `<a class="cat-card ${cls}" href="/products?cat=${esc(c.value)}" style="--c:${esc(c.color)}">
+          ${art}<span class="cat-go">${ICON.arrow}</span>
+          <strong>${esc(c.label)}</strong>
+          <small>${c.count} termék${c.from ? ` · <b>${fmtFt(c.from)}</b>-tól` : ""}</small>
+          ${c.desc ? `<em>${esc(c.desc)}</em>` : ""}
+        </a>`;
+      }).join("");
+    }
     showSection("categories", cats.length > 0);
+
+    const rh = $("[data-recent-home]");
+    if (rh) {
+      const rec = N.recent.list().map(id => N.byId(id)).filter(Boolean).slice(0, 8);
+      rh.innerHTML = rec.map(p => `<a href="${productUrl(p)}"><img src="${esc(imageUrl(p.images[0]))}" alt="" loading="lazy"><span><strong>${esc(p.name)}</strong><span class="rr-price">${fmtFt(p.price)}</span></span></a>`).join("");
+      showSection("recent", rec.length > 0);
+    }
+
+    const fq = $("[data-faq]");
+    if (fq) {
+      const items = faqItems(s);
+      fq.innerHTML = items.map((x, i) => `<details${i === 0 ? " open" : ""}><summary>${esc(x.q)}</summary><div class="faq-a">${esc(x.a)}</div></details>`).join("");
+      showSection("faq", items.length > 0);
+    }
 
     const fg = $("[data-featured]");
     if (fg) fg.innerHTML = featured.length ? featured.map(cardHTML).join("") : emptyHTML("Hamarosan bővül a kínálat", "Nézz vissza később.");
@@ -916,7 +985,21 @@
     const favN = N.favorites.list().filter(id => N.byId(id)).length;
     chips.innerHTML = `<button class="chip" type="button" data-cat="all" aria-pressed="${filters.cat === "all" && !filters.fav}">Összes</button>`
       + (favN || filters.fav ? `<button class="chip" type="button" data-fav-chip aria-pressed="${!!filters.fav}">♥ ${esc(t("fav.title"))} (${favN})</button>` : "")
-      + cats.map(c => `<button class="chip" type="button" data-cat="${esc(c.value)}" aria-pressed="${filters.cat === c.value && !filters.fav}">${esc(c.label)}</button>`).join("");
+      + cats.map(c => `<button class="chip chip-img" type="button" data-cat="${esc(c.value)}" aria-pressed="${filters.cat === c.value && !filters.fav}" style="--c:${esc(c.color)}">${catThumb(c) ? `<img src="${esc(catThumb(c))}" alt="" loading="lazy">` : ""}${esc(c.label)}<span>${c.count}</span></button>`).join("");
+    const active = chips.querySelector('[aria-pressed="true"]');
+    if (active && chips.scrollWidth > chips.clientWidth) chips.scrollLeft = Math.max(0, active.offsetLeft - 24);
+  }
+
+  function renderCatHero() {
+    const hero = $("[data-cat-hero]");
+    if (!hero) return;
+    const c = filters.cat !== "all" && !filters.fav ? categoriesWithCounts().find(x => x.value === filters.cat) : null;
+    hero.hidden = !c;
+    $(".page-head")?.classList.toggle("has-hero", !!c);
+    if (!c) return;
+    hero.style.setProperty("--c", c.color);
+    const art = (c.cover ? [c.cover] : c.imgs.slice(0, 3)).map(src => `<img src="${esc(src)}" alt="" loading="lazy">`).join("");
+    hero.innerHTML = `<div><h2>${esc(c.label)}</h2>${c.desc ? `<p>${esc(c.desc)}</p>` : ""}<div class="meta"><span>${c.count} termék</span>${c.inStock ? `<span>${c.inStock} készleten</span>` : ""}${c.from ? `<span><b>${fmtFt(c.from)}</b>-tól</span>` : ""}</div></div><div class="cat-hero-art" aria-hidden="true">${art}</div>`;
   }
 
   function renderList() {
@@ -927,6 +1010,8 @@
     const cl = $("[data-cat-list]");
     if (cl) cl.innerHTML = catBtn("all", t("link.all"), all.length) + (favN || filters.fav ? `<button type="button" data-fav-chip aria-pressed="${!!filters.fav}">♥ ${esc(t("fav.title"))}<span>${favN}</span></button>` : "") + cats.map(c => catBtn(c.value, c.label, c.count)).join("");
     renderChips();
+    renderCatHero();
+    $$("[data-view]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === (root.getAttribute("data-cols-m") || "2"))));
 
     $$("[data-f]").forEach(el => {
       const k = el.dataset.f;
@@ -1108,7 +1193,9 @@
           <h1 class="display">${esc(p.name)}</h1>
           ${p.line ? `<p class="muted" style="font-size:1.1rem">${esc(p.line)}</p>` : ""}
           <div class="pdp-price">${p.oldPrice ? `<s>${fmtFt(p.oldPrice)}</s>` : ""}<strong>${fmtFt(p.price)}</strong>${p.oldPrice ? `<span class="save">−${N.discount(p)}%</span>` : ""}</div>
-          <span class="stock stock-${st.key}" style="font-size:1rem">${esc(st.label)}${inCart ? ` · ebből ${inCart} db már a kosaradban` : ""}</span>
+          ${st.key === "low" ? `<div class="urgency"><span>${esc(st.label)} – siess, ha szeretnéd!</span><div class="bar"><i style="width:${Math.max(8, Math.min(100, p.stock / Math.max(1, s.lowStock + 1) * 100))}%"></i></div></div>` : `<span class="stock stock-${st.key}" style="font-size:1rem">${esc(st.label)}${inCart ? ` · ebből ${inCart} db már a kosaradban` : ""}</span>`}
+          ${st.key === "low" && inCart ? `<span class="muted" style="font-size:.9rem">Ebből ${inCart} db már a kosaradban.</span>` : ""}
+          ${buyable && dispatchText(s) ? `<div class="dispatch">${ICON.truck}<span data-dispatch>${dispatchText(s)}</span></div>` : ""}
           ${buyable ? `
             <div class="buy-row">
               <div class="stepper lg" role="group" aria-label="Mennyiség">
@@ -1117,14 +1204,14 @@
                 <button type="button" data-pdp-qty="1" aria-label="Eggyel több" ${pdpQty >= maxQty ? "disabled" : ""}>+</button>
               </div>
               <button class="btn btn-primary" type="button" data-pdp-add ${maxQty <= 0 ? "disabled" : ""}>${ICON.cart}${maxQty <= 0 ? "A teljes készlet a kosaradban" : esc(t("pdp.add"))}</button>
-            </div>` : `<div class="notice">${N.isSoon(p) ? "Ez a termék hamarosan érkezik, még nem rendelhető." : "Ez a termék jelenleg elfogyott."}${s.email ? ` Írj nekünk a <a href="mailto:${esc(s.email)}?subject=${encodeURIComponent(`Érdeklődés: ${p.name}`)}">${esc(s.email)}</a> címre, és szólunk, ha elérhető.` : ""}</div>`}
+            </div>` : `${s.email ? `<a class="btn btn-ghost" href="mailto:${esc(s.email)}?subject=${encodeURIComponent(`Értesítés kérése: ${p.name}`)}&body=${encodeURIComponent(`Kérem, értesítsenek, ha a(z) ${p.name} rendelhető lesz.\n\nKöszönöm!`)}">${ICON.mail}${esc(t("notify.button"))}</a>` : ""}<div class="notice">${N.isSoon(p) ? "Ez a termék hamarosan érkezik, még nem rendelhető." : "Ez a termék jelenleg elfogyott."}${s.email ? ` Írj nekünk a <a href="mailto:${esc(s.email)}?subject=${encodeURIComponent(`Érdeklődés: ${p.name}`)}">${esc(s.email)}</a> címre, és szólunk, ha elérhető.` : ""}</div>`}
           <div class="pdp-tools">
             ${favBtn(p, "btn btn-ghost btn-sm")}
             <button class="btn btn-ghost btn-sm" type="button" data-share>${ICON.share}${esc(t("pdp.share"))}</button>
           </div>
           <div class="perks">
             <div>${ICON.shield}<strong>${esc(t("perk.1"))}</strong><span>${esc(t("perk.1.text"))}</span></div>
-            <div>${ICON.truck}<strong>${esc(t("perk.2"))}</strong><span>${esc(shipShortLabel())}${s.freeShippingFrom > 0 ? `, ${fmtFt(s.freeShippingFrom)} felett ingyenes` : ""}</span></div>
+            <div>${ICON.truck}<strong>${esc(t("perk.2"))}</strong><span>${esc(shipShortLabel())}${s.freeShippingFrom > 0 ? `, ${fmtFt(s.freeShippingFrom)} felett ingyenes` : ""}${s.deliveryText ? ` · ${esc(s.deliveryText)}` : ""}</span></div>
             <div>${ICON.lock}<strong>${esc(t("perk.3"))}</strong><span>${esc(cap(joinHu(pays)) || "Rendeléskor egyeztetjük")}</span></div>
           </div>
           <div>
@@ -1160,6 +1247,26 @@
     $("[data-related]").innerHTML = related.map(cardHTML).join("");
     updateCount(false);
     window.dispatchEvent(new CustomEvent("nsc:pdp"));
+  }
+
+  /* feladási határidő: „Rendelj 2 óra 15 percen belül, és még ma feladjuk.” (hétvégén a következő munkanap) */
+  function dispatchText(s) {
+    const cut = Number(s.dispatchCutoff) || 0;
+    if (!cut) return "";
+    const now = new Date();
+    const work = d => d >= 1 && d <= 5;
+    if (work(now.getDay()) && now.getHours() < cut) {
+      const end = new Date(now); end.setHours(cut, 0, 0, 0);
+      const mins = Math.max(1, Math.round((end - now) / 60000));
+      const h = Math.floor(mins / 60), m = mins % 60;
+      const time = h ? `<b>${h} óra ${m} percen</b>` : `<b>${m} percen</b>`;
+      return esc(t("dispatch.today", { time: "§" })).replace("§", time);
+    }
+    const d = new Date(now);
+    do { d.setDate(d.getDate() + 1); } while (!work(d.getDay()));
+    const days = Math.round((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - new Date(now.getFullYear(), now.getMonth(), now.getDate())) / 86400000);
+    const names = ["vasárnap", "hétfőn", "kedden", "szerdán", "csütörtökön", "pénteken", "szombaton"];
+    return esc(t("dispatch.next", { day: "§" })).replace("§", `<b>${days === 1 ? "holnap" : names[d.getDay()]}</b>`);
   }
 
   function setSlide(i, smooth = true) {
@@ -1206,6 +1313,7 @@
       if (e.key === "ArrowRight") { e.preventDefault(); setSlide(pdpImage + 1); }
       if (e.key === "ArrowLeft") { e.preventDefault(); setSlide(Math.max(0, pdpImage - 1)); }
     });
+    setInterval(() => { const el = $("[data-dispatch]"); if (el) el.innerHTML = dispatchText(N.settings()); }, 30000);
     const sticky = $("[data-sticky-buy]");
     if (sticky && "IntersectionObserver" in window) {
       const io = new IntersectionObserver(entries => {
@@ -1565,9 +1673,19 @@
   }
 
   /* ---------------- indulás ---------------- */
+  /* mobil nézet (rács / lista) – a vásárló saját választása felülírja az alapbeállítást */
+  const VIEW_KEY = "nsc.view.v1";
+  function applyViewPref() {
+    const v = N.store.get(VIEW_KEY);
+    if (v === "1" || v === "2") { root.style.setProperty("--cols-m", v); root.setAttribute("data-cols-m", v); }
+  }
+  let installEvt = null;
+  window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; renderChrome(); });
+
   function renderPage() {
     const s = N.settings();
     N.applyTheme(s.theme, undefined, !N.previewMode);
+    applyViewPref();
     cart.prune();
     applyTexts();
     renderChrome();
@@ -1583,6 +1701,18 @@
   }
 
   bindChrome();
+  {
+    const tt = $("[data-to-top]");
+    let ticking = false;
+    window.addEventListener("scroll", () => {
+      if (ticking || !tt) return;
+      ticking = true;
+      requestAnimationFrame(() => { tt.classList.toggle("show", scrollY > innerHeight * 1.4); ticking = false; });
+    }, { passive: true });
+  }
+  if ("serviceWorker" in navigator && window.parent === window && !/^(localhost|127\.)/.test(location.hostname)) {
+    window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(() => {}));
+  }
   bindTilt();
   if (page === "home") bindHome();
   if (page === "products") bindList();
