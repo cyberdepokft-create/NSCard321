@@ -17,7 +17,8 @@
   <link rel="manifest" href="/site.webmanifest">
   <link rel="preload" href="/assets/fonts/archivo-black.woff" as="font" type="font/woff" crossorigin>
   <link rel="preload" href="/assets/fonts/dm-sans.woff" as="font" type="font/woff" crossorigin>
-  <link rel="stylesheet" href="/assets/css/shop.css?v=3.1.0">
+  <link rel="stylesheet" href="/assets/css/shop.css?v=4.0.0">
+  <script src="/assets/js/theme-boot.js?v=4.0.0"></script>
 </head>
 <body data-page="product">
   <div class="sky" aria-hidden="true"><i></i><i></i><i></i><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div>
@@ -25,49 +26,67 @@
   <div class="announce" data-announce hidden></div>
   <header class="site-header">
     <div class="wrap hdr">
-      <button class="icon-btn only-mobile" type="button" data-open-menu aria-controls="menu" aria-expanded="false" aria-label="Menü megnyitása"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-      <a class="brand" href="/" aria-label="NS Card kezdőlap"><img src="/img/brand/wordmark.webp" alt="NS Card" width="130" height="46"></a>
-      <nav class="nav" aria-label="Fő menü"><a href="/">Kezdőlap</a><a href="/products">Termékek</a><a href="/#rendeles">Szállítás és fizetés</a><a href="/#kapcsolat" data-contact-nav>Kapcsolat</a></nav>
-      <form class="search" role="search" action="/products">
+      <button class="icon-btn only-mobile" type="button" data-open-menu aria-controls="menu" aria-expanded="false" aria-label="Menü megnyitása"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      <a class="brand" href="/" aria-label="NS Card kezdőlap"><img src="/img/brand/wordmark.webp" alt="NS Card" width="135" height="48"></a>
+      <nav class="nav" aria-label="Fő menü"><a href="/" data-t="nav.home">Kezdőlap</a><a href="/products" data-t="nav.products">Termékek</a><a href="/#rendeles" data-t="nav.ship">Szállítás és fizetés</a><a href="/#kapcsolat" data-contact-nav data-t="nav.contact">Kapcsolat</a></nav>
+      <form class="search" role="search" action="/products" data-search-form>
         <label class="sr-only" for="q-desktop">Keresés a termékek között</label>
-        <input id="q-desktop" name="q" type="search" placeholder="Keresés: tin, ETB, Mega…" autocomplete="off" data-q>
+        <input id="q-desktop" name="q" type="search" placeholder="Keresés: tin, ETB, Mega…" data-t-ph="search.placeholder" autocomplete="off" data-q aria-autocomplete="list" aria-controls="suggest-desktop">
         <button type="submit" aria-label="Keresés"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <div class="suggest" id="suggest-desktop" data-suggest hidden></div>
       </form>
       <div class="hdr-actions">
-        <button class="icon-btn only-mobile" type="button" data-toggle-search aria-expanded="false" aria-label="Keresés megnyitása"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-        <button class="cart-btn" type="button" data-open-cart aria-controls="cart" aria-label="Kosár megnyitása"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L20.5 8H6.2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.5" fill="currentColor"/><circle cx="17" cy="20" r="1.5" fill="currentColor"/></svg><span class="cart-label">Kosár</span><span class="cart-count" data-cart-count>0</span></button>
+        <button class="icon-btn only-mobile" type="button" data-open-search aria-controls="search-sheet" aria-label="Keresés megnyitása"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <button class="icon-btn cart-mini" type="button" data-open-cart aria-controls="cart" aria-label="Kosár megnyitása"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L20.5 8H6.2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.5" fill="currentColor"/><circle cx="17" cy="20" r="1.5" fill="currentColor"/></svg><span class="cart-count" data-cart-count>0</span></button>
+        <button class="cart-btn" type="button" data-open-cart aria-controls="cart" aria-label="Kosár megnyitása"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L20.5 8H6.2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.5" fill="currentColor"/><circle cx="17" cy="20" r="1.5" fill="currentColor"/></svg><span class="cart-label" data-t="cart.button">Kosár</span><span class="cart-count" data-cart-count>0</span></button>
       </div>
     </div>
-    <div class="mobile-search" data-mobile-search>
-      <form class="search" role="search" action="/products">
-        <label class="sr-only" for="q-mobile">Keresés a termékek között</label>
-        <input id="q-mobile" name="q" type="search" placeholder="Keresés: tin, ETB, Mega…" autocomplete="off" data-q>
+  </header>
+
+  <div class="search-sheet" id="search-sheet" role="dialog" aria-modal="true" aria-label="Keresés" data-search-sheet>
+    <div class="sheet-top">
+      <form class="search" role="search" action="/products" data-search-form>
+        <label class="sr-only" for="q-sheet">Keresés a termékek között</label>
+        <input id="q-sheet" name="q" type="search" placeholder="Keresés: tin, ETB, Mega…" data-t-ph="search.placeholder" autocomplete="off" data-q enterkeyhint="search">
         <button type="submit" aria-label="Keresés"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
       </form>
+      <button class="icon-btn" type="button" data-close-search aria-label="Keresés bezárása"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
     </div>
-  </header>
+    <div class="sheet-body">
+      <div data-sheet-cats></div>
+      <div class="suggest" data-sheet-results></div>
+    </div>
+  </div>
 
   <div class="scrim" data-scrim></div>
   <aside class="drawer drawer-left" id="menu" aria-label="Menü" data-menu>
     <div class="drawer-head"><img src="/img/brand/wordmark.webp" alt="NS Card" width="101" height="36"><button class="icon-btn" type="button" data-close aria-label="Menü bezárása"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
     <div class="drawer-body">
-      <nav class="menu-links" aria-label="Mobil menü"><a href="/">Kezdőlap</a><a href="/products">Termékek</a><a href="/#rendeles">Szállítás és fizetés</a><a href="/#kapcsolat" data-contact-nav>Kapcsolat</a></nav>
+      <nav class="menu-links" aria-label="Mobil menü"><a href="/" data-t="nav.home">Kezdőlap</a><a href="/products" data-t="nav.products">Termékek</a><a href="/#rendeles" data-t="nav.ship">Szállítás és fizetés</a><a href="/#kapcsolat" data-contact-nav data-t="nav.contact">Kapcsolat</a></nav>
       <div class="menu-cats" data-menu-cats></div>
     </div>
   </aside>
   <aside class="drawer drawer-right" id="cart" aria-label="Kosár" data-cart>
-    <div class="drawer-head"><h2>Kosár</h2><button class="icon-btn" type="button" data-close aria-label="Kosár bezárása"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
+    <span class="grab" aria-hidden="true"></span>
+    <div class="drawer-head" data-cart-head><h2 data-t="cart.title">Kosár</h2><button class="icon-btn" type="button" data-close aria-label="Kosár bezárása"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
     <div class="drawer-body" data-cart-lines></div>
     <div class="drawer-foot" data-cart-foot></div>
   </aside>
+  <div class="added" role="status" aria-live="polite" data-added></div>
   <div class="toast" role="status" aria-live="polite" data-toast></div>
+  <nav class="tabbar" aria-label="Gyors menü">
+    <a href="/"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 11.5 12 5l8 6.5V19a1 1 0 0 1-1 1h-4.5v-5h-5v5H5a1 1 0 0 1-1-1z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span data-t="nav.home">Kezdőlap</span></a>
+    <a href="/products"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="7.5" y="3" width="11" height="15" rx="2" stroke="currentColor" stroke-width="2" transform="rotate(10 13 10.5)"/><rect x="4" y="6" width="11" height="15" rx="2" stroke="currentColor" stroke-width="2" fill="var(--ink-2, #0b1a44)"/></svg><span data-t="nav.products">Termékek</span></a>
+    <button type="button" data-open-search aria-controls="search-sheet"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span data-t="tab.search">Keresés</span></button>
+    <button type="button" data-open-cart aria-controls="cart"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L20.5 8H6.2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.5" fill="currentColor"/><circle cx="17" cy="20" r="1.5" fill="currentColor"/></svg><span data-t="cart.button">Kosár</span><span class="cart-count" data-cart-count>0</span></button>
+  </nav>
 
   <main id="main">
     <div class="wrap">
       <div class="page-head" style="padding-bottom:12px"><ol class="crumbs" data-crumbs><li><a href="/">Kezdőlap</a></li><li><a href="/products">Termékek</a></li></ol></div>
       <div data-pdp><div class="empty"><strong>Termék betöltése…</strong></div></div>
       <section class="section-tight" data-related-wrap hidden aria-labelledby="rel-title">
-        <div class="sec-head"><h2 class="display" id="rel-title">Ezek is érdekelhetnek</h2><a class="link-more" href="/products">Összes termék</a></div>
+        <div class="sec-head"><h2 class="display" id="rel-title" data-t="pdp.related">Ezek is érdekelhetnek</h2><a class="link-more" href="/products"><span data-t="link.all">Összes termék</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
         <div class="grid" data-related></div>
       </section>
     </div>
@@ -79,30 +98,31 @@
       <div class="foot-grid">
         <div class="foot-brand">
           <img src="/img/brand/logo.webp" alt="NS Card webshop logó" width="150" height="158" loading="lazy">
-          <p data-foot-text>Pokémon TCG termékek gyűjtőknek és bontásra: boosterek, tin dobozok, Elite Trainer Boxok és kollekciók.</p>
+          <p data-t="footer.text">Pokémon TCG termékek gyűjtőknek és bontásra: boosterek, tin dobozok, Elite Trainer Boxok és kollekciók.</p>
           <div class="social" data-social hidden></div>
         </div>
         <div>
-          <h2>Vásárlás</h2>
-          <ul data-foot-cats><li><a href="/products">Összes termék</a></li></ul>
+          <h2 data-t="footer.shop">Vásárlás</h2>
+          <ul data-foot-cats><li><a href="/products" data-t="link.all">Összes termék</a></li></ul>
         </div>
         <div>
-          <h2>Segítség</h2>
+          <h2 data-t="footer.help">Segítség</h2>
           <ul>
-            <li><a href="/#rendeles">Szállítás és fizetés</a></li>
-            <li><a href="/checkout">Pénztár</a></li>
-            <li><a href="/#kapcsolat">Kapcsolat</a></li>
+            <li><a href="/#rendeles" data-t="nav.ship">Szállítás és fizetés</a></li>
+            <li><a href="/checkout" data-t="checkout.title">Pénztár</a></li>
+            <li><a href="/#kapcsolat" data-t="nav.contact">Kapcsolat</a></li>
           </ul>
         </div>
         <div>
-          <h2>Elérhetőség</h2>
+          <h2 data-t="footer.contact">Elérhetőség</h2>
           <ul data-foot-contact><li><a href="/#kapcsolat">Írj nekünk</a></li></ul>
         </div>
       </div>
-      <div class="foot-bottom"><span>© <span data-year>2026</span> NS Card</span><span>Az árak forintban értendők.</span></div>
+      <div class="foot-bottom"><span>© <span data-year>2026</span> NS Card</span><span data-t="footer.note">Az árak forintban értendők.</span></div>
     </div>
   </footer>
-  <script src="/assets/js/store.js?v=3.1.0" defer></script>
-  <script src="/assets/js/shop.js?v=3.1.0" defer></script>
+  <script src="/assets/js/texts.js?v=4.0.0" defer></script>
+  <script src="/assets/js/store.js?v=4.0.0" defer></script>
+  <script src="/assets/js/shop.js?v=4.0.0" defer></script>
 </body>
 </html>

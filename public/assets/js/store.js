@@ -45,11 +45,6 @@
     facebook: "",
     tiktok: "",
     announcement: "",
-    heroTitle: "A következő bontásod itt kezdődik.",
-    heroText: "Pokémon TCG boosterek, tin dobozok, Elite Trainer Boxok és kollekciók – magyar webshopból, készletről.",
-    featuredTitle: "Kiemelt termékek",
-    featuredText: "A jelenlegi kínálat legkeresettebb darabjai.",
-    footerText: "Pokémon TCG termékek gyűjtőknek és bontásra: boosterek, tin dobozok, Elite Trainer Boxok és kollekciók.",
     shipHome: true,
     shippingHome: 2500,
     shipLocker: true,
@@ -162,10 +157,178 @@
       else s[key] = String(r[key] ?? "").trim();
     }
     if (!s.shopName) s.shopName = DEFAULT_SETTINGS.shopName;
-    for (const k of ["heroTitle", "heroText", "featuredTitle", "featuredText", "footerText"]) if (!s[k]) s[k] = DEFAULT_SETTINGS[k];
     if (!s.shipHome && !s.shipLocker && !s.shipPickup) s.shipHome = true;
     s.categories = sanitizeCategories(r.categories);
+    s.texts = sanitizeTexts(r.texts, r);
+    s.theme = sanitizeTheme(r.theme);
     return s;
+  }
+
+  /* ---------- szövegek ---------- */
+  const TEXT_GROUPS = window.NSC_TEXT_GROUPS || [];
+  const TEXT_DEFAULTS = {};
+  TEXT_GROUPS.forEach(([, items]) => items.forEach(([key, , def]) => { TEXT_DEFAULTS[key] = def; }));
+  const LEGACY_TEXT = { heroTitle: "hero.title", heroText: "hero.text", featuredTitle: "featured.title", featuredText: "featured.text", footerText: "footer.text" };
+
+  function sanitizeTexts(raw, legacy = {}) {
+    const out = {};
+    const src = raw && typeof raw === "object" ? raw : {};
+    for (const key of Object.keys(TEXT_DEFAULTS)) {
+      const v = typeof src[key] === "string" ? src[key].trim().slice(0, 400) : "";
+      if (v && v !== TEXT_DEFAULTS[key]) out[key] = v;
+    }
+    for (const [old, key] of Object.entries(LEGACY_TEXT)) {
+      const v = String(legacy?.[old] || "").trim();
+      if (v && !out[key] && v !== TEXT_DEFAULTS[key]) out[key] = v;
+    }
+    return out;
+  }
+
+  function t(key, vars) {
+    const custom = current?.settings?.texts?.[key];
+    let str = custom || TEXT_DEFAULTS[key] || key;
+    if (vars) for (const [k, v] of Object.entries(vars)) str = str.replace(new RegExp(`\\{${k}\\}`, "g"), v);
+    return str;
+  }
+
+  /* ---------- megjelenés (téma) ---------- */
+  const FONTS = {
+    display: [
+      { key: "archivo", label: "Archivo Black – vastag, játékos", family: '"Archivo Black", "Arial Black", sans-serif', weight: 400 },
+      { key: "anton", label: "Anton – magas, plakátszerű", family: 'Anton, Impact, sans-serif', weight: 400 },
+      { key: "montserrat", label: "Montserrat – modern, letisztult", family: 'Montserrat, system-ui, sans-serif', weight: 800 },
+      { key: "poppins", label: "Poppins – kerekded, barátságos", family: 'Poppins, system-ui, sans-serif', weight: 700 },
+      { key: "bitter", label: "Bitter – talpas, erőteljes", family: 'Bitter, Georgia, serif', weight: 800 },
+      { key: "lora", label: "Lora – elegáns, klasszikus", family: 'Lora, Georgia, serif', weight: 700 }
+    ],
+    body: [
+      { key: "dmsans", label: "DM Sans", family: '"DM Sans", system-ui, sans-serif' },
+      { key: "fira", label: "Fira Sans", family: '"Fira Sans", system-ui, sans-serif' },
+      { key: "opensans", label: "Open Sans", family: '"Open Sans", system-ui, sans-serif' },
+      { key: "roboto", label: "Roboto", family: 'Roboto, system-ui, sans-serif' },
+      { key: "sourcesans", label: "Source Sans 3", family: '"Source Sans 3", system-ui, sans-serif' },
+      { key: "poppins", label: "Poppins", family: 'Poppins, system-ui, sans-serif' },
+      { key: "montserrat", label: "Montserrat", family: 'Montserrat, system-ui, sans-serif' }
+    ]
+  };
+
+  const PRESETS = [
+    { key: "sarkanytuz", label: "Sárkánytűz", colors: { bg: "#061230", surface: "#0b1a44", primary: "#ff7a1f", accent: "#ffd23f", secondary: "#45aaff", text: "#f2f5ff" } },
+    { key: "jegvihar", label: "Jégvihar", colors: { bg: "#03141d", surface: "#08283a", primary: "#2fd3ff", accent: "#e9fbff", secondary: "#7cf3c8", text: "#eef9ff" } },
+    { key: "lohere", label: "Lóhere", colors: { bg: "#06170e", surface: "#0d2b1b", primary: "#3ccb76", accent: "#f2d24a", secondary: "#9be15d", text: "#effbf3" } },
+    { key: "lilaholo", label: "Lila holo", colors: { bg: "#110726", surface: "#1e0f42", primary: "#c34cff", accent: "#ffd23f", secondary: "#33e0ff", text: "#f6f0ff" } },
+    { key: "aranyelit", label: "Arany elit", colors: { bg: "#0c0a07", surface: "#1b1610", primary: "#e7b743", accent: "#ffe7a1", secondary: "#e08a3c", text: "#fbf6ea" } },
+    { key: "vilagos", label: "Világos", colors: { bg: "#f3f5fb", surface: "#ffffff", primary: "#ff6a00", accent: "#b45309", secondary: "#1d6fd8", text: "#0c1633" } }
+  ];
+
+  const SECTION_LIST = [
+    { id: "ticker", label: "Futó sáv" },
+    { id: "pack", label: "Csomagbontó" },
+    { id: "categories", label: "Kategóriák" },
+    { id: "featured", label: "Kiemelt termékek" },
+    { id: "soon", label: "Hamarosan érkezik" },
+    { id: "steps", label: "Így rendelhetsz" },
+    { id: "contact", label: "Kapcsolat" }
+  ];
+
+  const THEME_DEFAULTS = Object.freeze({
+    preset: "sarkanytuz",
+    colors: PRESETS[0].colors,
+    fontDisplay: "archivo",
+    fontBody: "dmsans",
+    displayScale: 100,
+    radius: "rounded",
+    buttons: "pill",
+    cards: "glass",
+    colsDesktop: 4,
+    colsMobile: 2,
+    heroSide: "right",
+    customCss: "",
+    anim: { level: "full", speed: "normal", float: true, sparkles: true, glow: true, tilt: true, reveal: true, ticker: true, fly: true, pack: true },
+    sections: SECTION_LIST.map(x => ({ id: x.id, on: true }))
+  });
+
+  const HEX = /^#[0-9a-f]{6}$/i;
+  const pick = (v, allowed, def) => allowed.includes(v) ? v : def;
+
+  function sanitizeTheme(raw) {
+    const r = raw && typeof raw === "object" ? raw : {};
+    const d = THEME_DEFAULTS;
+    const colors = {};
+    for (const k of Object.keys(d.colors)) colors[k] = HEX.test(String(r.colors?.[k] || "")) ? String(r.colors[k]).toLowerCase() : d.colors[k];
+    const anim = {};
+    for (const [k, v] of Object.entries(d.anim)) {
+      if (typeof v === "boolean") anim[k] = typeof r.anim?.[k] === "boolean" ? r.anim[k] : v;
+    }
+    anim.level = pick(r.anim?.level, ["full", "subtle", "off"], d.anim.level);
+    anim.speed = pick(r.anim?.speed, ["slow", "normal", "fast"], d.anim.speed);
+    const seen = new Set();
+    const sections = [];
+    (Array.isArray(r.sections) ? r.sections : []).forEach(sct => {
+      if (SECTION_LIST.some(x => x.id === sct?.id) && !seen.has(sct.id)) { seen.add(sct.id); sections.push({ id: sct.id, on: sct.on !== false }); }
+    });
+    SECTION_LIST.forEach(x => { if (!seen.has(x.id)) sections.push({ id: x.id, on: true }); });
+    return {
+      preset: String(r.preset || d.preset),
+      colors,
+      fontDisplay: pick(r.fontDisplay, FONTS.display.map(f => f.key), d.fontDisplay),
+      fontBody: pick(r.fontBody, FONTS.body.map(f => f.key), d.fontBody),
+      displayScale: Math.min(130, Math.max(80, int(r.displayScale || d.displayScale))),
+      radius: pick(r.radius, ["sharp", "rounded", "round"], d.radius),
+      buttons: pick(r.buttons, ["pill", "rounded", "square"], d.buttons),
+      cards: pick(r.cards, ["glass", "solid", "outline"], d.cards),
+      colsDesktop: [3, 4, 5].includes(Number(r.colsDesktop)) ? Number(r.colsDesktop) : d.colsDesktop,
+      colsMobile: [1, 2].includes(Number(r.colsMobile)) ? Number(r.colsMobile) : d.colsMobile,
+      heroSide: pick(r.heroSide, ["right", "left"], d.heroSide),
+      customCss: String(r.customCss || "").replace(/<\/?style/gi, "").slice(0, 12000),
+      anim,
+      sections
+    };
+  }
+
+  /* Téma → CSS változók (a bolt és az admin előnézete is ezt használja) */
+  function hexToRgb(h) { const n = parseInt(h.slice(1), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+  function lum(h) { const [r, g, b] = hexToRgb(h).map(v => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; }); return .2126 * r + .7152 * g + .0722 * b; }
+  function onColor(h) { return lum(h) > .42 ? "#160a00" : "#ffffff"; }
+
+  function themeVars(theme) {
+    const th = sanitizeTheme(theme);
+    const c = th.colors;
+    const fd = FONTS.display.find(f => f.key === th.fontDisplay) || FONTS.display[0];
+    const fb = FONTS.body.find(f => f.key === th.fontBody) || FONTS.body[0];
+    const r = { sharp: .35, rounded: 1, round: 1.5 }[th.radius];
+    const light = lum(c.bg) > .5;
+    return {
+      vars: {
+        "--ink": c.bg, "--ink-2": c.surface, "--paper": c.text,
+        "--ember": c.primary, "--gold": c.accent, "--spark": c.secondary,
+        "--on-ember": onColor(c.primary), "--on-gold": onColor(c.accent), "--on-spark": onColor(c.secondary),
+        "--display": fd.family, "--display-weight": String(fd.weight), "--body": fb.family,
+        "--display-scale": String(th.displayScale / 100),
+        "--r": String(r), "--btn-r": th.buttons === "pill" ? "999px" : th.buttons === "rounded" ? "14px" : "6px",
+        "--cols": String(th.colsDesktop), "--cols-m": String(th.colsMobile),
+        "--speed": String({ slow: 1.6, normal: 1, fast: .65 }[th.anim.speed])
+      },
+      attrs: {
+        "data-cards": th.cards, "data-hero": th.heroSide, "data-cols-m": String(th.colsMobile), "data-light": light ? "1" : "0", "data-anim": th.anim.level,
+        "data-fx": Object.entries(th.anim).filter(([k, v]) => typeof v === "boolean" && v).map(([k]) => k).join(" ")
+      }
+    };
+  }
+
+  function applyTheme(theme, root = document.documentElement, persist = true) {
+    const { vars, attrs } = themeVars(theme);
+    const css = sanitizeTheme(theme).customCss;
+    for (const [k, v] of Object.entries(vars)) root.style.setProperty(k, v);
+    for (const [k, v] of Object.entries(attrs)) root.setAttribute(k, v);
+    if (root === document.documentElement) {
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute("content", vars["--ink"]);
+      let tag = document.getElementById("nsc-custom-css");
+      if (css && !tag) { tag = document.createElement("style"); tag.id = "nsc-custom-css"; document.head.appendChild(tag); }
+      if (tag) tag.textContent = css;
+      if (persist) store.set("nsc.theme.v1", { vars, attrs, css });
+    }
   }
 
   function slugify(text) {
@@ -296,14 +459,25 @@
     }
     try {
       const next = await fetchPublished(options);
+      if (previewMode && current) { next.settings = current.settings; if (previewProducts) next.products = current.products; }
       const changed = !current || JSON.stringify(current.products) !== JSON.stringify(next.products) || JSON.stringify(current.settings) !== JSON.stringify(next.settings);
       current = next;
-      store.set(KEYS.published, { version: VERSION, updatedAt: next.updatedAt, products: next.products, settings: next.settings });
+      if (!previewMode) store.set(KEYS.published, { version: VERSION, updatedAt: next.updatedAt, products: next.products, settings: next.settings });
       if (changed) emit();
     } catch (err) {
       if (!current) { current = { products: [], settings: sanitizeSettings(null), updatedAt: null, source: "error" }; emit(); }
     }
     return current;
+  }
+
+  let previewMode = false;
+  let previewProducts = false;
+  function setPreview(settingsRaw, productsRaw) {
+    previewMode = true;
+    if (!current) current = { products: [], settings: sanitizeSettings(null), updatedAt: null, source: "preview" };
+    current = { ...current, settings: sanitizeSettings(settingsRaw) };
+    if (Array.isArray(productsRaw)) { previewProducts = true; current.products = sanitizeCatalog(productsRaw); }
+    emit();
   }
 
   const ready = load();
@@ -317,10 +491,10 @@
 
   function stockInfo(p) {
     const low = settings().lowStock;
-    if (isSoon(p)) return { key: "soon", label: "Hamarosan érkezik" };
-    if (p.stock <= 0) return { key: "out", label: "Elfogyott" };
-    if (p.stock <= low) return { key: "low", label: `Már csak ${p.stock} db` };
-    return { key: "in", label: "Készleten" };
+    if (isSoon(p)) return { key: "soon", label: t("stock.soon") };
+    if (p.stock <= 0) return { key: "out", label: t("stock.out") };
+    if (p.stock <= low) return { key: "low", label: t("stock.low", { n: p.stock }) };
+    return { key: "in", label: t("stock.in") };
   }
 
   function discount(p) {
@@ -398,11 +572,14 @@
   window.NSC = {
     VERSION, KEYS, FLAGS, DEFAULT_SETTINGS, DEFAULT_REMOTE, DEFAULT_CATEGORIES, LOCAL_CATALOG,
     get CATEGORIES() { return categories(); },
+    FONTS, PRESETS, SECTION_LIST, THEME_DEFAULTS, TEXT_GROUPS, TEXT_DEFAULTS,
+    t, sanitizeTheme, sanitizeTexts, themeVars, applyTheme, setPreview,
     store, clone, fmtFt, esc, int, categoryLabel, categories, imageUrl, slugify,
     sanitizeProduct, sanitizeCatalog, sanitizeSettings, sanitizeCategories, sanitizePayload, buildPayload,
     normalizeRemote, rawUrl, resolveRemote, setLocalRemote, fetchWithTimeout, fetchPublished,
     ready, load,
     get data() { return current; },
+    get previewMode() { return previewMode; },
     products, settings, byId, isSoon, isBuyable, stockInfo, discount,
     cart, shippingFor, shippingMethods
   };

@@ -10,7 +10,7 @@
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="preload" href="/assets/fonts/dm-sans.woff" as="font" type="font/woff" crossorigin>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=3.1.0">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=4.0.0">
 </head>
 <body>
   <!-- Belépés -->
@@ -40,10 +40,15 @@
   <div class="app" data-app hidden>
     <aside class="side" aria-label="Admin menü">
       <a class="side-brand" href="/admin"><img src="/img/brand/wordmark.webp" alt="NS Card" width="113" height="40"><span>Admin</span></a>
+      <div class="mode-switch" role="group" aria-label="Szerkesztő mód">
+        <button type="button" data-mode="basic" aria-pressed="true">Kezdő</button>
+        <button type="button" data-mode="pro" aria-pressed="false">Haladó</button>
+      </div>
       <nav class="side-nav" data-nav>
         <a href="#attekintes" data-view-link="attekintes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4zm10 7h6v-9h-6zM4 20h6v-4H4zm10-16v4h6V4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Áttekintés</span></a>
         <a href="#termekek" data-view-link="termekek"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4zm0 5l9 4 9-4M3 17l9 4 9-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Termékek</span><b class="nav-badge" data-nav-count></b></a>
         <a href="#kategoriak" data-view-link="kategoriak"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h7v7H4zM13 5h7v7h-7zM4 14h7v6H4zM13 14h7v6h-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Kategóriák</span></a>
+        <a href="#megjelenes" data-view-link="megjelenes" data-pro><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-.5-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6H16a5 5 0 0 0 5-5c0-4.1-4-7.6-9-7.6Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="7.5" cy="11" r="1.3" fill="currentColor"/><circle cx="10.5" cy="7.5" r="1.3" fill="currentColor"/><circle cx="15" cy="7.5" r="1.3" fill="currentColor"/></svg><span>Megjelenés</span><b class="pro-tag">Haladó</b></a>
         <a href="#beallitasok" data-view-link="beallitasok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="6" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="18" r="2" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Beállítások</span></a>
         <a href="#publikalas" data-view-link="publikalas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0-4 4m4-4 4 4M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Publikálás</span><b class="nav-dot" data-nav-dirty hidden></b></a>
       </nav>
@@ -66,6 +71,8 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
           </button>
           <div class="more-menu" data-more-menu hidden>
+            <a href="#kategoriak">Kategóriák</a>
+            <button type="button" data-mode-toggle>Haladó mód bekapcsolása</button>
             <a href="/" target="_blank" rel="noopener">Bolt megnyitása</a>
             <button type="button" data-logout>Kijelentkezés</button>
           </div>
@@ -148,6 +155,13 @@
 
         <!-- Beállítások -->
         <section data-view="beallitasok" aria-label="Bolt beállítások" hidden>
+          <div class="card">
+            <div class="card-head"><h2>Szerkesztő mód</h2></div>
+            <div class="mode-cards">
+              <button type="button" class="mode-card" data-mode="basic" aria-pressed="true"><strong>Kezdő</strong><span>Termékek, kategóriák, szállítás és fizetés. Minden, ami a napi működéshez kell.</span></button>
+              <button type="button" class="mode-card" data-mode="pro" aria-pressed="false"><strong>Haladó</strong><span>Plusz a Megjelenés szerkesztő: színek, betűk, animációk, szekciók, minden szöveg és saját CSS, élő előnézettel.</span></button>
+            </div>
+          </div>
           <form class="settings" data-settings-form novalidate>
             <div class="card">
               <div class="card-head"><h2>Bolt adatai</h2></div>
@@ -168,16 +182,8 @@
               <span class="hint">A kitöltött linkek ikonként jelennek meg a lábléceben.</span>
             </div>
             <div class="card">
-              <div class="card-head"><h2>Kezdőlap és szövegek</h2></div>
-              <div class="form-grid">
-                <div class="field full"><label for="s-announcement">Felső értesítő sáv (nem kötelező)</label><input class="input" id="s-announcement" name="announcement" maxlength="140" placeholder="pl. Ingyenes szállítás 30 000 Ft felett"><span class="hint">Üresen hagyva nem jelenik meg.</span></div>
-                <div class="field full"><label for="s-heroTitle">Főcím</label><input class="input" id="s-heroTitle" name="heroTitle" maxlength="80"></div>
-                <div class="field full"><label for="s-heroText">Főcím alatti szöveg</label><textarea class="textarea" id="s-heroText" name="heroText" rows="2" maxlength="220"></textarea></div>
-                <div class="field"><label for="s-featuredTitle">Kiemelt termékek címe</label><input class="input" id="s-featuredTitle" name="featuredTitle" maxlength="60"></div>
-                <div class="field"><label for="s-featuredText">Kiemelt termékek alcíme</label><input class="input" id="s-featuredText" name="featuredText" maxlength="140"></div>
-                <div class="field full"><label for="s-footerText">Lábléc szövege</label><textarea class="textarea" id="s-footerText" name="footerText" rows="2" maxlength="220"></textarea></div>
-              </div>
-              <span class="hint">A kezdőlapon kiemelt termékeket a terméknél a „Kezdőlapon kiemelve” jelöléssel választod ki.</span>
+              <div class="card-head"><h2>Értesítő sáv</h2></div>
+              <div class="field"><label for="s-announcement">Szöveg az oldal tetején (nem kötelező)</label><input class="input" id="s-announcement" name="announcement" maxlength="140" placeholder="pl. Ingyenes szállítás 30 000 Ft felett"><span class="hint">Üresen hagyva nem jelenik meg. A főcímet, a többi szöveget és a kinézetet a Haladó mód Megjelenés menüjében szerkesztheted.</span></div>
             </div>
             <div class="card">
               <div class="card-head"><h2>Szállítás</h2></div>
@@ -217,6 +223,48 @@
             </div>
             <div class="sticky-save"><span class="muted" data-settings-note></span><button class="btn btn-primary" type="submit">Beállítások mentése</button></div>
           </form>
+        </section>
+
+        <!-- Megjelenés (Haladó) -->
+        <section data-view="megjelenes" aria-label="Megjelenés" hidden>
+          <div class="studio" data-studio>
+            <div class="studio-panel">
+              <div class="studio-tabs" role="tablist" aria-label="Megjelenés részei">
+                <button type="button" role="tab" data-studio-tab="style" aria-selected="true">Kinézet</button>
+                <button type="button" role="tab" data-studio-tab="fonts" aria-selected="false">Betűk</button>
+                <button type="button" role="tab" data-studio-tab="anim" aria-selected="false">Animációk</button>
+                <button type="button" role="tab" data-studio-tab="sections" aria-selected="false">Kezdőlap</button>
+                <button type="button" role="tab" data-studio-tab="texts" aria-selected="false">Szövegek</button>
+                <button type="button" role="tab" data-studio-tab="css" aria-selected="false">Saját CSS</button>
+              </div>
+              <div class="studio-body" data-studio-body role="tabpanel"></div>
+              <div class="studio-foot">
+                <span class="hint" data-studio-note>A változás azonnal látszik az előnézetben, és publikálás után élesedik.</span>
+                <button class="btn btn-ghost btn-sm" type="button" data-studio-reset>Alaphelyzet</button>
+              </div>
+            </div>
+            <div class="studio-preview" data-studio-preview>
+              <div class="preview-bar">
+                <label class="sr-only" for="pv-page">Előnézet oldala</label>
+                <select class="select" id="pv-page" data-preview-page>
+                  <option value="/">Kezdőlap</option>
+                  <option value="/products">Termékek</option>
+                  <option value="product">Termékoldal</option>
+                  <option value="/checkout">Pénztár</option>
+                </select>
+                <div class="segmented seg-sm" role="radiogroup" aria-label="Eszköz">
+                  <label><input type="radio" name="pv-device" value="desktop" checked><span>Asztali</span></label>
+                  <label><input type="radio" name="pv-device" value="mobile"><span>Mobil</span></label>
+                </div>
+                <button class="icon-btn" type="button" data-preview-reload aria-label="Előnézet újratöltése"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+                <button class="icon-btn preview-close" type="button" data-preview-close aria-label="Előnézet bezárása"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+              </div>
+              <div class="preview-stage" data-preview-stage>
+                <div class="preview-frame" data-preview-frame><iframe title="Webshop élő előnézet" data-preview-iframe></iframe></div>
+              </div>
+            </div>
+            <button class="btn btn-primary preview-fab" type="button" data-preview-open><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/></svg>Élő előnézet</button>
+          </div>
         </section>
 
         <!-- Publikálás -->
@@ -274,7 +322,8 @@
     <nav class="tabbar" aria-label="Admin menü">
       <a href="#attekintes" data-view-link="attekintes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4zm10 7h6v-9h-6zM4 20h6v-4H4zm10-16v4h6V4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Áttekintés</span></a>
       <a href="#termekek" data-view-link="termekek"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4zm0 5l9 4 9-4M3 17l9 4 9-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Termékek</span></a>
-      <a href="#kategoriak" data-view-link="kategoriak"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h7v7H4zM13 5h7v7h-7zM4 14h7v6H4zM13 14h7v6h-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Kategóriák</span></a>
+      <a href="#kategoriak" data-view-link="kategoriak" data-basic-only><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h7v7H4zM13 5h7v7h-7zM4 14h7v6H4zM13 14h7v6h-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Kategóriák</span></a>
+      <a href="#megjelenes" data-view-link="megjelenes" data-pro><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-.5-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6H16a5 5 0 0 0 5-5c0-4.1-4-7.6-9-7.6Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="7.5" cy="11" r="1.3" fill="currentColor"/><circle cx="10.5" cy="7.5" r="1.3" fill="currentColor"/><circle cx="15" cy="7.5" r="1.3" fill="currentColor"/></svg><span>Megjelenés</span></a>
       <a href="#beallitasok" data-view-link="beallitasok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="6" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="18" r="2" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Beállítások</span></a>
       <a href="#publikalas" data-view-link="publikalas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0-4 4m4-4 4 4M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Publikálás</span><b class="nav-dot" data-nav-dirty hidden></b></a>
     </nav>
@@ -359,7 +408,8 @@
 
   <div class="toast" role="status" aria-live="polite" data-toast></div>
 
-  <script src="/assets/js/store.js?v=3.1.0" defer></script>
-  <script src="/assets/js/admin.js?v=3.1.0" defer></script>
+  <script src="/assets/js/texts.js?v=4.0.0" defer></script>
+  <script src="/assets/js/store.js?v=4.0.0" defer></script>
+  <script src="/assets/js/admin.js?v=4.0.0" defer></script>
 </body>
 </html>

@@ -18,6 +18,7 @@
     attekintes: "Áttekintés",
     termekek: "Termékek",
     kategoriak: "Kategóriák",
+    megjelenes: "Megjelenés",
     beallitasok: "Beállítások",
     publikalas: "Publikálás"
   };
@@ -335,6 +336,9 @@
   /* ---------------- megjelenítés ---------------- */
   function go(view) {
     if (!VIEWS[view]) view = "attekintes";
+    if (view === "megjelenes" && state.mode !== "pro") setMode("pro", { quiet: true });
+    $("[data-app]").classList.toggle("studio-mode", view === "megjelenes");
+    const mm = $("[data-more-menu]"); if (mm) mm.hidden = true;
     if (location.hash.slice(1) !== view) history.replaceState(null, "", `#${view}`);
     state.view = view;
     $$("[data-view]").forEach(s => { s.hidden = s.dataset.view !== view; });
@@ -368,6 +372,7 @@
     else if (state.view === "termekek") renderProducts();
     else if (state.view === "kategoriak") renderCategories();
     else if (state.view === "beallitasok") renderSettings();
+    else if (state.view === "megjelenes") renderStudio();
     else if (state.view === "publikalas") renderPublish();
   }
 
@@ -641,6 +646,8 @@
       return;
     }
     raw.categories = state.draft.settings.categories;
+    raw.texts = state.draft.settings.texts;
+    raw.theme = state.draft.settings.theme;
     state.draft.settings = N.sanitizeSettings(raw);
     saveDraft();
     renderStatus();
@@ -909,6 +916,376 @@
     renderAll();
   }
 
+  /* ---------------- Haladó mód: Megjelenés szerkesztő ---------------- */
+  const MODE_KEY = "nsc.admin.mode.v1";
+  state.mode = N.store.get(MODE_KEY) === "pro" ? "pro" : "basic";
+
+  function applyMode() {
+    document.documentElement.dataset.adminMode = state.mode;
+    $$("[data-mode]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === state.mode)));
+    $$("[data-mode-toggle]").forEach(b => { b.textContent = state.mode === "pro" ? "Kezdő módra váltás" : "Haladó mód bekapcsolása"; });
+  }
+  function setMode(mode, { quiet = false } = {}) {
+    if (mode !== "pro" && mode !== "basic") return;
+    const changed = state.mode !== mode;
+    state.mode = mode;
+    N.store.set(MODE_KEY, mode);
+    applyMode();
+    if (mode === "basic" && state.view === "megjelenes") go("attekintes");
+    if (changed && !quiet) toast(mode === "pro" ? "Haladó mód: a Megjelenés menüben az egész oldalt szerkesztheted." : "Kezdő mód: termékek, kategóriák és alapbeállítások.");
+  }
+
+  const studio = { tab: "style", device: "desktop", page: "/", textQ: "", saveT: 0, loaded: false, open: false };
+  const COLOR_FIELDS = [
+    ["bg", "Háttér", "Az oldal alapszíne"],
+    ["surface", "Felületek", "Fiókok, panelek, kártyák alapja"],
+    ["primary", "Fő szín", "Gombok, kosár, kiemelések"],
+    ["accent", "Kiemelő szín", "Árak, csillogás, ritka jelölés"],
+    ["secondary", "Másodlagos szín", "Linkek, új termék, fények"],
+    ["text", "Szöveg", "Címek és törzsszöveg"]
+  ];
+  const ANIM_FIELDS = [
+    ["float", "Lebegő termékek", "A nyitó képen és a termékoldalon lebegnek a dobozok."],
+    ["sparkles", "Csillogás és konfetti", "Csillanások, csillagok és konfetti a csomagbontásnál."],
+    ["glow", "Holo fények", "Mozgó háttérfények, holo fény a játékszőnyegen és a címen."],
+    ["tilt", "Kártya dőlés", "Asztali gépen a termékkártya követi az egeret."],
+    ["reveal", "Megjelenés görgetéskor", "A kártyák finoman beúsznak görgetés közben."],
+    ["ticker", "Futó sáv", "A kategóriák sávja folyamatosan halad."],
+    ["fly", "Kosárba repülés", "A termék képe a kosárba repül."],
+    ["pack", "Csomagbontás", "A csomag kinyílik, a lapok egyenként fordulnak meg."]
+  ];
+  const TEXT_TARGET = { "Kezdőlap: nyitó blokk": ".hero", "Kezdőlap: csomagbontó": "#csomag", "Lábléc": ".site-footer", "Fejléc és menü": "body" };
+  const TEXT_KEY_TARGET = { cats: "[data-section=categories]", link: "[data-section=featured]", featured: "[data-section=featured]", soon: "#hamarosan", steps: "#rendeles", contact: "#kapcsolat" };
+
+  const theme = () => state.draft.settings.theme;
+  const texts = () => state.draft.settings.texts || (state.draft.settings.texts = {});
+
+  function hexLum(h) {
+    const n = parseInt(h.slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(v => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; })
+      .reduce((s, v, i) => s + v * [.2126, .7152, .0722][i], 0);
+  }
+  const contrast = (a, b) => { const x = hexLum(a), y = hexLum(b); return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
+
+  function setTheme(path, value) {
+    const th = N.clone(theme());
+    const keys = path.split(".");
+    let o = th;
+    for (let i = 0; i < keys.length - 1; i++) o = o[keys[i]];
+    o[keys[keys.length - 1]] = value;
+    if (path.startsWith("colors.")) th.preset = "custom";
+    state.draft.settings.theme = N.sanitizeTheme(th);
+    studioChanged();
+  }
+  function studioChanged() {
+    sendPreview();
+    clearTimeout(studio.saveT);
+    studio.saveT = setTimeout(() => saveDraft(), 700);
+  }
+
+  /* élő előnézet */
+  let pvRaf = 0;
+  function sendPreview(withProducts = false) {
+    cancelAnimationFrame(pvRaf);
+    pvRaf = requestAnimationFrame(() => {
+      const w = $("[data-preview-iframe]")?.contentWindow;
+      if (!w) return;
+      try { w.postMessage({ type: "nsc:preview", settings: state.draft.settings, products: withProducts ? state.draft.products : undefined }, location.origin); } catch {}
+    });
+  }
+  function previewScroll(target) {
+    if (!target || studio.page !== "/") return;
+    const w = $("[data-preview-iframe]")?.contentWindow;
+    try { w?.postMessage({ type: "nsc:preview-scroll", target }, location.origin); } catch {}
+  }
+  function previewUrl() {
+    if (studio.page === "product") {
+      const p = products().find(x => !x.hidden && x.availability !== "coming_soon" && x.stock > 0) || products()[0];
+      return p ? `/product?id=${p.id}` : "/products";
+    }
+    return studio.page;
+  }
+  function loadPreview() {
+    const f = $("[data-preview-iframe]");
+    if (!f) return;
+    studio.loaded = true;
+    f.src = previewUrl();
+  }
+  function layoutPreview() {
+    const stage = $("[data-preview-stage]"), frame = $("[data-preview-frame]"), f = $("[data-preview-iframe]");
+    if (!stage || !frame || !f || !stage.clientWidth) return;
+    const W = stage.clientWidth - 28, H = stage.clientHeight - 28;
+    const phone = studio.device === "mobile";
+    const vw = phone ? 390 : 1280;
+    const s = phone ? Math.min(1, (W - 20) / vw, H / 700) : Math.min(1, W / vw);
+    const vh = phone ? Math.min(844, Math.max(560, Math.floor((H - 20) / s))) : Math.floor(H / s);
+    frame.classList.toggle("phone", phone);
+    f.style.width = `${vw}px`;
+    f.style.height = `${vh}px`;
+    f.style.transform = `scale(${s})`;
+    frame.style.width = `${Math.round(vw * s)}px`;
+    frame.style.height = `${Math.round(vh * s)}px`;
+  }
+
+  /* panel tartalom */
+  const seg = (path, opts, cur, label) => `
+    <div class="seg-row">${label ? `<span>${label}</span>` : ""}<div class="segmented" role="radiogroup"${label ? ` aria-label="${esc(label)}"` : ""}>${opts.map(([v, l]) => `<label><input type="radio" name="th-${path}" value="${v}" data-th="${path}" ${String(cur) === String(v) ? "checked" : ""}><span>${l}</span></label>`).join("")}</div></div>`;
+
+  function styleTabHTML() {
+    const th = theme(), c = th.colors;
+    const warn = [];
+    if (contrast(c.text, c.bg) < 4.5) warn.push("A szöveg nehezen olvasható ezen a háttéren – válassz világosabb vagy sötétebb szövegszínt.");
+    if (contrast(c.text, c.surface) < 4) warn.push("A felületek (kártyák, fiókok) és a szöveg között kicsi a kontraszt.");
+    return `
+      <div class="sgroup"><h3>Kész témák <small>egy kattintás</small></h3>
+        <div class="presets">${N.PRESETS.map(p => `<button type="button" class="preset" data-preset="${p.key}" aria-pressed="${th.preset === p.key}"><span class="sw" style="background:linear-gradient(150deg, ${p.colors.surface}, ${p.colors.bg})"><i style="background:${p.colors.primary}"></i><i style="background:${p.colors.accent}"></i><i style="background:${p.colors.secondary}"></i></span><b>${esc(p.label)}</b></button>`).join("")}</div>
+      </div>
+      <div class="sgroup"><h3>Színek ${th.preset === "custom" ? "<small>egyedi</small>" : ""}</h3>
+        <div class="colors">${COLOR_FIELDS.map(([k, l, h]) => `
+          <div class="color-row"><input type="color" value="${c[k]}" data-color="${k}" aria-label="${l}"><span><strong>${l}</strong><small>${h}</small></span><input class="input hex" value="${c[k]}" data-hex="${k}" maxlength="7" spellcheck="false" aria-label="${l} hex kódja"></div>`).join("")}</div>
+        ${warn.map(w => `<p class="contrast-warn">${w}</p>`).join("")}
+      </div>
+      <div class="sgroup"><h3>Formák</h3>
+        ${seg("radius", [["sharp", "Szögletes"], ["rounded", "Lekerekített"], ["round", "Kerek"]], th.radius, "Sarkok")}
+        ${seg("buttons", [["pill", "Kapszula"], ["rounded", "Lekerekített"], ["square", "Szögletes"]], th.buttons, "Gombok")}
+        ${seg("cards", [["glass", "Üveg"], ["solid", "Tömör"], ["outline", "Körvonal"]], th.cards, "Termékkártyák")}
+      </div>
+      <div class="sgroup"><h3>Elrendezés</h3>
+        ${seg("colsDesktop", [["3", "3"], ["4", "4"], ["5", "5"]], th.colsDesktop, "Termékek egy sorban (asztali)")}
+        ${seg("colsMobile", [["1", "1 – lista"], ["2", "2 – rács"]], th.colsMobile, "Termékek egy sorban (mobil)")}
+        ${seg("heroSide", [["right", "Kép jobbra"], ["left", "Kép balra"]], th.heroSide, "Nyitó blokk")}
+      </div>`;
+  }
+
+  function fontsTabHTML() {
+    const th = theme();
+    const opt = (path, f, cur, sample) => `<label class="font-opt"><input type="radio" name="th-${path}" value="${f.key}" data-th="${path}" ${cur === f.key ? "checked" : ""}><span style="font-family:${esc(f.family)};font-weight:${f.weight || 400}"><b>${sample}</b><small>${esc(f.label)}</small></span></label>`;
+    return `
+      <div class="sgroup"><h3>Címek betűtípusa</h3>
+        <div class="font-grid">${N.FONTS.display.map(f => opt("fontDisplay", f, th.fontDisplay, "Nyiss csomagot!")).join("")}</div>
+      </div>
+      <div class="sgroup"><h3>Címek mérete</h3>
+        <div class="range-row"><input type="range" min="80" max="130" step="5" value="${th.displayScale}" data-th="displayScale" data-num aria-label="Címek mérete"><output data-scale-out>${th.displayScale}%</output></div>
+      </div>
+      <div class="sgroup"><h3>Szövegek betűtípusa</h3>
+        <div class="font-grid">${N.FONTS.body.map(f => opt("fontBody", f, th.fontBody, "Booster, tin, ETB")).join("")}</div>
+      </div>`;
+  }
+
+  function animTabHTML() {
+    const a = theme().anim;
+    return `
+      <div class="sgroup"><h3>Összes animáció</h3>
+        ${seg("anim.level", [["full", "Teljes"], ["subtle", "Visszafogott"], ["off", "Kikapcsolva"]], a.level)}
+        ${seg("anim.speed", [["slow", "Lassú"], ["normal", "Normál"], ["fast", "Gyors"]], a.speed, "Sebesség")}
+        <p class="hint">Akinek a készülékén be van kapcsolva a „mozgás csökkentése”, annak automatikusan visszafogott marad.</p>
+      </div>
+      <div class="sgroup"><h3>Effektek egyenként</h3>
+        <div class="toggles">${ANIM_FIELDS.map(([k, l, h]) => `<label class="toggle"><input type="checkbox" data-th="anim.${k}" ${a[k] ? "checked" : ""}><span class="switch"></span><span><strong>${l}</strong><small>${h}</small></span></label>`).join("")}</div>
+      </div>`;
+  }
+
+  function sectionsTabHTML() {
+    const list = theme().sections;
+    return `
+      <div class="sgroup"><h3>Kezdőlap szekciói <small>sorrend és láthatóság</small></h3>
+        <div class="sec-list">
+          <div class="sec-row fixed"><label class="toggle"><input type="checkbox" checked disabled><span class="switch"></span><span><strong>Nyitó blokk</strong><small>Mindig az első</small></span></label></div>
+          ${list.map((s, i) => {
+            const meta = N.SECTION_LIST.find(x => x.id === s.id);
+            return `<div class="sec-row"><label class="toggle"><input type="checkbox" data-sec-on="${s.id}" ${s.on ? "checked" : ""}><span class="switch"></span><span><strong>${esc(meta?.label || s.id)}</strong></span></label>
+              <div class="order-btns"><button type="button" data-sec-move="${i}" data-d="-1" aria-label="Feljebb" ${i === 0 ? "disabled" : ""}>${ARROW_UP}</button><button type="button" data-sec-move="${i}" data-d="1" aria-label="Lejjebb" ${i === list.length - 1 ? "disabled" : ""}>${ARROW_DOWN}</button></div></div>`;
+          }).join("")}
+        </div>
+        <p class="hint">A „Hamarosan érkezik” és a „Kapcsolat” csak akkor látszik, ha van hozzá tartalom (érkező termék, illetve e-mail cím vagy telefonszám). A csomagbontóhoz legalább 3 rendelhető, képes termék kell.</p>
+      </div>`;
+  }
+
+  function textListHTML() {
+    const q = studio.textQ.trim().toLowerCase();
+    const tx = texts();
+    const groups = N.TEXT_GROUPS.map(([g, items], gi) => {
+      const list = items.filter(([k, l, d]) => !q || `${l} ${d} ${tx[k] || ""}`.toLowerCase().includes(q));
+      if (!list.length) return "";
+      const custom = items.filter(([k]) => tx[k]).length;
+      return `<details class="tgroup" ${q || gi === 1 ? "open" : ""} data-tgroup="${esc(g)}"><summary>${esc(g)}${custom ? `<small>${custom} módosítva</small>` : ""}</summary><div class="tgroup-body">${list.map(([k, l, d]) => {
+        const v = tx[k] || d;
+        const long = d.length > 64;
+        return `<div class="field tfield${tx[k] ? " custom" : ""}"><div class="label-row"><label for="tx-${k}">${esc(l)}</label><button class="mini-link" type="button" data-text-reset="${k}" ${tx[k] ? "" : "hidden"}>Eredeti</button></div>${long
+          ? `<textarea class="textarea" id="tx-${k}" data-text="${k}" rows="3">${esc(v)}</textarea>`
+          : `<input class="input" id="tx-${k}" data-text="${k}" value="${esc(v)}">`}</div>`;
+      }).join("")}</div></details>`;
+    }).join("");
+    return groups || '<p class="muted">Nincs ilyen szöveg.</p>';
+  }
+  function textsTabHTML() {
+    return `
+      <div class="text-search"><label class="sr-only" for="tx-q">Szöveg keresése</label><input class="input" id="tx-q" type="search" placeholder="Keresés a szövegek között, pl. kosár" value="${esc(studio.textQ)}" data-text-q></div>
+      <div class="sgroup" data-text-list>${textListHTML()}</div>`;
+  }
+
+  function cssTabHTML() {
+    return `
+      <div class="sgroup"><h3>Saját CSS <small>szakértőknek</small></h3>
+        <p class="hint">Bármit felülírhatsz a bolt kinézetében. Példa: <code>.pcard h3 { font-size: 1.1rem; }</code> vagy <code>:root { --wrap: 1400px; }</code>. Hibás CSS nem rontja el a boltot, csak nem érvényesül.</p>
+        <textarea class="textarea code-area" data-css spellcheck="false" placeholder="/* ide írd a saját stílusaidat */">${esc(theme().customCss)}</textarea>
+      </div>`;
+  }
+
+  const ARROW_UP = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const ARROW_DOWN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+  function renderStudioBody() {
+    const body = $("[data-studio-body]");
+    if (!body) return;
+    const html = { style: styleTabHTML, fonts: fontsTabHTML, anim: animTabHTML, sections: sectionsTabHTML, texts: textsTabHTML, css: cssTabHTML }[studio.tab] || styleTabHTML;
+    const top = body.scrollTop;
+    body.innerHTML = html();
+    body.scrollTop = top;
+  }
+
+  function renderStudio() {
+    $$("[data-studio-tab]").forEach(b => b.setAttribute("aria-selected", String(b.dataset.studioTab === studio.tab)));
+    renderStudioBody();
+    const pageSel = $("[data-preview-page]");
+    if (pageSel) pageSel.value = studio.page;
+    if (!studio.loaded && (!isMobile() || studio.open)) loadPreview();
+    requestAnimationFrame(layoutPreview);
+  }
+  const isMobile = () => window.matchMedia("(max-width: 860px)").matches;
+
+  async function resetStudioTab() {
+    const names = { style: "a színeket és formákat", fonts: "a betűtípusokat", anim: "az animációkat", sections: "a kezdőlap szekcióit", texts: "az összes szöveget", css: "a saját CSS-t" };
+    const ok = await confirmDialog({ title: "Alaphelyzet visszaállítása", text: `Biztosan visszaállítod ${names[studio.tab]} az eredeti állapotra? Publikálásig visszavonható az „elvetés” gombbal.`, yes: "Visszaállítás", danger: false });
+    if (!ok) return;
+    const d = N.THEME_DEFAULTS, th = N.clone(theme());
+    if (studio.tab === "style") Object.assign(th, { preset: d.preset, colors: N.clone(d.colors), radius: d.radius, buttons: d.buttons, cards: d.cards, colsDesktop: d.colsDesktop, colsMobile: d.colsMobile, heroSide: d.heroSide });
+    else if (studio.tab === "fonts") Object.assign(th, { fontDisplay: d.fontDisplay, fontBody: d.fontBody, displayScale: d.displayScale });
+    else if (studio.tab === "anim") th.anim = N.clone(d.anim);
+    else if (studio.tab === "sections") th.sections = N.clone(d.sections);
+    else if (studio.tab === "css") th.customCss = "";
+    if (studio.tab === "texts") state.draft.settings.texts = {};
+    else state.draft.settings.theme = N.sanitizeTheme(th);
+    studioChanged();
+    renderStudioBody();
+    toast("Visszaállítva.");
+  }
+
+  function bindStudio() {
+    const body = $("[data-studio-body]");
+    if (!body) return;
+    body.addEventListener("input", e => {
+      const el = e.target;
+      if (el.matches("[data-color]")) {
+        const hex = $(`[data-hex="${el.dataset.color}"]`, body);
+        if (hex) hex.value = el.value;
+        setTheme(`colors.${el.dataset.color}`, el.value);
+      } else if (el.matches("[data-th][data-num]")) {
+        setTheme(el.dataset.th, Number(el.value));
+        const out = $("[data-scale-out]", body);
+        if (out) out.textContent = `${el.value}%`;
+      } else if (el.matches("[data-text]")) {
+        const k = el.dataset.text;
+        const def = N.TEXT_DEFAULTS[k] || "";
+        const v = el.value;
+        if (!v.trim() || v.trim() === def) delete texts()[k]; else texts()[k] = v;
+        const custom = !!texts()[k];
+        el.closest(".tfield")?.classList.toggle("custom", custom);
+        const rb = $(`[data-text-reset="${k}"]`, body);
+        if (rb) rb.hidden = !custom;
+        studioChanged();
+      } else if (el.matches("[data-text-q]")) {
+        studio.textQ = el.value;
+        const list = $("[data-text-list]", body);
+        if (list) list.innerHTML = textListHTML();
+      } else if (el.matches("[data-css]")) {
+        setTheme("customCss", el.value);
+      }
+    });
+    body.addEventListener("change", e => {
+      const el = e.target;
+      if (el.matches("[data-th]:not([data-num])")) {
+        setTheme(el.dataset.th, el.type === "checkbox" ? el.checked : el.value);
+        if (studio.tab === "style" && el.dataset.th.startsWith("colors")) renderStudioBody();
+      } else if (el.matches("[data-hex]")) {
+        let v = el.value.trim().toLowerCase();
+        if (/^[0-9a-f]{6}$/.test(v)) v = `#${v}`;
+        if (/^#[0-9a-f]{3}$/.test(v)) v = `#${v[1]}${v[1]}${v[2]}${v[2]}${v[3]}${v[3]}`;
+        if (/^#[0-9a-f]{6}$/.test(v)) { setTheme(`colors.${el.dataset.hex}`, v); renderStudioBody(); }
+        else { toast("Hex színkódot adj meg, pl. #ff7a1f.", true); el.value = theme().colors[el.dataset.hex]; }
+      } else if (el.matches("[data-color]")) {
+        renderStudioBody();
+      } else if (el.matches("[data-sec-on]")) {
+        const th = N.clone(theme());
+        const s = th.sections.find(x => x.id === el.dataset.secOn);
+        if (s) s.on = el.checked;
+        state.draft.settings.theme = N.sanitizeTheme(th);
+        studioChanged();
+        const target = { ticker: ".ticker", pack: "#csomag", categories: "[data-section=categories]", featured: "[data-section=featured]", soon: "#hamarosan", steps: "#rendeles", contact: "#kapcsolat" }[el.dataset.secOn];
+        if (el.checked) setTimeout(() => previewScroll(target), 250);
+      }
+    });
+    body.addEventListener("click", e => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      if (b.matches("[data-preset]")) {
+        const p = N.PRESETS.find(x => x.key === b.dataset.preset);
+        if (!p) return;
+        state.draft.settings.theme = N.sanitizeTheme({ ...N.clone(theme()), preset: p.key, colors: N.clone(p.colors) });
+        studioChanged();
+        renderStudioBody();
+      } else if (b.matches("[data-sec-move]")) {
+        const i = Number(b.dataset.secMove), j = i + Number(b.dataset.d);
+        const th = N.clone(theme());
+        if (j < 0 || j >= th.sections.length) return;
+        [th.sections[i], th.sections[j]] = [th.sections[j], th.sections[i]];
+        state.draft.settings.theme = N.sanitizeTheme(th);
+        studioChanged();
+        renderStudioBody();
+        $(`[data-sec-move="${j}"][data-d="${b.dataset.d}"]`, body)?.focus();
+      } else if (b.matches("[data-text-reset]")) {
+        const k = b.dataset.textReset;
+        delete texts()[k];
+        const f = $(`[data-text="${k}"]`, body);
+        if (f) { f.value = N.TEXT_DEFAULTS[k] || ""; f.closest(".tfield")?.classList.remove("custom"); }
+        b.hidden = true;
+        studioChanged();
+      }
+    });
+    body.addEventListener("focusin", e => {
+      const el = e.target;
+      if (!el.matches("[data-text]")) return;
+      const k = el.dataset.text;
+      const g = el.closest("[data-tgroup]")?.dataset.tgroup;
+      previewScroll(TEXT_KEY_TARGET[k.split(".")[0]] && g === "Kezdőlap: szekciók" ? TEXT_KEY_TARGET[k.split(".")[0]] : TEXT_TARGET[g]);
+    });
+
+    $$("[data-studio-tab]").forEach(b => b.addEventListener("click", () => { studio.tab = b.dataset.studioTab; renderStudio(); body.scrollTop = 0; }));
+    $("[data-studio-reset]")?.addEventListener("click", resetStudioTab);
+    $("[data-preview-page]")?.addEventListener("change", e => { studio.page = e.target.value; loadPreview(); });
+    $$('input[name="pv-device"]').forEach(r => r.addEventListener("change", () => { studio.device = r.value; studio.deviceChosen = true; layoutPreview(); }));
+    $("[data-preview-reload]")?.addEventListener("click", loadPreview);
+    $("[data-preview-open]")?.addEventListener("click", () => {
+      studio.open = true;
+      if (!studio.deviceChosen) { studio.device = "mobile"; const r = $('input[name="pv-device"][value="mobile"]'); if (r) r.checked = true; }
+      $("[data-studio]").classList.add("preview-open");
+      document.body.classList.add("lock");
+      if (!studio.loaded) loadPreview(); else sendPreview();
+      requestAnimationFrame(layoutPreview);
+    });
+    $("[data-preview-close]")?.addEventListener("click", () => {
+      studio.open = false;
+      $("[data-studio]").classList.remove("preview-open");
+      document.body.classList.remove("lock");
+    });
+    window.addEventListener("message", e => {
+      if (e.origin !== location.origin || e.data?.type !== "nsc:preview-ready") return;
+      sendPreview(true);
+    });
+    if ("ResizeObserver" in window) new ResizeObserver(() => layoutPreview()).observe($("[data-preview-stage]"));
+    else window.addEventListener("resize", layoutPreview);
+  }
+
   /* ---------------- események ---------------- */
   function bind() {
     $("[data-login-form]").addEventListener("submit", onLogin);
@@ -923,6 +1300,8 @@
         return;
       }
       if (t.matches("[data-logout]")) return logout();
+      if (t.matches("[data-mode]")) return setMode(t.dataset.mode);
+      if (t.matches("[data-mode-toggle]")) { $("[data-more-menu]").hidden = true; return setMode(state.mode === "pro" ? "basic" : "pro"); }
       if (t.matches("[data-publish]")) return publish();
       if (t.matches("[data-mobile-more]")) {
         const m = $("[data-more-menu]");
@@ -1045,6 +1424,7 @@
 
   /* ---------------- indulás ---------------- */
   async function startApp() {
+    applyMode();
     $("[data-login]").hidden = true;
     $("[data-app]").hidden = false;
     $("[data-view-title]").textContent = "Betöltés…";
@@ -1062,6 +1442,7 @@
   }
 
   bind();
+  bindStudio();
   if (session()) startApp();
   else {
     $("[data-login]").hidden = false;

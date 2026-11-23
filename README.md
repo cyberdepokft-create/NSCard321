@@ -21,3 +21,12 @@ Pokémon TCG webshop admin felülettel. A webshop a Cloudflare Pages-en fut, és
 Cím: `/admin`. A publikáláshoz az admin Publikálás oldalán kell megadni egy GitHub tokent (Fine-grained token, csak erre a repóra, Contents: Read and write). A token csak abban a böngészőben tárolódik, ahol megadod.
 
 Jelszócsere: az `public/assets/js/admin.js` fájlban az `AUTH.hash` értéke a `nscard-admin-v3|<felhasználónév>|<jelszó>` szöveg SHA-256 lenyomata.
+
+### Kezdő és Haladó mód
+
+- **Kezdő**: termékek, kategóriák, szállítás, fizetés, készlet, publikálás.
+- **Haladó**: ezen felül a *Megjelenés* menü élő előnézettel (asztali és mobil nézet): kész témák és saját színek, betűtípusok és címméret, formák (sarkok, gombok, kártyák), oszlopszám, animációk egyenként, a kezdőlap szekcióinak sorrendje és láthatósága, a bolt összes szövege, valamint saját CSS.
+
+A Megjelenés beállításai a katalógus `settings.theme` és `settings.texts` mezőjébe kerülnek, publikáláskor élesednek.
+
+A szövegek listája a `public/assets/js/texts.js` fájlban van (a forrás a fejlesztői `texts.json`, amiből a `build_pages.py` generálja a HTML-t is).
