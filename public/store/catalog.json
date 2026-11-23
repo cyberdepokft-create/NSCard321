@@ -1,0 +1,248 @@
+{
+  "version": 3,
+  "updatedAt": "2026-11-23T17:10:00.000Z",
+  "updatedBy": "NS Card",
+  "settings": {
+    "shopName": "NS Card",
+    "email": "",
+    "phone": "",
+    "announcement": "",
+    "shippingHome": 2500,
+    "shippingLocker": 2500,
+    "freeShippingFrom": 0,
+    "payCard": false,
+    "payTransfer": true,
+    "payCod": true,
+    "codFee": 0,
+    "lowStock": 3,
+    "shipHome": true,
+    "shipLocker": true,
+    "shipPickup": false,
+    "shippingPickup": 0,
+    "pickupAddress": "",
+    "address": "",
+    "instagram": "",
+    "facebook": "",
+    "tiktok": "",
+    "heroTitle": "A következő bontásod itt kezdődik.",
+    "heroText": "Pokémon TCG boosterek, tin dobozok, Elite Trainer Boxok és kollekciók – magyar webshopból, készletről.",
+    "featuredTitle": "Kiemelt termékek",
+    "featuredText": "A jelenlegi kínálat legkeresettebb darabjai.",
+    "footerText": "Pokémon TCG termékek gyűjtőknek és bontásra: boosterek, tin dobozok, Elite Trainer Boxok és kollekciók.",
+    "categories": [
+      {
+        "value": "booster",
+        "label": "Booster csomagok",
+        "hidden": false
+      },
+      {
+        "value": "tinek",
+        "label": "Tin dobozok",
+        "hidden": false
+      },
+      {
+        "value": "display",
+        "label": "Displayek",
+        "hidden": false
+      },
+      {
+        "value": "etb",
+        "label": "Elite Trainer Boxok",
+        "hidden": false
+      },
+      {
+        "value": "collections",
+        "label": "Kollekciók",
+        "hidden": false
+      },
+      {
+        "value": "mysteri",
+        "label": "Mystery boxok",
+        "hidden": false
+      },
+      {
+        "value": "single",
+        "label": "Single kártyák",
+        "hidden": false
+      },
+      {
+        "value": "accessories",
+        "label": "Kiegészítők",
+        "hidden": false
+      }
+    ]
+  },
+  "products": [
+    {
+      "id": 11,
+      "category": "tinek",
+      "name": "Pokémon TCG: Mega Heroes Mini Tin",
+      "set": "",
+      "line": "",
+      "description": "",
+      "price": 7490,
+      "oldPrice": null,
+      "stock": 50,
+      "badge": "",
+      "flags": [
+        "popular",
+        "home"
+      ],
+      "images": [
+        "img/products/11-1.webp"
+      ],
+      "availability": "in_stock",
+      "hidden": false
+    },
+    {
+      "id": 12,
+      "category": "display",
+      "name": "Pokémon TCG SV10.5 Unova Victini Illustration Collection",
+      "set": "",
+      "line": "",
+      "description": "",
+      "price": 15990,
+      "oldPrice": null,
+      "stock": 5,
+      "badge": "",
+      "flags": [
+        "popular"
+      ],
+      "images": [
+        "img/products/12-1.webp"
+      ],
+      "availability": "in_stock",
+      "hidden": false
+    },
+    {
+      "id": 13,
+      "category": "booster",
+      "name": "Pokémon TCG: Pokémon Day 2026 Collection",
+      "set": "",
+      "line": "",
+      "description": "",
+      "price": 11990,
+      "oldPrice": null,
+      "stock": 6,
+      "badge": "",
+      "flags": [
+        "new"
+      ],
+      "images": [
+        "img/products/13-1.webp"
+      ],
+      "availability": "in_stock",
+      "hidden": false
+    },
+    {
+      "id": 14,
+      "category": "booster",
+      "name": "Pokémon TCG: Mega Latias ex Box",
+      "set": "",
+      "line": "",
+      "description": "",
+      "price": 14690,
+      "oldPrice": null,
+      "stock": 6,
+      "badge": "",
+      "flags": [
+        "home"
+      ],
+      "images": [
+        "img/products/14-1.webp"
+      ],
+      "availability": "in_stock",
+      "hidden": false
+    },
+    {
+      "id": 15,
+      "category": "tinek",
+      "name": "Pokémon TCG: Poké Ball Tin 2025",
+      "set": "",
+      "line": "",
+      "description": "",
+      "price": 6990,
+      "oldPrice": null,
+      "stock": 6,
+      "badge": "",
+      "flags": [],
+      "images": [
+        "img/products/15-1.webp"
+      ],
+      "availability": "in_stock",
+      "hidden": false
+    },
+    {
+      "id": 16,
+      "category": "tinek",
+      "name": "Pokémon TCG: Team Rocket Tin Persian Ex",
+      "set": "",
+      "line": "",
+      "description": "",
+      "price": 11990,
+      "oldPrice": null,
+      "stock": 2,
+      "badge": "",
+      "flags": [],
+      "images": [
+        "img/products/16-1.webp"
+      ],
+      "availability": "in_stock",
+      "hidden": false
+    },
+    {
+      "id": 17,
+      "category": "tinek",
+      "name": "Pokémon TCG: Team Rocket Tin Mewtwo Ex",
+      "set": "",
+      "line": "",
+      "description": "",
+      "price": 11990,
+      "oldPrice": null,
+      "stock": 2,
+      "badge": "",
+      "flags": [],
+      "images": [
+        "img/products/17-1.webp"
+      ],
+      "availability": "in_stock",
+      "hidden": false
+    },
+    {
+      "id": 18,
+      "category": "tinek",
+      "name": "Pokémon TCG: Team Rocket Tin Nidoking Ex",
+      "set": "",
+      "line": "",
+      "description": "",
+      "price": 11990,
+      "oldPrice": null,
+      "stock": 2,
+      "badge": "",
+      "flags": [],
+      "images": [
+        "img/products/18-1.webp"
+      ],
+      "availability": "in_stock",
+      "hidden": false
+    },
+    {
+      "id": 19,
+      "category": "etb",
+      "name": "Pokémon TCG: Phantasmal Flames Elite Trainer Box",
+      "set": "",
+      "line": "",
+      "description": "",
+      "price": 29990,
+      "oldPrice": null,
+      "stock": 10,
+      "badge": "",
+      "flags": [],
+      "images": [
+        "img/products/19-1.webp"
+      ],
+      "availability": "coming_soon",
+      "hidden": false
+    }
+  ]
+}

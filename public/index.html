@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>NS Card – Pokémon TCG webshop</title>
+  <meta name="description" content="Pokémon TCG boosterek, tin dobozok, Elite Trainer Boxok és kollekciók készletről. Gyors keresés, átlátható árak, egyszerű rendelés.">
+  <meta name="theme-color" content="#061230">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="NS Card">
+  <meta property="og:title" content="NS Card – Pokémon TCG webshop">
+  <meta property="og:description" content="Pokémon TCG boosterek, tin dobozok, Elite Trainer Boxok és kollekciók készletről. Gyors keresés, átlátható árak, egyszerű rendelés.">
+  <meta property="og:image" content="/img/brand/og.jpg">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="preload" href="/assets/fonts/archivo-black.woff" as="font" type="font/woff" crossorigin>
+  <link rel="preload" href="/assets/fonts/dm-sans.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="/assets/css/shop.css?v=3.1.0">
+</head>
+<body data-page="home">
+  <div class="sky" aria-hidden="true"><i></i><i></i><i></i><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div>
+  <a class="skip" href="#main">Ugrás a tartalomra</a>
+  <div class="announce" data-announce hidden></div>
+  <header class="site-header">
+    <div class="wrap hdr">
+      <button class="icon-btn only-mobile" type="button" data-open-menu aria-controls="menu" aria-expanded="false" aria-label="Menü megnyitása"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      <a class="brand" href="/" aria-label="NS Card kezdőlap"><img src="/img/brand/wordmark.webp" alt="NS Card" width="130" height="46"></a>
+      <nav class="nav" aria-label="Fő menü"><a href="/" aria-current="page">Kezdőlap</a><a href="/products">Termékek</a><a href="/#rendeles">Szállítás és fizetés</a><a href="/#kapcsolat" data-contact-nav>Kapcsolat</a></nav>
+      <form class="search" role="search" action="/products">
+        <label class="sr-only" for="q-desktop">Keresés a termékek között</label>
+        <input id="q-desktop" name="q" type="search" placeholder="Keresés: tin, ETB, Mega…" autocomplete="off" data-q>
+        <button type="submit" aria-label="Keresés"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      </form>
+      <div class="hdr-actions">
+        <button class="icon-btn only-mobile" type="button" data-toggle-search aria-expanded="false" aria-label="Keresés megnyitása"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        <button class="cart-btn" type="button" data-open-cart aria-controls="cart" aria-label="Kosár megnyitása"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L20.5 8H6.2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.5" fill="currentColor"/><circle cx="17" cy="20" r="1.5" fill="currentColor"/></svg><span class="cart-label">Kosár</span><span class="cart-count" data-cart-count>0</span></button>
+      </div>
+    </div>
+    <div class="mobile-search" data-mobile-search>
+      <form class="search" role="search" action="/products">
+        <label class="sr-only" for="q-mobile">Keresés a termékek között</label>
+        <input id="q-mobile" name="q" type="search" placeholder="Keresés: tin, ETB, Mega…" autocomplete="off" data-q>
+        <button type="submit" aria-label="Keresés"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      </form>
+    </div>
+  </header>
+
+  <div class="scrim" data-scrim></div>
+  <aside class="drawer drawer-left" id="menu" aria-label="Menü" data-menu>
+    <div class="drawer-head"><img src="/img/brand/wordmark.webp" alt="NS Card" width="101" height="36"><button class="icon-btn" type="button" data-close aria-label="Menü bezárása"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
+    <div class="drawer-body">
+      <nav class="menu-links" aria-label="Mobil menü"><a href="/" aria-current="page">Kezdőlap</a><a href="/products">Termékek</a><a href="/#rendeles">Szállítás és fizetés</a><a href="/#kapcsolat" data-contact-nav>Kapcsolat</a></nav>
+      <div class="menu-cats" data-menu-cats></div>
+    </div>
+  </aside>
+  <aside class="drawer drawer-right" id="cart" aria-label="Kosár" data-cart>
+    <div class="drawer-head"><h2>Kosár</h2><button class="icon-btn" type="button" data-close aria-label="Kosár bezárása"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
+    <div class="drawer-body" data-cart-lines></div>
+    <div class="drawer-foot" data-cart-foot></div>
+  </aside>
+  <div class="toast" role="status" aria-live="polite" data-toast></div>
+
+  <main id="main">
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <h1 class="display" data-hero-title>A következő bontásod itt kezdődik.</h1>
+          <p class="lead" data-hero-text>Pokémon TCG boosterek, tin dobozok, Elite Trainer Boxok és kollekciók – magyar webshopból, készletről.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="/products">Termékek böngészése</a>
+            <a class="btn btn-ghost" href="#hamarosan" data-soon-link hidden>Hamarosan érkezik</a>
+          </div>
+        </div>
+        <div class="playmat" data-playmat>
+          <img class="playmat-mark" src="/img/brand/mark.webp" alt="" width="320" height="319">
+          <div class="zone" aria-hidden="true"></div>
+          <div class="fan" data-fan></div>
+          <div class="sparks" aria-hidden="true"><span class="spark"></span><span class="spark"></span><span class="spark"></span><span class="spark"></span><span class="spark"></span><span class="spark"></span></div>
+        </div>
+        <dl class="facts">
+          <div><dt>Kínálat</dt><dd data-fact-stock>Betöltés…</dd></div>
+          <div><dt>Szállítás</dt><dd data-fact-ship>Betöltés…</dd></div>
+          <div><dt>Fizetés</dt><dd data-fact-pay>Betöltés…</dd></div>
+        </dl>
+      </div>
+    </section>
+    <div class="ticker" data-ticker aria-hidden="true"></div>
+
+    <section class="section-tight" aria-labelledby="cats-title">
+      <div class="wrap">
+        <div class="sec-head"><h2 class="display" id="cats-title">Kategóriák</h2><a class="link-more" href="/products">Összes termék</a></div>
+        <div class="cat-rail" data-cat-rail></div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="featured-title">
+      <div class="wrap">
+        <div class="sec-head">
+          <div><h2 class="display" id="featured-title" data-featured-title>Kiemelt termékek</h2><p data-featured-text>A jelenlegi kínálat legkeresettebb darabjai.</p></div>
+          <a class="link-more" href="/products">Teljes kínálat</a>
+        </div>
+        <div class="grid" data-featured></div>
+      </div>
+    </section>
+
+    <section class="section" id="hamarosan" aria-labelledby="soon-title" data-soon-section hidden>
+      <div class="wrap">
+        <div class="sec-head"><div><h2 class="display" id="soon-title">Hamarosan érkezik</h2><p>Ezek a termékek még nem rendelhetők. Kérdezz rá, ha szeretnéd, hogy szóljunk, amikor megjönnek.</p></div></div>
+        <div class="grid" data-soon></div>
+      </div>
+    </section>
+
+    <section class="section" id="rendeles" aria-labelledby="steps-title">
+      <div class="wrap">
+        <div class="sec-head"><div><h2 class="display" id="steps-title">Így rendelhetsz</h2><p>Regisztráció nélkül, pár perc alatt.</p></div></div>
+        <ol class="steps">
+          <li><h3>Tedd kosárba a termékeket</h3><p>A kosár a böngésződben megmarad, így később is folytathatod a vásárlást.</p></li>
+          <li><h3>Add meg a szállítási adatokat</h3><p data-step-ship>Házhozszállítás vagy csomagautomata.</p></li>
+          <li><h3>Fizess, ahogy neked kényelmes</h3><p data-step-pay>A rendelésről visszaigazolást küldünk e-mailben.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section" id="kapcsolat" aria-labelledby="contact-title">
+      <div class="wrap contact">
+        <div>
+          <h2 class="display" id="contact-title">Kérdésed van?</h2>
+          <p class="muted" style="margin-top:12px;max-width:46ch">Írj nekünk, ha egy konkrét terméket keresel, nagyobb tételben rendelnél, vagy segítség kell a választáshoz.</p>
+          <div class="contact-list" data-contact-list></div>
+        </div>
+        <form class="panel form" data-contact-form novalidate>
+          <div class="form-grid">
+            <div class="field"><label for="c-name">Neved</label><input class="input" id="c-name" name="name" autocomplete="name" required></div>
+            <div class="field"><label for="c-email">E-mail címed</label><input class="input" id="c-email" name="email" type="email" autocomplete="email" required></div>
+            <div class="field full"><label for="c-msg">Üzenet</label><textarea class="textarea" id="c-msg" name="message" rows="5" placeholder="Melyik termék érdekel, vagy miben segíthetünk?" required></textarea></div>
+          </div>
+          <div><button class="btn btn-primary" type="submit">Üzenet küldése</button></div>
+          <p class="muted" style="font-size:.88rem" data-contact-note>A gomb megnyitja a levelezőprogramodat a kitöltött üzenettel.</p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="foot-grid">
+        <div class="foot-brand">
+          <img src="/img/brand/logo.webp" alt="NS Card webshop logó" width="150" height="158" loading="lazy">
+          <p data-foot-text>Pokémon TCG termékek gyűjtőknek és bontásra: boosterek, tin dobozok, Elite Trainer Boxok és kollekciók.</p>
+          <div class="social" data-social hidden></div>
+        </div>
+        <div>
+          <h2>Vásárlás</h2>
+          <ul data-foot-cats><li><a href="/products">Összes termék</a></li></ul>
+        </div>
+        <div>
+          <h2>Segítség</h2>
+          <ul>
+            <li><a href="/#rendeles">Szállítás és fizetés</a></li>
+            <li><a href="/checkout">Pénztár</a></li>
+            <li><a href="/#kapcsolat">Kapcsolat</a></li>
+          </ul>
+        </div>
+        <div>
+          <h2>Elérhetőség</h2>
+          <ul data-foot-contact><li><a href="/#kapcsolat">Írj nekünk</a></li></ul>
+        </div>
+      </div>
+      <div class="foot-bottom"><span>© <span data-year>2026</span> NS Card</span><span>Az árak forintban értendők.</span></div>
+    </div>
+  </footer>
+  <script src="/assets/js/store.js?v=3.1.0" defer></script>
+  <script src="/assets/js/shop.js?v=3.1.0" defer></script>
+</body>
+</html>

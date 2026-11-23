@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Admin – NS Card</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#061230">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="preload" href="/assets/fonts/dm-sans.woff" as="font" type="font/woff" crossorigin>
+  <link rel="stylesheet" href="/assets/css/admin.css?v=3.1.0">
+</head>
+<body>
+  <!-- Belépés -->
+  <main class="login" data-login hidden>
+    <form class="login-card" data-login-form novalidate>
+      <img src="/img/brand/logo.webp" alt="NS Card" width="120" height="127">
+      <h1>Admin belépés</h1>
+      <div class="field">
+        <label for="lg-user">Felhasználónév</label>
+        <input class="input" id="lg-user" name="user" autocomplete="username" autocapitalize="off" spellcheck="false" required>
+      </div>
+      <div class="field">
+        <label for="lg-pass">Jelszó</label>
+        <div class="pass-wrap">
+          <input class="input" id="lg-pass" name="pass" type="password" autocomplete="current-password" required>
+          <button class="pass-toggle" type="button" data-toggle-pass aria-label="Jelszó megjelenítése">Mutat</button>
+        </div>
+      </div>
+      <label class="check"><input type="checkbox" name="remember"> Maradjak bejelentkezve ezen az eszközön</label>
+      <p class="form-error" data-login-error role="alert" hidden></p>
+      <button class="btn btn-primary btn-block" type="submit">Belépés</button>
+      <a class="link" href="/">Vissza a webshopba</a>
+    </form>
+  </main>
+
+  <!-- Admin felület -->
+  <div class="app" data-app hidden>
+    <aside class="side" aria-label="Admin menü">
+      <a class="side-brand" href="/admin"><img src="/img/brand/wordmark.webp" alt="NS Card" width="113" height="40"><span>Admin</span></a>
+      <nav class="side-nav" data-nav>
+        <a href="#attekintes" data-view-link="attekintes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4zm10 7h6v-9h-6zM4 20h6v-4H4zm10-16v4h6V4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Áttekintés</span></a>
+        <a href="#termekek" data-view-link="termekek"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4zm0 5l9 4 9-4M3 17l9 4 9-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Termékek</span><b class="nav-badge" data-nav-count></b></a>
+        <a href="#kategoriak" data-view-link="kategoriak"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h7v7H4zM13 5h7v7h-7zM4 14h7v6H4zM13 14h7v6h-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Kategóriák</span></a>
+        <a href="#beallitasok" data-view-link="beallitasok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="6" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="18" r="2" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Beállítások</span></a>
+        <a href="#publikalas" data-view-link="publikalas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0-4 4m4-4 4 4M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Publikálás</span><b class="nav-dot" data-nav-dirty hidden></b></a>
+      </nav>
+      <div class="side-foot">
+        <a class="side-link" href="/" target="_blank" rel="noopener">Bolt megnyitása</a>
+        <button class="side-link" type="button" data-logout>Kijelentkezés</button>
+      </div>
+    </aside>
+
+    <div class="main">
+      <header class="topbar">
+        <div class="topbar-title">
+          <img class="topbar-logo" src="/img/brand/wordmark.webp" alt="NS Card" width="85" height="30">
+          <h1 data-view-title>Áttekintés</h1>
+        </div>
+        <div class="topbar-actions">
+          <span class="status-pill" data-status-pill>…</span>
+          <button class="btn btn-primary btn-sm" type="button" data-publish>Publikálás</button>
+          <button class="icon-btn only-mobile" type="button" data-mobile-more aria-label="További lehetőségek" aria-expanded="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+          </button>
+          <div class="more-menu" data-more-menu hidden>
+            <a href="/" target="_blank" rel="noopener">Bolt megnyitása</a>
+            <button type="button" data-logout>Kijelentkezés</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="content">
+        <!-- Áttekintés -->
+        <section data-view="attekintes" aria-label="Áttekintés">
+          <div class="stats" data-stats></div>
+          <div class="two-col">
+            <div class="card">
+              <div class="card-head"><h2>Teendők</h2></div>
+              <ul class="todo" data-todo></ul>
+            </div>
+            <div class="card">
+              <div class="card-head"><h2>Alacsony készlet</h2><a class="link" href="#termekek" data-goto-low>Összes</a></div>
+              <div data-lowstock></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Termékek -->
+        <section data-view="termekek" aria-label="Termékek" hidden>
+          <div class="toolbar">
+            <div class="search-field">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <label class="sr-only" for="p-search">Keresés</label>
+              <input class="input" id="p-search" type="search" placeholder="Keresés név vagy szett alapján" data-p-search>
+            </div>
+            <label class="sr-only" for="p-cat">Kategória</label>
+            <select class="select" id="p-cat" data-p-cat></select>
+            <label class="sr-only" for="p-status">Állapot</label>
+            <select class="select" id="p-status" data-p-status>
+              <option value="all">Minden állapot</option>
+              <option value="in">Készleten</option>
+              <option value="low">Alacsony készlet</option>
+              <option value="out">Elfogyott</option>
+              <option value="soon">Hamarosan</option>
+              <option value="hidden">Rejtett</option>
+            </select>
+            <button class="btn btn-primary" type="button" data-new-product>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>Új termék
+            </button>
+          </div>
+          <div class="card card-flush">
+            <div class="table-wrap">
+              <table class="ptable">
+                <thead>
+                  <tr>
+                    <th class="col-order"><span class="sr-only">Sorrend</span></th>
+                    <th>Termék</th>
+                    <th class="col-price">Ár</th>
+                    <th class="col-stock">Készlet</th>
+                    <th class="col-status">Állapot</th>
+                    <th class="col-actions"><span class="sr-only">Műveletek</span></th>
+                  </tr>
+                </thead>
+                <tbody data-p-rows></tbody>
+              </table>
+            </div>
+            <div class="plist" data-p-cards></div>
+            <p class="table-foot" data-p-foot></p>
+          </div>
+        </section>
+
+        <!-- Kategóriák -->
+        <section data-view="kategoriak" aria-label="Kategóriák" hidden>
+          <div class="card">
+            <div class="card-head"><h2>Kategóriák</h2><span class="muted" data-cat-count></span></div>
+            <p class="muted">A sorrend a webshop menüjében és szűrőiben is így jelenik meg. Az átnevezés azonnal érvényes minden termékre.</p>
+            <div class="cat-rows" data-cat-rows></div>
+            <form class="cat-add" data-cat-add novalidate>
+              <label class="sr-only" for="cat-new">Új kategória neve</label>
+              <input class="input" id="cat-new" name="label" maxlength="40" placeholder="Új kategória neve, pl. Előrendelés">
+              <button class="btn btn-primary" type="submit">Hozzáadás</button>
+            </form>
+          </div>
+        </section>
+
+        <!-- Beállítások -->
+        <section data-view="beallitasok" aria-label="Bolt beállítások" hidden>
+          <form class="settings" data-settings-form novalidate>
+            <div class="card">
+              <div class="card-head"><h2>Bolt adatai</h2></div>
+              <div class="form-grid">
+                <div class="field"><label for="s-shopName">Bolt neve</label><input class="input" id="s-shopName" name="shopName"></div>
+                <div class="field"><label for="s-email">Rendelések és kapcsolat e-mail címe</label><input class="input" id="s-email" name="email" type="email" placeholder="pl. rendeles@nscard.hu"><span class="hint">Ide érkeznek a rendelések. Enélkül csak bankkártyával lehet rendelni.</span></div>
+                <div class="field"><label for="s-phone">Telefonszám (nem kötelező)</label><input class="input" id="s-phone" name="phone" type="tel" placeholder="+36 30 123 4567"></div>
+                <div class="field"><label for="s-address">Cím vagy átvételi pont (nem kötelező)</label><input class="input" id="s-address" name="address" placeholder="pl. Budapest"></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h2>Közösségi oldalak</h2></div>
+              <div class="form-grid three">
+                <div class="field"><label for="s-instagram">Instagram link</label><input class="input" id="s-instagram" name="instagram" type="url" placeholder="https://instagram.com/…"></div>
+                <div class="field"><label for="s-facebook">Facebook link</label><input class="input" id="s-facebook" name="facebook" type="url" placeholder="https://facebook.com/…"></div>
+                <div class="field"><label for="s-tiktok">TikTok link</label><input class="input" id="s-tiktok" name="tiktok" type="url" placeholder="https://tiktok.com/@…"></div>
+              </div>
+              <span class="hint">A kitöltött linkek ikonként jelennek meg a lábléceben.</span>
+            </div>
+            <div class="card">
+              <div class="card-head"><h2>Kezdőlap és szövegek</h2></div>
+              <div class="form-grid">
+                <div class="field full"><label for="s-announcement">Felső értesítő sáv (nem kötelező)</label><input class="input" id="s-announcement" name="announcement" maxlength="140" placeholder="pl. Ingyenes szállítás 30 000 Ft felett"><span class="hint">Üresen hagyva nem jelenik meg.</span></div>
+                <div class="field full"><label for="s-heroTitle">Főcím</label><input class="input" id="s-heroTitle" name="heroTitle" maxlength="80"></div>
+                <div class="field full"><label for="s-heroText">Főcím alatti szöveg</label><textarea class="textarea" id="s-heroText" name="heroText" rows="2" maxlength="220"></textarea></div>
+                <div class="field"><label for="s-featuredTitle">Kiemelt termékek címe</label><input class="input" id="s-featuredTitle" name="featuredTitle" maxlength="60"></div>
+                <div class="field"><label for="s-featuredText">Kiemelt termékek alcíme</label><input class="input" id="s-featuredText" name="featuredText" maxlength="140"></div>
+                <div class="field full"><label for="s-footerText">Lábléc szövege</label><textarea class="textarea" id="s-footerText" name="footerText" rows="2" maxlength="220"></textarea></div>
+              </div>
+              <span class="hint">A kezdőlapon kiemelt termékeket a terméknél a „Kezdőlapon kiemelve” jelöléssel választod ki.</span>
+            </div>
+            <div class="card">
+              <div class="card-head"><h2>Szállítás</h2></div>
+              <div class="ship-rows">
+                <div class="ship-row">
+                  <label class="toggle"><input type="checkbox" name="shipHome"><span class="switch"></span><span><strong>Házhozszállítás</strong><small>Futárral a vásárló címére.</small></span></label>
+                  <div class="unit-input"><label class="sr-only" for="s-shippingHome">Házhozszállítás díja</label><input class="input" id="s-shippingHome" name="shippingHome" type="number" min="0" step="10" inputmode="numeric"><span>Ft</span></div>
+                </div>
+                <div class="ship-row">
+                  <label class="toggle"><input type="checkbox" name="shipLocker"><span class="switch"></span><span><strong>Csomagautomata</strong><small>A vásárló megadja az automatát.</small></span></label>
+                  <div class="unit-input"><label class="sr-only" for="s-shippingLocker">Csomagautomata díja</label><input class="input" id="s-shippingLocker" name="shippingLocker" type="number" min="0" step="10" inputmode="numeric"><span>Ft</span></div>
+                </div>
+                <div class="ship-row">
+                  <label class="toggle"><input type="checkbox" name="shipPickup"><span class="switch"></span><span><strong>Személyes átvétel</strong><small>Nincs címmegadás, az átvételt egyeztetitek.</small></span></label>
+                  <div class="unit-input"><label class="sr-only" for="s-shippingPickup">Személyes átvétel díja</label><input class="input" id="s-shippingPickup" name="shippingPickup" type="number" min="0" step="10" inputmode="numeric"><span>Ft</span></div>
+                </div>
+              </div>
+              <div class="form-grid">
+                <div class="field"><label for="s-pickupAddress">Személyes átvétel helye</label><input class="input" id="s-pickupAddress" name="pickupAddress" placeholder="pl. Budapest, XI. kerület"></div>
+                <div class="field"><label for="s-freeShippingFrom">Ingyenes szállítás ettől</label><div class="unit-input"><input class="input" id="s-freeShippingFrom" name="freeShippingFrom" type="number" min="0" step="100" inputmode="numeric"><span>Ft</span></div><span class="hint">0 = nincs ingyenes szállítás.</span></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h2>Fizetési módok</h2></div>
+              <div class="toggles">
+                <label class="toggle"><input type="checkbox" name="payTransfer"><span class="switch"></span><span><strong>Banki átutalás</strong><small>A rendelés e-mailben érkezik, az utalási adatokat te küldöd.</small></span></label>
+                <label class="toggle"><input type="checkbox" name="payCod"><span class="switch"></span><span><strong>Utánvét</strong><small>Fizetés a csomag átvételekor.</small></span></label>
+                <div class="field indent"><label for="s-codFee">Utánvételi díj</label><div class="unit-input"><input class="input" id="s-codFee" name="codFee" type="number" min="0" step="10" inputmode="numeric"><span>Ft</span></div></div>
+                <label class="toggle"><input type="checkbox" name="payCard"><span class="switch"></span><span><strong>Bankkártya (Stripe)</strong><small>Csak akkor kapcsold be, ha a Cloudflare projekt GitHubról települ, és beállítottad a STRIPE_SECRET_KEY változót.</small></span></label>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h2>Készlet</h2></div>
+              <div class="form-grid three">
+                <div class="field"><label for="s-lowStock">Alacsony készlet jelzése ennyi darabtól</label><div class="unit-input"><input class="input" id="s-lowStock" name="lowStock" type="number" min="0" step="1" inputmode="numeric"><span>db</span></div><span class="hint">A boltban „Már csak X db” felirat jelenik meg.</span></div>
+              </div>
+            </div>
+            <div class="sticky-save"><span class="muted" data-settings-note></span><button class="btn btn-primary" type="submit">Beállítások mentése</button></div>
+          </form>
+        </section>
+
+        <!-- Publikálás -->
+        <section data-view="publikalas" aria-label="Publikálás" hidden>
+          <div class="card publish-card" data-publish-card></div>
+          <div class="two-col">
+            <form class="card" data-gh-form novalidate>
+              <div class="card-head"><h2>GitHub kapcsolat</h2><span class="status-pill" data-gh-pill></span></div>
+              <p class="muted">A termékek és a képek a GitHubon tárolódnak, a webshop onnan olvassa őket. A publikáláshoz egy hozzáférési token kell, amit csak ez a böngésző tárol.</p>
+              <div class="field">
+                <label for="gh-token">GitHub token</label>
+                <div class="pass-wrap"><input class="input" id="gh-token" name="token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…"><button class="pass-toggle" type="button" data-toggle-pass aria-label="Token megjelenítése">Mutat</button></div>
+              </div>
+              <label class="toggle"><input type="checkbox" name="autoPublish"><span class="switch"></span><span><strong>Automatikus publikálás</strong><small>Minden mentés után azonnal élesíti a változást.</small></span></label>
+              <details class="advanced">
+                <summary>Haladó: tároló helye</summary>
+                <div class="form-grid">
+                  <div class="field"><label for="gh-owner">Tulajdonos</label><input class="input" id="gh-owner" name="owner" spellcheck="false"></div>
+                  <div class="field"><label for="gh-repo">Repó</label><input class="input" id="gh-repo" name="repo" spellcheck="false"></div>
+                  <div class="field"><label for="gh-branch">Branch</label><input class="input" id="gh-branch" name="branch" spellcheck="false"></div>
+                  <div class="field"><label for="gh-path">Katalógus fájl</label><input class="input" id="gh-path" name="path" spellcheck="false"></div>
+                </div>
+                <p class="hint">Ha itt módosítasz, a webshop <code>sync-config.json</code> fájljában is ugyanezt kell beállítani, különben a vásárlók a régi helyről olvasnak.</p>
+              </details>
+              <div class="row-actions">
+                <button class="btn btn-primary" type="submit">Kapcsolat mentése és ellenőrzése</button>
+                <button class="btn btn-ghost" type="button" data-gh-forget>Token törlése</button>
+              </div>
+              <p class="form-msg" data-gh-msg role="status"></p>
+            </form>
+            <div class="card">
+              <div class="card-head"><h2>Token készítése</h2></div>
+              <ol class="howto">
+                <li>GitHubon: <a class="link" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Settings → Developer settings → Fine-grained tokens → Generate new token</a>.</li>
+                <li>Név: <code>NS Card admin</code>, lejárat: amennyi kényelmes (pl. 1 év).</li>
+                <li><em>Repository access</em>: <strong>Only select repositories</strong> → <code data-gh-repo-name>nscardshoop</code>.</li>
+                <li><em>Permissions → Repository permissions → Contents</em>: <strong>Read and write</strong>.</li>
+                <li>A kapott tokent másold be balra, és mentsd el.</li>
+              </ol>
+              <div class="card-head" style="margin-top:20px"><h2>Biztonsági mentés</h2></div>
+              <div class="row-actions">
+                <button class="btn btn-ghost" type="button" data-export>Katalógus letöltése (JSON)</button>
+                <button class="btn btn-ghost" type="button" data-import>JSON betöltése</button>
+                <input type="file" accept="application/json,.json" data-import-file hidden>
+              </div>
+              <div class="row-actions">
+                <button class="btn btn-danger-ghost" type="button" data-discard>Nem publikált módosítások elvetése</button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <nav class="tabbar" aria-label="Admin menü">
+      <a href="#attekintes" data-view-link="attekintes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4zm10 7h6v-9h-6zM4 20h6v-4H4zm10-16v4h6V4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Áttekintés</span></a>
+      <a href="#termekek" data-view-link="termekek"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4zm0 5l9 4 9-4M3 17l9 4 9-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Termékek</span></a>
+      <a href="#kategoriak" data-view-link="kategoriak"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h7v7H4zM13 5h7v7h-7zM4 14h7v6H4zM13 14h7v6h-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Kategóriák</span></a>
+      <a href="#beallitasok" data-view-link="beallitasok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="6" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="18" r="2" fill="none" stroke="currentColor" stroke-width="2"/></svg><span>Beállítások</span></a>
+      <a href="#publikalas" data-view-link="publikalas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0-4 4m4-4 4 4M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Publikálás</span><b class="nav-dot" data-nav-dirty hidden></b></a>
+    </nav>
+  </div>
+
+  <!-- Termék szerkesztő -->
+  <div class="scrim" data-scrim></div>
+  <aside class="editor" data-editor aria-labelledby="ed-title" role="dialog" aria-modal="true">
+    <form class="editor-form" data-editor-form novalidate>
+      <header class="editor-head">
+        <h2 id="ed-title" data-ed-title>Új termék</h2>
+        <button class="icon-btn" type="button" data-ed-close aria-label="Bezárás"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+      </header>
+      <div class="editor-body">
+        <fieldset>
+          <legend>Alapadatok</legend>
+          <div class="field"><label for="e-name">Termék neve</label><input class="input" id="e-name" name="name" required placeholder="pl. Pokémon TCG: Mega Evolution Elite Trainer Box"><span class="field-error" data-e-err="name" hidden></span></div>
+          <div class="form-grid">
+            <div class="field"><label for="e-category">Kategória</label><select class="select" id="e-category" name="category" data-e-cats></select></div>
+            <div class="field"><label for="e-set">Szett / sorozat (nem kötelező)</label><input class="input" id="e-set" name="set" placeholder="pl. Scarlet & Violet"></div>
+          </div>
+          <div class="field"><label for="e-line">Rövid kiemelés (nem kötelező)</label><input class="input" id="e-line" name="line" maxlength="120" placeholder="Egy mondat a termékoldal címe alatt"></div>
+          <div class="field"><label for="e-description">Leírás</label><textarea class="textarea" id="e-description" name="description" rows="5" placeholder="Mit tartalmaz a doboz? Hány booster, milyen promó kártya, kinek ajánlod?"></textarea></div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Ár és készlet</legend>
+          <div class="form-grid three">
+            <div class="field"><label for="e-price">Ár</label><div class="unit-input"><input class="input" id="e-price" name="price" type="number" min="0" step="10" inputmode="numeric" required><span>Ft</span></div><span class="field-error" data-e-err="price" hidden></span></div>
+            <div class="field"><label for="e-oldPrice">Eredeti ár (akcióhoz)</label><div class="unit-input"><input class="input" id="e-oldPrice" name="oldPrice" type="number" min="0" step="10" inputmode="numeric"><span>Ft</span></div><span class="hint" data-e-discount></span></div>
+            <div class="field"><label for="e-stock">Készlet</label><div class="unit-input"><input class="input" id="e-stock" name="stock" type="number" min="0" step="1" inputmode="numeric"><span>db</span></div></div>
+          </div>
+          <div class="field">
+            <span class="label" id="e-av-label">Elérhetőség</span>
+            <div class="segmented" role="radiogroup" aria-labelledby="e-av-label">
+              <label><input type="radio" name="availability" value="in_stock"><span>Rendelhető</span></label>
+              <label><input type="radio" name="availability" value="coming_soon"><span>Hamarosan érkezik</span></label>
+            </div>
+          </div>
+          <label class="toggle"><input type="checkbox" name="hidden"><span class="switch"></span><span><strong>Elrejtés a boltból</strong><small>A termék megmarad az adminban, de a vásárlók nem látják.</small></span></label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Képek</legend>
+          <div class="dropzone" data-dropzone tabindex="0" role="button" aria-label="Képek feltöltése">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0-4 4m4-4 4 4M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <strong>Húzd ide a képeket, vagy kattints a kiválasztáshoz</strong>
+            <span>JPG, PNG vagy WebP, legfeljebb 8 kép. Automatikusan optimalizáljuk őket.</span>
+            <input type="file" accept="image/*" multiple data-file hidden>
+          </div>
+          <div class="img-grid" data-img-grid></div>
+          <details class="advanced">
+            <summary>Kép hozzáadása webcímmel</summary>
+            <div class="url-row"><label class="sr-only" for="e-imgurl">Kép webcíme</label><input class="input" id="e-imgurl" type="url" placeholder="https://…" data-img-url><button class="btn btn-ghost" type="button" data-add-url>Hozzáadás</button></div>
+          </details>
+          <span class="field-error" data-e-err="images" hidden></span>
+        </fieldset>
+
+        <fieldset>
+          <legend>Megjelenés</legend>
+          <div class="chips-check" data-e-flags></div>
+          <div class="field"><label for="e-badge">Egyedi címke (nem kötelező)</label><input class="input" id="e-badge" name="badge" maxlength="24" placeholder="pl. Előrendelés, Limitált"></div>
+        </fieldset>
+      </div>
+      <footer class="editor-foot">
+        <button class="btn btn-danger-ghost" type="button" data-ed-delete hidden>Törlés</button>
+        <span class="spacer"></span>
+        <button class="btn btn-ghost" type="button" data-ed-close>Mégse</button>
+        <button class="btn btn-primary" type="submit" data-ed-save>Mentés</button>
+      </footer>
+    </form>
+  </aside>
+
+  <div class="confirm" data-confirm hidden role="alertdialog" aria-modal="true" aria-labelledby="cf-title" aria-describedby="cf-text">
+    <div class="confirm-card">
+      <h2 id="cf-title" data-cf-title></h2>
+      <p id="cf-text" data-cf-text></p>
+      <div class="field" data-cf-select-wrap hidden><label for="cf-select" data-cf-select-label></label><select class="select" id="cf-select" data-cf-select></select></div>
+      <div class="row-actions end"><button class="btn btn-ghost" type="button" data-cf-no>Mégse</button><button class="btn btn-danger" type="button" data-cf-yes>Törlés</button></div>
+    </div>
+  </div>
+
+  <div class="toast" role="status" aria-live="polite" data-toast></div>
+
+  <script src="/assets/js/store.js?v=3.1.0" defer></script>
+  <script src="/assets/js/admin.js?v=3.1.0" defer></script>
+</body>
+</html>

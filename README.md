@@ -1,28 +1,23 @@
-# NS Card – javított logóval és egységes termékkártyákkal
+# NS Card webshop
 
-Ez a csomag a webshop teljes, GitHubra feltölthető verziója.
+Pokémon TCG webshop admin felülettel. A webshop a Cloudflare Pages-en fut, és ebből a repóból települ: minden új commit után a Cloudflare magától frissíti az oldalt.
 
-## Mi lett javítva
+## Felépítés
 
-- új, vízszintesebb `logo-nscard.png`, hogy a fejlécben ne legyen összenyomva
-- új favicon készlet a csatolt logó alapján
-- a termékkártyák most fix méretűek, a képarány nem nyújtja vagy tolja szét őket
-- mobilra optimalizált kosárnézet
-- Stripe Checkout integráció `functions/` mappával
+- `public/` – maga a weboldal (bolt, termékoldal, pénztár, admin)
+- `public/store/catalog.json` – termékek és bolt beállítások. Ezt az admin írja.
+- `public/store/images/` – az adminban feltöltött termékképek
+- `functions/api/` – bankkártyás fizetés (Stripe) szerveroldali része
 
-## Feltöltés GitHubra
+## Cloudflare Pages beállítás
 
-A ZIP tartalmát csomagold ki, majd a benne lévő fájlokat és a `functions/` mappát együtt töltsd fel a repó gyökerébe.
+- Framework preset: **None**
+- Build command: *(üres)*
+- Build output directory: `public`
+- Bankkártyás fizetéshez: Settings → Variables and Secrets → `STRIPE_SECRET_KEY` (Secret), utána az adminban kapcsold be a Bankkártya fizetési módot.
 
-## Fontos
+## Admin
 
-A Stripe secret kulcsot ne tedd GitHubba. A kulcsot Netlify környezeti változóként add meg:
+Cím: `/admin`. A publikáláshoz az admin Publikálás oldalán kell megadni egy GitHub tokent (Fine-grained token, csak erre a repóra, Contents: Read and write). A token csak abban a böngészőben tárolódik, ahol megadod.
 
-`STRIPE_SECRET_KEY`
-
-Részletes leírás: `STRIPE_SETUP.md`
-
-Frissítve: a projekt teljes zipje újragenerálva a csatolt NS Card logóval, valamint új tab/favicon ikonokkal.
-Hamburger menü logó fix v2: a torzított teljes logó helyett ikon + wordmark mobil brand blokk került a menü fejlécébe.
-
-Legutóbbi frissítés: a hamburger menü felső logóblokkja új, letisztult mobil brand megjelenést kapott külön symbol assettel (menu-mark.png).
+Jelszócsere: az `public/assets/js/admin.js` fájlban az `AUTH.hash` értéke a `nscard-admin-v3|<felhasználónév>|<jelszó>` szöveg SHA-256 lenyomata.
