@@ -18,6 +18,7 @@
     attekintes: "Áttekintés",
     termekek: "Termékek",
     kategoriak: "Kategóriák",
+    oldalak: "Oldalak",
     megjelenes: "Megjelenés",
     beallitasok: "Beállítások",
     publikalas: "Publikálás"
@@ -27,6 +28,7 @@
     attekintes: "A bolt állapota, teendők és alacsony készlet egy helyen.",
     termekek: "Termékek hozzáadása, árak, készlet és képek.",
     kategoriak: "A webshop menüjének és szűrőinek kategóriái.",
+    oldalak: "ÁSZF, adatkezelési tájékoztató, szállítás, rólunk és impresszum.",
     megjelenes: "Színek, betűk, animációk és szövegek élő előnézettel.",
     beallitasok: "Elérhetőség, szállítás, fizetés és szerkesztő mód.",
     publikalas: "Élesítés, GitHub kapcsolat és biztonsági mentés."
@@ -403,6 +405,7 @@
     else if (state.view === "kategoriak") renderCategories();
     else if (state.view === "beallitasok") renderSettings();
     else if (state.view === "megjelenes") renderStudio();
+    else if (state.view === "oldalak") renderPages();
     else if (state.view === "publikalas") renderPublish();
   }
 
@@ -434,6 +437,8 @@
     if (orphan.length) todo.push({ cls: "bad", text: `${orphan.length} termék nincs érvényes kategóriában, ezért a kategória szűrőkben nem jelenik meg.`, btn: "Javítás", act: `edit:${orphan[0].id}` });
     const noDesc = visible.filter(p => !p.description);
     if (noDesc.length) todo.push({ cls: "", text: `${noDesc.length} terméknél hiányzik a leírás. A leírás segít a vásárlóknak és a keresőknek.`, btn: "Pótlás", act: `edit:${noDesc[0].id}` });
+    if (!s.pages?.aszf || !s.pages?.adatkezeles) todo.push({ cls: "", text: "Töltsd ki az ÁSZF-et és az adatkezelési tájékoztatót – webshopnál ezek kötelezőek.", btn: "Oldalak", act: "go:oldalak" });
+    if (!s.companyName) todo.push({ cls: "", text: "Add meg a cég (üzemeltető) adatait az impresszumhoz.", btn: "Cégadatok", act: "go:beallitasok" });
     if (!todo.length) todo.push({ cls: "ok", text: "Minden rendben, nincs teendő." });
     $("[data-todo]").innerHTML = todo.map(t => `<li class="${t.cls}"><span>${esc(t.text)}</span>${t.btn ? `<button class="btn btn-ghost" type="button" data-act="${t.act}">${t.btn}</button>` : "<span></span>"}</li>`).join("");
 
@@ -650,6 +655,7 @@
       if (el.type === "checkbox") el.checked = !!v; else el.value = v;
     }
     $("[data-settings-note]").textContent = "";
+    renderCoupons();
   }
 
   function onSettingsSubmit(e) {
@@ -678,6 +684,8 @@
     raw.categories = state.draft.settings.categories;
     raw.texts = state.draft.settings.texts;
     raw.theme = state.draft.settings.theme;
+    raw.coupons = state.draft.settings.coupons;
+    raw.pages = state.draft.settings.pages;
     state.draft.settings = N.sanitizeSettings(raw);
     saveDraft();
     renderStatus();
@@ -946,6 +954,156 @@
     renderAll();
   }
 
+  /* ---------------- Tájékoztató oldalak (ÁSZF, adatkezelés…) ---------------- */
+  const PAGE_TEMPLATES = {
+    aszf: `## 1. A szolgáltató adatai
+A webshop üzemeltetője: [Cégnév / vállalkozó neve]
+Székhely: [cím]
+Adószám: [adószám] · Nyilvántartási szám: [szám]
+E-mail: [e-mail] · Telefon: [telefonszám]
+Tárhelyszolgáltató: Cloudflare, Inc. (101 Townsend St, San Francisco, CA 94107, USA)
+
+## 2. A szerződés tárgya és nyelve
+Jelen feltételek az NS Card webshopban (www.nscard.hu) történő vásárlásra vonatkoznak. A szerződés nyelve magyar, a szerződést nem iktatjuk, utólag nem hozzáférhető.
+
+## 3. Termékek és árak
+A termékek bontatlan, gyári Pokémon TCG termékek. Az árak forintban értendők, és [tartalmazzák az áfát / alanyi adómentesek]. A szállítási díjat a pénztár külön mutatja.
+
+## 4. A rendelés menete
+- A terméket a kosárba teszed, majd a pénztárban megadod az adataidat.
+- A rendelés elküldése után e-mailben visszaigazoljuk, és ezzel jön létre a szerződés.
+- Az adatbeviteli hibákat a rendelés elküldése előtt a pénztárban javíthatod.
+
+## 5. Fizetés
+[Banki átutalás / utánvét / bankkártya – a ténylegesen elérhető módok leírása.]
+
+## 6. Szállítás
+[Szállítási módok, díjak, várható szállítási idő.]
+
+## 7. Elállási jog
+A 45/2014. (II. 26.) Korm. rendelet alapján a termék átvételétől számított 14 napon belül indoklás nélkül elállhatsz a vásárlástól. Az elállási szándékot e-mailben jelezd: [e-mail]. A terméket bontatlan, eredeti állapotban, az elállás közlésétől számított 14 napon belül kell visszaküldeni; a visszaküldés költsége [a vásárlót terheli]. A vételárat a visszaérkezést követően legkésőbb 14 napon belül visszautaljuk.
+
+## 8. Szavatosság és panaszkezelés
+Panaszodat a [e-mail] címen jelezheted, 30 napon belül írásban válaszolunk. Jogvita esetén a lakóhelyed szerinti békéltető testülethez fordulhatsz, illetve használhatod az EU online vitarendezési platformját: [link](https://ec.europa.eu/consumers/odr).`,
+    adatkezeles: `## Adatkezelő
+[Cégnév / vállalkozó neve] · [székhely] · [e-mail]
+
+## Milyen adatokat kezelünk?
+- Rendeléskor: név, e-mail cím, telefonszám, szállítási cím vagy csomagautomata, megjegyzés.
+- Kapcsolatfelvételkor: név, e-mail cím, üzenet.
+- A böngésződ helyi tárhelyén (nem sütiként): kosár, kedvencek, megnézett termékek. Ezek nem jutnak el hozzánk.
+
+## Az adatkezelés célja és jogalapja
+A rendelés teljesítése és a kapcsolattartás – szerződés teljesítése (GDPR 6. cikk (1) b)). A számlázás – jogi kötelezettség (GDPR 6. cikk (1) c)).
+
+## Meddig őrizzük az adatokat?
+A rendelési adatokat [a szerződés teljesítéséig és az elévülési időig (5 év)], a számviteli bizonylatokat 8 évig.
+
+## Kik férhetnek hozzá az adatokhoz?
+- Tárhely: Cloudflare, Inc.
+- Kártyás fizetés esetén: Stripe Payments Europe Ltd.
+- Kiszállítás: [futárszolgálat neve]
+- E-mail szolgáltató: [szolgáltató neve]
+
+## A jogaid
+Kérhetsz tájékoztatást, helyesbítést, törlést, az adatkezelés korlátozását és adathordozhatóságot, valamint tiltakozhatsz. Kérésedet a [e-mail] címre küldd. Panasszal a Nemzeti Adatvédelmi és Információszabadság Hatósághoz (NAIH, [link](https://naih.hu)) fordulhatsz.`,
+    szallitas: `## Szállítási módok
+- Házhozszállítás futárral: [díj], várható kézbesítés [1–3] munkanap.
+- Csomagautomata: [díj], várható kézbesítés [1–3] munkanap.
+- Személyes átvétel: [helyszín és időpont egyeztetés szerint].
+
+## Fizetési módok
+- Banki átutalás: az utalási adatokat a visszaigazoló e-mailben küldjük.
+- Utánvét: fizetés a csomag átvételekor.
+
+## Elállás és visszaküldés
+A termék átvételétől számított 14 napon belül indoklás nélkül elállhatsz. Írj a [e-mail] címre, és küldd vissza a bontatlan terméket.`,
+    rolunk: `## Kik vagyunk?
+[Pár mondat a boltról: mióta foglalkoztok Pokémon kártyákkal, mi a célotok, miért érdemes nálatok vásárolni.]
+
+## Amit vállalunk
+- Csak eredeti, bontatlan termékek.
+- Gondos, biztonságos csomagolás.
+- Gyors válasz minden kérdésre.`
+  };
+
+  function pageFilled(key) { return !!state.draft.settings.pages?.[key]?.body; }
+
+  function renderPages() {
+    const list = $("[data-pages-list]");
+    if (!list) return;
+    const s = state.draft.settings;
+    if (!state.pageKey) state.pageKey = "aszf";
+    const items = [...N.INFO_PAGES.map(pg => ({ key: pg.key, label: pg.label, on: pageFilled(pg.key) })), { key: "impresszum", label: "Impresszum", on: !!(s.companyName || s.email), auto: true }];
+    list.innerHTML = `<div class="page-items">${items.map(it => `<button type="button" class="page-item" data-page-key="${it.key}" aria-pressed="${state.pageKey === it.key}"><span><b>${esc(it.label)}</b><small>${it.auto ? "Automatikus, a cégadatokból" : it.on ? "Kitöltve, látszik a boltban" : "Üres, nem látszik"}</small></span><i class="pill ${it.on ? "in" : "hidden"}">${it.on ? "Aktív" : "Üres"}</i></button>`).join("")}</div>`;
+
+    const key = state.pageKey;
+    const ed = $("[data-page-editor]");
+    const body = $("[data-page-body]");
+    const meta = N.INFO_PAGES.find(pg => pg.key === key);
+    $("[data-page-open]").href = `/info?p=${key}`;
+    if (key === "impresszum") {
+      $("[data-page-title]").textContent = "Impresszum";
+      $("[data-page-meta]").textContent = "Automatikusan készül a Beállítások → Cég adatai és a bolt elérhetőségei alapján.";
+      ed.classList.add("auto");
+      $("[data-page-preview]").innerHTML = `<dl>${[["Webshop", s.shopName], ["Üzemeltető", s.companyName], ["Székhely", s.companyAddress], ["Adószám", s.taxNumber], ["Nyilvántartási szám", s.regNumber], ["E-mail", s.email], ["Telefon", s.phone], ["Tárhelyszolgáltató", "Cloudflare, Inc."]].filter(([, v]) => v).map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("")}</dl><p><a class="btn btn-primary btn-sm" href="#beallitasok">Cégadatok szerkesztése</a></p>`;
+      return;
+    }
+    ed.classList.remove("auto");
+    $("[data-page-title]").textContent = meta.label;
+    const text = s.pages?.[key]?.body || "";
+    $("[data-page-meta]").textContent = text ? `${text.length.toLocaleString("hu-HU")} karakter` : "Még üres. Kezdd a sablonnal, vagy írd meg a saját szövegedet.";
+    if (document.activeElement !== body) body.value = text;
+    body.placeholder = "## Cím\nSzöveg…";
+    $("[data-page-template]").hidden = !!text;
+    $("[data-page-preview]").innerHTML = text ? N.mdToHtml(text) : '<p class="muted">Az előnézet itt jelenik meg.</p>';
+  }
+
+  let pageSaveT = 0;
+  function setPageBody(key, text) {
+    const pages = { ...(state.draft.settings.pages || {}) };
+    if (text.trim()) pages[key] = { body: text }; else delete pages[key];
+    state.draft.settings.pages = pages;
+    $("[data-page-preview]").innerHTML = text.trim() ? N.mdToHtml(text) : '<p class="muted">Az előnézet itt jelenik meg.</p>';
+    $("[data-page-meta]").textContent = text ? `${text.length.toLocaleString("hu-HU")} karakter` : "Még üres.";
+    $("[data-page-template]").hidden = !!text.trim();
+    clearTimeout(pageSaveT);
+    pageSaveT = setTimeout(() => { saveDraft(); renderPagesList(); }, 600);
+  }
+  function renderPagesList() { if (state.view === "oldalak") { const ae = document.activeElement; renderPages(); if (ae?.matches?.("[data-page-body]")) ae.focus(); } }
+
+  /* ---------------- Kuponok ---------------- */
+  const CP_TYPES = { percent: "Százalék", fixed: "Fix összeg", ship: "Ingyenes szállítás" };
+  function renderCoupons() {
+    const rows = $("[data-cp-rows]");
+    if (!rows) return;
+    const list = state.draft.settings.coupons || [];
+    $("[data-cp-count]").textContent = list.length ? `${list.filter(c => c.active).length} aktív / ${list.length}` : "";
+    rows.innerHTML = list.length ? list.map((c, i) => `
+      <div class="cp-row${c.active ? "" : " off"}">
+        <code class="cp-code">${esc(c.code)}</code>
+        <span class="cp-desc"><b>${c.type === "percent" ? `${c.value}%` : c.type === "fixed" ? fmtFt(c.value) : "Ingyenes szállítás"}</b><small>${esc(CP_TYPES[c.type])}${c.minOrder ? ` · ${fmtFt(c.minOrder)} felett` : ""}</small></span>
+        <label class="toggle compact"><input type="checkbox" data-cp-active="${i}" ${c.active ? "checked" : ""}><span class="switch"></span><span class="sr-only">Aktív</span></label>
+        <button class="icon-btn danger-hover" type="button" data-cp-del="${i}" aria-label="${esc(c.code)} törlése"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      </div>`).join("") : '<p class="muted">Még nincs kuponkód.</p>';
+  }
+  function addCoupon(form) {
+    const code = String(form.code.value || "").toUpperCase().replace(/[^A-Z0-9_-]/g, "");
+    if (!code) { toast("Adj meg egy kódot (betűk, számok, kötőjel).", true); form.code.focus(); return; }
+    const list = state.draft.settings.coupons || [];
+    if (list.some(c => c.code === code)) { toast("Ilyen kód már van.", true); return; }
+    const type = form.type.value;
+    const value = Number(form.value.value) || 0;
+    if (type !== "ship" && value <= 0) { toast("Add meg a kedvezmény értékét.", true); form.value.focus(); return; }
+    state.draft.settings.coupons = N.sanitizeCoupons([...list, { code, type, value, minOrder: Number(form.minOrder.value) || 0, active: true }]);
+    form.reset();
+    $("[data-cp-unit]").textContent = "%";
+    $("#cp-value").disabled = false;
+    saveDraft();
+    renderCoupons();
+    toast(`Kupon hozzáadva: ${code}`);
+  }
+
   /* ---------------- Haladó mód: Megjelenés szerkesztő ---------------- */
   const MODE_KEY = "nsc.admin.mode.v1";
   state.mode = N.store.get(MODE_KEY) === "pro" ? "pro" : "basic";
@@ -1199,6 +1357,52 @@
     studioChanged();
     renderStudioBody();
     toast("Visszaállítva.");
+  }
+
+  function bindPagesAndCoupons() {
+    $("[data-pages-list]")?.addEventListener("click", e => {
+      const b = e.target.closest("[data-page-key]");
+      if (!b) return;
+      state.pageKey = b.dataset.pageKey;
+      renderPages();
+      if (window.matchMedia("(max-width: 860px)").matches) $("[data-page-editor]")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    $("[data-page-body]")?.addEventListener("input", e => setPageBody(state.pageKey, e.target.value));
+    $("[data-page-template]")?.addEventListener("click", () => {
+      const tpl = PAGE_TEMPLATES[state.pageKey];
+      if (!tpl) return;
+      const s = state.draft.settings;
+      const fill = tpl.replaceAll("[e-mail]", s.email || "[e-mail]").replaceAll("[Cégnév / vállalkozó neve]", s.companyName || "[Cégnév / vállalkozó neve]");
+      const ta = $("[data-page-body]");
+      ta.value = fill;
+      setPageBody(state.pageKey, fill);
+      ta.focus();
+      ta.setSelectionRange(0, 0);
+      ta.scrollTop = 0;
+      toast("Sablon beszúrva. Töltsd ki a szögletes zárójeles részeket.");
+    });
+    $$('input[name="pg-view"]').forEach(r => r.addEventListener("change", () => { $("[data-page-split]").dataset.view = r.value; }));
+    $("[data-cp-add]")?.addEventListener("submit", e => { e.preventDefault(); addCoupon(e.currentTarget); });
+    $("#cp-type")?.addEventListener("change", e => {
+      $("[data-cp-unit]").textContent = e.target.value === "percent" ? "%" : "Ft";
+      $("#cp-value").disabled = e.target.value === "ship";
+    });
+    $("[data-cp-rows]")?.addEventListener("change", e => {
+      const i = e.target.dataset.cpActive;
+      if (i === undefined) return;
+      const list = state.draft.settings.coupons;
+      list[Number(i)].active = e.target.checked;
+      saveDraft(); renderCoupons();
+    });
+    $("[data-cp-rows]")?.addEventListener("click", async e => {
+      const b = e.target.closest("[data-cp-del]");
+      if (!b) return;
+      const list = state.draft.settings.coupons;
+      const c = list[Number(b.dataset.cpDel)];
+      if (!c || !await confirmDialog({ title: "Kupon törlése", text: `Biztosan törlöd a(z) ${c.code} kódot?` })) return;
+      state.draft.settings.coupons = list.filter(x => x !== c);
+      saveDraft(); renderCoupons();
+    });
   }
 
   function bindStudio() {
@@ -1473,6 +1677,7 @@
 
   bind();
   bindStudio();
+  bindPagesAndCoupons();
   if (session()) startApp();
   else {
     $("[data-login]").hidden = false;

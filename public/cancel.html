@@ -15,10 +15,12 @@
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/site.webmanifest">
+  <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="preload" href="/assets/fonts/archivo-black.woff" as="font" type="font/woff" crossorigin>
   <link rel="preload" href="/assets/fonts/dm-sans.woff" as="font" type="font/woff" crossorigin>
-  <link rel="stylesheet" href="/assets/css/shop.css?v=4.1.0">
-  <script src="/assets/js/theme-boot.js?v=4.1.0"></script>
+  <link rel="stylesheet" href="/assets/css/shop.css?v=4.2.0">
+  <script src="/assets/js/theme-boot.js?v=4.2.0"></script>
   <meta name="robots" content="noindex">
 </head>
 <body data-page="cancel">
@@ -106,7 +108,7 @@
         </div>
         <div>
           <h2 data-t="footer.help">Segítség</h2>
-          <ul>
+          <ul data-foot-help>
             <li><a href="/#rendeles" data-t="nav.ship">Szállítás és fizetés</a></li>
             <li><a href="/checkout" data-t="checkout.title">Pénztár</a></li>
             <li><a href="/#kapcsolat" data-t="nav.contact">Kapcsolat</a></li>
@@ -117,11 +119,11 @@
           <ul data-foot-contact><li><a href="/#kapcsolat">Írj nekünk</a></li></ul>
         </div>
       </div>
-      <div class="foot-bottom"><span>© <span data-year>2026</span> NS Card</span><span data-t="footer.note">Az árak forintban értendők.</span></div>
+      <div class="foot-bottom"><span>© <span data-year>2026</span> NS Card</span><nav class="foot-legal" data-foot-legal aria-label="Jogi információk"></nav><span data-t="footer.note">Az árak forintban értendők.</span></div>
     </div>
   </footer>
-  <script src="/assets/js/texts.js?v=4.1.0" defer></script>
-  <script src="/assets/js/store.js?v=4.1.0" defer></script>
-  <script src="/assets/js/shop.js?v=4.1.0" defer></script>
+  <script src="/assets/js/texts.js?v=4.2.0" defer></script>
+  <script src="/assets/js/store.js?v=4.2.0" defer></script>
+  <script src="/assets/js/shop.js?v=4.2.0" defer></script>
 </body>
 </html>

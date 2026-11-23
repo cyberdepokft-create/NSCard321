@@ -39,7 +39,15 @@
     lock: '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="2"/></svg>'
   };
 
+  ICON.heart = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 20s-7.5-4.6-9.2-9.4C1.6 7.2 3.8 4 7.2 4c2 0 3.6 1.1 4.8 2.8C13.2 5.1 14.8 4 16.8 4c3.4 0 5.6 3.2 4.4 6.6C19.5 15.4 12 20 12 20Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>';
+  ICON.share = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="18" cy="5.5" r="2.5" stroke="currentColor" stroke-width="2"/><circle cx="6" cy="12" r="2.5" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="18.5" r="2.5" stroke="currentColor" stroke-width="2"/><path d="m8.2 10.8 7.6-4.1M8.2 13.2l7.6 4.1" stroke="currentColor" stroke-width="2"/></svg>';
+  ICON.zoom = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5M11 8v6M8 11h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+  ICON.left = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 6-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  ICON.right = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const SITE = "https://www.nscard.hu";
+
   const productUrl = p => `/product?id=${p.id}`;
+  const favBtn = (p, cls = "fav") => `<button class="${cls}" type="button" data-fav="${p.id}" aria-pressed="${N.favorites.has(p.id)}" aria-label="${esc(t("fav.add"))}: ${esc(p.name)}">${ICON.heart}${cls === "fav" ? "" : `<span data-fav-label>${esc(N.favorites.has(p.id) ? t("fav.added") : t("fav.add"))}</span>`}</button>`;
   const norm = s => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
 
   /* ---------------- szövegek ---------------- */
@@ -265,6 +273,7 @@
         <div class="pcard-top"><span class="pcard-cat">${esc(N.categoryLabel(p.category))}</span><span class="gem" aria-hidden="true"></span></div>
         <div class="pcard-media">
           <div class="tags">${tagsHTML(p)}</div>
+          ${favBtn(p)}
           ${img ? `<img src="${esc(img)}" alt="" loading="lazy" decoding="async">` : ""}
         </div>
         <div class="pcard-body">
@@ -468,10 +477,27 @@
     if (ann) { ann.textContent = s.announcement; ann.hidden = !s.announcement; }
 
     const cats = categoriesWithCounts();
+    const favN = N.favorites.list().filter(id => N.byId(id)).length;
     const menuCats = $("[data-menu-cats]");
-    if (menuCats) menuCats.innerHTML = cats.length ? `<p>${esc(t("cats.title"))}</p>${cats.map(c => `<a href="/products?cat=${esc(c.value)}"><span>${esc(c.label)}</span><span>${c.count}</span></a>`).join("")}` : "";
+    if (menuCats) menuCats.innerHTML = (favN ? `<a href="/products?fav=1"><span>${esc(t("fav.title"))}</span><span>${favN}</span></a>` : "") + (cats.length ? `<p>${esc(t("cats.title"))}</p>${cats.map(c => `<a href="/products?cat=${esc(c.value)}"><span>${esc(c.label)}</span><span>${c.count}</span></a>`).join("")}` : "");
     const footCats = $("[data-foot-cats]");
     if (footCats) footCats.innerHTML = `<li><a href="/products">${esc(t("link.all"))}</a></li>` + cats.map(c => `<li><a href="/products?cat=${esc(c.value)}">${esc(c.label)}</a></li>`).join("");
+    const pages = s.pages || {};
+    const hasCompany = !!(s.companyName || s.email || s.phone);
+    const help = $("[data-foot-help]");
+    if (help) help.innerHTML = [
+      sectionOn("steps") ? `<li><a href="/#rendeles">${esc(t("nav.ship"))}</a></li>` : "",
+      pages.szallitas ? `<li><a href="/info?p=szallitas">${esc(N.INFO_PAGES[2].short)}</a></li>` : "",
+      pages.rolunk ? `<li><a href="/info?p=rolunk">${esc(N.INFO_PAGES[3].short)}</a></li>` : "",
+      `<li><a href="/checkout">${esc(t("checkout.title"))}</a></li>`,
+      (s.email || s.phone) && sectionOn("contact") ? `<li><a href="/#kapcsolat">${esc(t("nav.contact"))}</a></li>` : ""
+    ].join("");
+    const legal = $("[data-foot-legal]");
+    if (legal) legal.innerHTML = [
+      pages.aszf ? `<a href="/info?p=aszf">ÁSZF</a>` : "",
+      pages.adatkezeles ? `<a href="/info?p=adatkezeles">Adatkezelés</a>` : "",
+      hasCompany ? `<a href="/info?p=impresszum">${esc(t("info.impresszum"))}</a>` : ""
+    ].join("");
     const footContact = $("[data-foot-contact]");
     if (footContact) {
       const items = [];
@@ -505,6 +531,12 @@
       else if (el.matches("[data-close]")) closeDrawer();
       else if (el.matches("[data-added-close]")) hideAdded();
       else if (el.matches("[data-add]")) addToCart(Number(el.dataset.add), 1, el);
+      else if (el.matches("[data-fav]")) {
+        e.preventDefault();
+        const on = N.favorites.toggle(el.dataset.fav);
+        if (motionOK()) { el.classList.remove("pop"); void el.offsetWidth; el.classList.add("pop"); }
+        if (on) toast(`${t("fav.title")}: ${N.byId(el.dataset.fav)?.name || ""}`);
+      }
       else if (el.matches("[data-qty]")) {
         const id = Number(el.dataset.qty);
         cart.set(id, cart.qtyOf(id) + Number(el.dataset.d));
@@ -525,6 +557,18 @@
     bindSwipeDown($("[data-cart]"), ".grab, [data-cart-head]", () => closeDrawer());
     bindSwipeDown($("[data-filters]"), ".filters-grab, .sheet-head", closeFilters);
 
+    window.addEventListener("nsc:fav", () => {
+      $$("[data-fav]").forEach(b => {
+        const on = N.favorites.has(b.dataset.fav);
+        b.setAttribute("aria-pressed", String(on));
+        const l = $("[data-fav-label]", b);
+        if (l) l.textContent = on ? t("fav.added") : t("fav.add");
+      });
+      renderChrome();
+      if (page === "products" && filters.fav) { renderList(); revealScan(); }
+      if (page === "products") renderChips();
+    });
+    window.addEventListener("storage", e => { if (e.key === N.KEYS.fav) window.dispatchEvent(new CustomEvent("nsc:fav")); });
     window.addEventListener("nsc:cart", () => {
       updateCount(false);
       if (openDrawerEl?.matches("[data-cart]")) renderCart();
@@ -807,7 +851,7 @@
   }
 
   /* ---------------- terméklista ---------------- */
-  const filters = { cat: "all", q: "", sort: "featured", instock: false, soon: false, sale: false, min: "", max: "" };
+  const filters = { cat: "all", q: "", sort: "featured", instock: false, soon: false, sale: false, min: "", max: "", fav: false };
 
   function readFilters() {
     const u = new URLSearchParams(location.search);
@@ -819,6 +863,7 @@
     filters.sale = u.get("sale") === "1";
     filters.min = u.get("min") || "";
     filters.max = u.get("max") || "";
+    filters.fav = u.get("fav") === "1";
   }
   function writeFilters() {
     if (page !== "products") return;
@@ -829,12 +874,14 @@
     ["instock", "soon", "sale"].forEach(k => filters[k] && u.set(k, "1"));
     if (filters.min) u.set("min", filters.min);
     if (filters.max) u.set("max", filters.max);
+    if (filters.fav) u.set("fav", "1");
     const qs = u.toString();
     history.replaceState(null, "", qs ? `?${qs}` : location.pathname);
   }
 
   function filtered() {
     let list = N.products();
+    if (filters.fav) { const fav = N.favorites.list(); list = list.filter(p => fav.includes(p.id)); }
     if (filters.cat !== "all") list = list.filter(p => p.category === filters.cat);
     if (filters.q) {
       const words = norm(filters.q).split(/\s+/).filter(Boolean);
@@ -862,14 +909,24 @@
 
   const activeFilterCount = () => ["instock", "soon", "sale"].filter(k => filters[k]).length + (filters.min ? 1 : 0) + (filters.max ? 1 : 0);
 
+  function renderChips() {
+    const chips = $("[data-chips]");
+    if (!chips) return;
+    const cats = categoriesWithCounts();
+    const favN = N.favorites.list().filter(id => N.byId(id)).length;
+    chips.innerHTML = `<button class="chip" type="button" data-cat="all" aria-pressed="${filters.cat === "all" && !filters.fav}">Összes</button>`
+      + (favN || filters.fav ? `<button class="chip" type="button" data-fav-chip aria-pressed="${!!filters.fav}">♥ ${esc(t("fav.title"))} (${favN})</button>` : "")
+      + cats.map(c => `<button class="chip" type="button" data-cat="${esc(c.value)}" aria-pressed="${filters.cat === c.value && !filters.fav}">${esc(c.label)}</button>`).join("");
+  }
+
   function renderList() {
     const all = N.products();
     const cats = categoriesWithCounts();
-    const catBtn = (value, label, count) => `<button type="button" data-cat="${esc(value)}" aria-pressed="${filters.cat === value}">${esc(label)}<span>${count}</span></button>`;
+    const catBtn = (value, label, count) => `<button type="button" data-cat="${esc(value)}" aria-pressed="${filters.cat === value && !filters.fav}">${esc(label)}<span>${count}</span></button>`;
+    const favN = N.favorites.list().filter(id => N.byId(id)).length;
     const cl = $("[data-cat-list]");
-    if (cl) cl.innerHTML = catBtn("all", t("link.all"), all.length) + cats.map(c => catBtn(c.value, c.label, c.count)).join("");
-    const chips = $("[data-chips]");
-    if (chips) chips.innerHTML = `<button class="chip" type="button" data-cat="all" aria-pressed="${filters.cat === "all"}">Összes</button>` + cats.map(c => `<button class="chip" type="button" data-cat="${esc(c.value)}" aria-pressed="${filters.cat === c.value}">${esc(c.label)}</button>`).join("");
+    if (cl) cl.innerHTML = catBtn("all", t("link.all"), all.length) + (favN || filters.fav ? `<button type="button" data-fav-chip aria-pressed="${!!filters.fav}">♥ ${esc(t("fav.title"))}<span>${favN}</span></button>` : "") + cats.map(c => catBtn(c.value, c.label, c.count)).join("");
+    renderChips();
 
     $$("[data-f]").forEach(el => {
       const k = el.dataset.f;
@@ -881,7 +938,7 @@
     const n = activeFilterCount();
     if (badge) badge.textContent = n ? ` (${n})` : "";
 
-    const catLabel = filters.cat === "all" ? t("products.title") : N.categoryLabel(filters.cat);
+    const catLabel = filters.fav ? t("fav.title") : filters.cat === "all" ? t("products.title") : N.categoryLabel(filters.cat);
     $("[data-list-title]").textContent = catLabel;
     $("[data-crumb-current]").textContent = catLabel;
     document.title = `${catLabel} – NS Card`;
@@ -892,7 +949,9 @@
     const grid = $("[data-list]");
     if (grid) grid.innerHTML = list.length
       ? list.map(cardHTML).join("")
-      : emptyHTML("Nincs a szűrésnek megfelelő termék", "Próbálj más kulcsszót, vagy töröld a szűrőket.", '<button class="btn btn-ghost" type="button" data-reset-filters>Szűrők törlése</button>');
+      : filters.fav && !N.favorites.list().length
+        ? emptyHTML(t("fav.title"), t("fav.empty"), `<a class="btn btn-primary" href="/products">${esc(t("hero.cta"))}</a>`)
+        : emptyHTML("Nincs a szűrésnek megfelelő termék", "Próbálj más kulcsszót, vagy töröld a szűrőket.", '<button class="btn btn-ghost" type="button" data-reset-filters>Szűrők törlése</button>');
   }
 
   function bindList() {
@@ -900,8 +959,9 @@
     document.addEventListener("click", e => {
       const b = e.target.closest("button");
       if (!b) return;
+      if (b.matches("[data-fav-chip]")) { filters.fav = !filters.fav; if (filters.fav) filters.cat = "all"; writeFilters(); renderList(); revealScan(); return; }
       if (b.matches("[data-cat]")) {
-        filters.cat = b.dataset.cat; writeFilters(); renderList(); revealScan();
+        filters.cat = b.dataset.cat; filters.fav = false; writeFilters(); renderList(); revealScan();
         if (b.classList.contains("chip")) b.scrollIntoView({ inline: "center", block: "nearest", behavior: motionOK() ? "smooth" : "auto" });
       } else if (b.matches("[data-reset-filters]")) {
         Object.assign(filters, { q: "", instock: false, soon: false, sale: false, min: "", max: "" });
@@ -926,6 +986,83 @@
   let pdpQty = 1;
   let pdpImage = 0;
   let pdpId = 0;
+  let pdpSeen = 0;
+
+  /* keresőknek: kanonikus cím és termék adatok (schema.org) */
+  function productMeta(p) {
+    const url = `${SITE}/product?id=${p.id}`;
+    let can = $('link[rel="canonical"]');
+    if (!can) { can = document.createElement("link"); can.rel = "canonical"; document.head.appendChild(can); }
+    can.href = url;
+    const img = imageUrl(p.images[0]);
+    const abs = img && !/^https?:/.test(img) ? `${location.origin}${img}` : img;
+    const ld = {
+      "@context": "https://schema.org", "@type": "Product", name: p.name, sku: `NSC-${p.id}`, category: N.categoryLabel(p.category),
+      image: p.images.map(src => { const u = imageUrl(src); return /^https?:/.test(u) ? u : `${location.origin}${u}`; }),
+      description: p.description || p.line || `${p.name} – ${N.categoryLabel(p.category)}`,
+      brand: { "@type": "Brand", name: "Pokémon TCG" },
+      offers: { "@type": "Offer", url, priceCurrency: "HUF", price: p.price, itemCondition: "https://schema.org/NewCondition",
+        availability: N.isSoon(p) ? "https://schema.org/PreOrder" : p.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock", seller: { "@type": "Organization", name: "NS Card" } }
+    };
+    let tag = $("#pdp-ld");
+    if (!tag) { tag = document.createElement("script"); tag.type = "application/ld+json"; tag.id = "pdp-ld"; document.head.appendChild(tag); }
+    tag.textContent = JSON.stringify(ld);
+    const og = (prop, val) => { let m = $(`meta[property="${prop}"]`); if (!m) { m = document.createElement("meta"); m.setAttribute("property", prop); document.head.appendChild(m); } m.setAttribute("content", val); };
+    og("og:title", `${p.name} – NS Card`);
+    og("og:url", url);
+    if (abs) og("og:image", abs);
+  }
+
+  /* képnagyító */
+  let lbIndex = 0;
+  function openLightbox(i = 0) {
+    const p = N.byId(Number(new URLSearchParams(location.search).get("id")));
+    if (!p || !p.images.length) return;
+    closeLightbox();
+    lbIndex = i;
+    const box = document.createElement("div");
+    box.className = "lightbox";
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-modal", "true");
+    box.setAttribute("aria-label", `${p.name} képei`);
+    box.dataset.lightbox = "";
+    const many = p.images.length > 1;
+    box.innerHTML = `
+      <div class="lb-top"><span data-lb-count>${i + 1} / ${p.images.length}</span><button class="icon-btn" type="button" data-lb-close aria-label="Bezárás">${ICON.close}</button></div>
+      <div class="lb-stage" data-lb-stage>${p.images.map((src, k) => `<div class="lb-slide"><img src="${esc(imageUrl(src))}" alt="${esc(p.name)} – ${k + 1}. kép"></div>`).join("")}</div>
+      ${many ? `<div class="lb-nav lb-prev"><button class="icon-btn" type="button" data-lb-go="-1" aria-label="Előző kép">${ICON.left}</button></div><div class="lb-nav lb-next"><button class="icon-btn" type="button" data-lb-go="1" aria-label="Következő kép">${ICON.right}</button></div>
+      <div class="lb-thumbs">${p.images.map((src, k) => `<button type="button" data-lb-thumb="${k}" aria-current="${k === i}" aria-label="${k + 1}. kép"><img src="${esc(imageUrl(src))}" alt=""></button>`).join("")}</div>` : "<div></div>"}`;
+    document.body.appendChild(box);
+    lock(true);
+    const stage = $("[data-lb-stage]", box);
+    requestAnimationFrame(() => { stage.scrollLeft = i * stage.clientWidth; });
+    stage.addEventListener("scroll", () => {
+      const k = Math.round(stage.scrollLeft / Math.max(1, stage.clientWidth));
+      if (k === lbIndex) return;
+      lbIndex = k;
+      $("[data-lb-count]", box).textContent = `${k + 1} / ${p.images.length}`;
+      $$("[data-lb-thumb]", box).forEach((b, n) => b.setAttribute("aria-current", String(n === k)));
+    }, { passive: true });
+    box.addEventListener("click", e => {
+      const b = e.target.closest("button");
+      if (b?.matches("[data-lb-close]") || e.target.classList.contains("lb-slide")) closeLightbox();
+      else if (b?.matches("[data-lb-go]")) lbGo(lbIndex + Number(b.dataset.lbGo));
+      else if (b?.matches("[data-lb-thumb]")) lbGo(Number(b.dataset.lbThumb));
+    });
+    $("[data-lb-close]", box).focus();
+  }
+  function lbGo(k) {
+    const stage = $("[data-lb-stage]");
+    if (!stage) return;
+    const n = stage.children.length;
+    stage.scrollTo({ left: ((k + n) % n) * stage.clientWidth, behavior: motionOK() ? "smooth" : "auto" });
+  }
+  function closeLightbox() {
+    const box = $("[data-lightbox]");
+    if (!box) return;
+    box.remove();
+    if (!openDrawerEl && !searchOpen) lock(false);
+  }
   const currentSlideImg = () => $$("[data-track] img")[pdpImage] || $("[data-track] img");
 
   function renderProduct() {
@@ -961,7 +1098,8 @@
     box.innerHTML = `
       <div class="pdp">
         <div class="gallery">
-          <div class="track" data-track tabindex="0" aria-label="Termékképek">${imgs.map((src, i) => `<div class="slide">${src ? `<img src="${esc(imageUrl(src))}" alt="${i === 0 ? esc(p.name) : `${esc(p.name)} – ${i + 1}. kép`}"${i ? ' loading="lazy"' : ""}>` : ""}</div>`).join("")}</div>
+          <div class="track" data-track tabindex="0" aria-label="Termékképek">${imgs.map((src, i) => `<div class="slide">${src ? `<img src="${esc(imageUrl(src))}" alt="${i === 0 ? esc(p.name) : `${esc(p.name)} – ${i + 1}. kép`}"${i ? ' loading="lazy"' : ""} data-zoom="${i}">` : ""}</div>`).join("")}</div>
+          ${imgs[0] ? `<button class="zoom-hint" type="button" data-zoom-open aria-label="Kép nagyítása">${ICON.zoom}</button>` : ""}
           ${multi ? `<div class="dots" aria-hidden="true">${imgs.map((_, i) => `<i${i === pdpImage ? ' class="on"' : ""}></i>`).join("")}</div>
           <div class="thumbs" role="group" aria-label="Képek">${imgs.map((src, i) => `<button type="button" data-thumb="${i}" aria-current="${i === pdpImage}" aria-label="${i + 1}. kép"><img src="${esc(imageUrl(src))}" alt=""></button>`).join("")}</div>` : ""}
         </div>
@@ -980,6 +1118,10 @@
               </div>
               <button class="btn btn-primary" type="button" data-pdp-add ${maxQty <= 0 ? "disabled" : ""}>${ICON.cart}${maxQty <= 0 ? "A teljes készlet a kosaradban" : esc(t("pdp.add"))}</button>
             </div>` : `<div class="notice">${N.isSoon(p) ? "Ez a termék hamarosan érkezik, még nem rendelhető." : "Ez a termék jelenleg elfogyott."}${s.email ? ` Írj nekünk a <a href="mailto:${esc(s.email)}?subject=${encodeURIComponent(`Érdeklődés: ${p.name}`)}">${esc(s.email)}</a> címre, és szólunk, ha elérhető.` : ""}</div>`}
+          <div class="pdp-tools">
+            ${favBtn(p, "btn btn-ghost btn-sm")}
+            <button class="btn btn-ghost btn-sm" type="button" data-share>${ICON.share}${esc(t("pdp.share"))}</button>
+          </div>
           <div class="perks">
             <div>${ICON.shield}<strong>${esc(t("perk.1"))}</strong><span>${esc(t("perk.1.text"))}</span></div>
             <div>${ICON.truck}<strong>${esc(t("perk.2"))}</strong><span>${esc(shipShortLabel())}${s.freeShippingFrom > 0 ? `, ${fmtFt(s.freeShippingFrom)} felett ingyenes` : ""}</span></div>
@@ -1004,6 +1146,12 @@
         : "";
       document.body.classList.toggle("has-sticky", !!sticky.innerHTML);
     }
+
+    if (pdpSeen !== p.id) { pdpSeen = p.id; N.recent.push(p.id); }
+    const recentList = N.recent.list().filter(id => id !== p.id).map(id => N.byId(id)).filter(Boolean).slice(0, 4);
+    const rw = $("[data-recent-wrap]");
+    if (rw) { rw.hidden = !recentList.length; $("[data-recent]").innerHTML = recentList.map(cardHTML).join(""); }
+    productMeta(p);
 
     const rel = N.products().filter(x => x.id !== p.id && x.category === p.category);
     const fill = N.products().filter(x => x.id !== p.id && !rel.includes(x) && N.isBuyable(x));
@@ -1036,10 +1184,23 @@
       const p = N.byId(Number(new URLSearchParams(location.search).get("id")));
       if (!p) return;
       if (b.matches("[data-thumb]")) setSlide(Number(b.dataset.thumb));
+      else if (b.matches("[data-zoom-open]")) openLightbox(pdpImage);
+      else if (b.matches("[data-share]")) {
+        const data = { title: p.name, text: `${p.name} – ${fmtFt(p.price)}`, url: location.href };
+        if (navigator.share) navigator.share(data).catch(() => {});
+        else navigator.clipboard?.writeText(location.href).then(() => toast("A termék linkje a vágólapra került."), () => toast(location.href));
+      }
       else if (b.matches("[data-pdp-qty]")) { pdpQty += Number(b.dataset.pdpQty); renderProduct(); $(`[data-pdp-qty="${b.dataset.pdpQty}"]`)?.focus(); }
       else if (b.matches("[data-pdp-add]")) { const q = pdpQty; pdpQty = 1; addToCart(p.id, q, b); }
     });
     document.addEventListener("scroll", e => { if (e.target?.matches?.("[data-track]")) syncSlide(); }, { capture: true, passive: true });
+    document.addEventListener("click", e => { const img = e.target.closest?.("[data-zoom]"); if (img) openLightbox(Number(img.dataset.zoom)); });
+    document.addEventListener("keydown", e => {
+      if (!$("[data-lightbox]")) return;
+      if (e.key === "Escape") { e.stopPropagation(); closeLightbox(); }
+      if (e.key === "ArrowRight") lbGo(lbIndex + 1);
+      if (e.key === "ArrowLeft") lbGo(lbIndex - 1);
+    }, true);
     document.addEventListener("keydown", e => {
       if (!e.target.matches?.("[data-track]")) return;
       if (e.key === "ArrowRight") { e.preventDefault(); setSlide(pdpImage + 1); }
@@ -1055,12 +1216,17 @@
   }
 
   /* ---------------- pénztár ---------------- */
-  const CO_FIELDS = ["name", "email", "phone", "zip", "city", "address", "locker", "note", "ship", "pay"];
+  const CO_FIELDS = ["name", "email", "phone", "zip", "city", "address", "locker", "note", "ship", "pay", "coupon"];
   let coState = Object.assign({ ship: "home", pay: "" }, N.store.get(N.KEYS.checkout) || {});
   let coDone = null;
   let coError = "";
   let coBusy = false;
   let coSummaryOpen = false;
+  let coCouponInput = "";
+  let coCouponMsg = "";
+  let coTerms = false;
+  const needTerms = s => !!(s.pages?.aszf || s.pages?.adatkezeles);
+  const couponDesc = c => c.type === "percent" ? `${c.value}% kedvezmény` : c.type === "fixed" ? `${fmtFt(c.value)} kedvezmény` : "Ingyenes szállítás";
 
   function availablePays(s) {
     const list = [];
@@ -1072,9 +1238,33 @@
 
   function totals(s) {
     const subtotal = cart.subtotal();
-    const shipping = N.shippingFor(coState.ship, subtotal);
+    const cp = coState.coupon ? N.findCoupon(coState.coupon, subtotal) : null;
+    const coupon = cp?.ok ? cp.coupon : null;
+    const discount = coupon ? cp.discount : 0;
+    let shipping = N.shippingFor(coState.ship, subtotal);
+    const freeShip = !!(coupon && cp.freeShip && coState.ship !== "pickup");
+    if (freeShip) shipping = 0;
     const cod = coState.pay === "cod" && subtotal ? s.codFee : 0;
-    return { subtotal, shipping, cod, total: subtotal + shipping + cod };
+    return { subtotal, shipping, cod, discount, coupon, couponState: cp, freeShip, total: Math.max(0, subtotal - discount) + shipping + cod };
+  }
+
+  function couponHTML(s, tt) {
+    if (!(s.coupons || []).some(c => c.active)) return "";
+    if (tt.coupon) return `<div class="coupon"><div class="coupon-on"><span><b>${esc(tt.coupon.code)}</b><small>${esc(couponDesc(tt.coupon))}</small></span><button type="button" data-coupon-remove>Eltávolítás</button></div></div>`;
+    const cs = tt.couponState;
+    const msg = coCouponMsg || (cs && !cs.ok ? (cs.reason === "min" ? t("coupon.min", { n: fmtFt(cs.coupon.minOrder) }) : t("coupon.invalid")) : "");
+    return `<div class="coupon"><label class="sr-only" for="co-coupon">${esc(t("coupon.label"))}</label><div class="coupon-row"><input class="input" id="co-coupon" placeholder="${esc(t("coupon.label"))}" value="${esc(coCouponInput || coState.coupon || "")}" autocomplete="off" autocapitalize="characters" spellcheck="false" enterkeyhint="done"><button class="btn btn-ghost" type="button" data-coupon-apply>${esc(t("coupon.apply"))}</button></div>${msg ? `<p class="coupon-msg" role="alert">${esc(msg)}</p>` : ""}</div>`;
+  }
+
+  function applyCoupon() {
+    const code = String(coCouponInput || $("#co-coupon")?.value || "").trim().toUpperCase();
+    const res = N.findCoupon(code, cart.subtotal());
+    coCouponMsg = "";
+    if (!code) return;
+    if (!res.ok) { coState.coupon = ""; coCouponMsg = res.reason === "min" ? t("coupon.min", { n: fmtFt(res.coupon.minOrder) }) : t("coupon.invalid"); }
+    else { coState.coupon = res.coupon.code; coCouponInput = ""; toast(`${res.coupon.code}: ${couponDesc(res.coupon)}`); }
+    saveCo();
+    renderCheckout();
   }
 
   function summaryHTML(s) {
@@ -1085,8 +1275,10 @@
         <h2>Összesítő</h2>
         <div class="summary-body">
           <div>${cart.lines().map(l => lineHTML(l, true)).join("")}</div>
-          ${freeShipHTML(tt.subtotal)}
+          ${couponHTML(s, tt)}
+          ${tt.freeShip ? "" : freeShipHTML(tt.subtotal)}
           <div class="sum-row"><span>Részösszeg</span><strong>${fmtFt(tt.subtotal)}</strong></div>
+          ${tt.discount ? `<div class="sum-row discount"><span>Kedvezmény (${esc(tt.coupon.code)})</span><strong>−${fmtFt(tt.discount)}</strong></div>` : ""}
           <div class="sum-row"><span>Szállítás</span><strong>${tt.shipping ? fmtFt(tt.shipping) : "Ingyenes"}</strong></div>
           ${tt.cod ? `<div class="sum-row"><span>Utánvételi díj</span><strong>${fmtFt(tt.cod)}</strong></div>` : ""}
           <div class="sum-row total"><span>Fizetendő</span><strong>${fmtFt(tt.total)}</strong></div>
@@ -1119,7 +1311,7 @@
     const tt = totals(s);
     const shipOpt = (v, title, desc, price) => `
       <label class="option"><input type="radio" name="ship" value="${v}" ${coState.ship === v ? "checked" : ""}>
-        <span><strong>${esc(title)}</strong><small>${esc(desc)}</small></span><span class="opt-price">${!price || (v !== "pickup" && tt.subtotal && s.freeShippingFrom > 0 && tt.subtotal >= s.freeShippingFrom) ? "Ingyenes" : fmtFt(price)}</span></label>`;
+        <span><strong>${esc(title)}</strong><small>${esc(desc)}</small></span><span class="opt-price">${!price || (v !== "pickup" && ((tt.subtotal && s.freeShippingFrom > 0 && tt.subtotal >= s.freeShippingFrom) || (tt.coupon && tt.coupon.type === "ship"))) ? "Ingyenes" : fmtFt(price)}</span></label>`;
     const focusId = document.activeElement?.id;
 
     box.innerHTML = `
@@ -1155,6 +1347,7 @@
             <div class="form-grid">${fieldHTML("note", "Megjegyzés a rendeléshez (nem kötelező)", 'rows="3"', "full")}</div>
           </section>
           ${coError ? `<div class="notice error" role="alert" style="margin-bottom:16px">${coError}</div>` : ""}
+          ${needTerms(s) ? `<label class="terms" data-terms><input type="checkbox" id="co-terms" ${coTerms ? "checked" : ""}><span>${esc(t("checkout.terms"))} ${s.pages.aszf ? '<a href="/info?p=aszf" target="_blank" rel="noopener">ÁSZF</a>' : ""}${s.pages.aszf && s.pages.adatkezeles ? " · " : ""}${s.pages.adatkezeles ? '<a href="/info?p=adatkezeles" target="_blank" rel="noopener">Adatkezelés</a>' : ""}</span></label>` : ""}
           <div class="co-submit">
             <button class="btn btn-primary btn-block" type="submit" style="--h:56px;font-size:1.05rem" ${!pays.length || coBusy ? "disabled" : ""}>
               ${coBusy ? "Folyamatban…" : `${esc(coState.pay === "card" ? t("checkout.pay") : t("checkout.submit"))} · ${fmtFt(tt.total)}`}
@@ -1190,8 +1383,15 @@
     }
     $$("[data-err]").forEach(el => { const k = el.dataset.err; el.hidden = !errs[k]; el.textContent = errs[k] || ""; $(`#co-${k}`)?.setAttribute("aria-invalid", String(!!errs[k])); });
     const first = Object.keys(errs)[0];
-    if (first) $(`#co-${first}`)?.focus();
-    return !first;
+    if (first) { $(`#co-${first}`)?.focus(); return false; }
+    if (needTerms(N.settings()) && !coTerms) {
+      const tl = $("[data-terms]");
+      tl?.setAttribute("aria-invalid", "true");
+      $("#co-terms")?.focus();
+      toast("A rendeléshez fogadd el az ÁSZF-et és az adatkezelési tájékoztatót.");
+      return false;
+    }
+    return true;
   }
 
   function orderNumber() {
@@ -1205,7 +1405,9 @@
     L.push(`Rendelésszám: ${o.id}`, "");
     L.push("Termékek:");
     o.lines.forEach(l => L.push(`- ${l.name} (#${l.id}) – ${l.qty} db × ${fmtFt(l.price)} = ${fmtFt(l.qty * l.price)}`));
-    L.push("", `Részösszeg: ${fmtFt(o.subtotal)}`, `Szállítás (${o.shipLabel}): ${o.shipping ? fmtFt(o.shipping) : "ingyenes"}`);
+    L.push("", `Részösszeg: ${fmtFt(o.subtotal)}`);
+    if (o.coupon) L.push(`Kupon (${o.coupon}): ${o.discount ? `−${fmtFt(o.discount)}` : "ingyenes szállítás"}`);
+    L.push(`Szállítás (${o.shipLabel}): ${o.shipping ? fmtFt(o.shipping) : "ingyenes"}`);
     if (o.cod) L.push(`Utánvételi díj: ${fmtFt(o.cod)}`);
     L.push(`Fizetendő: ${fmtFt(o.total)}`, `Fizetési mód: ${o.payLabel}`, "");
     L.push("Vásárló:", o.c.name, o.c.email, o.c.phone);
@@ -1251,7 +1453,7 @@
         const res = await fetch("/api/create-checkout-session", {
           method: "POST",
           headers: { "Content-Type": "application/json", Accept: "application/json" },
-          body: JSON.stringify({ items: lines.map(l => ({ id: l.product.id, qty: l.qty })), customer: c, shipping: coState.ship })
+          body: JSON.stringify({ items: lines.map(l => ({ id: l.product.id, qty: l.qty })), customer: c, shipping: coState.ship, coupon: tt.coupon?.code || "" })
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok || !data.url) throw new Error(data.error || "");
@@ -1268,7 +1470,7 @@
       id: orderNumber(),
       createdAt: new Date().toISOString(),
       lines: lines.map(l => ({ id: l.product.id, name: l.product.name, qty: l.qty, price: l.product.price })),
-      subtotal: tt.subtotal, shipping: tt.shipping, cod: tt.cod, total: tt.total,
+      subtotal: tt.subtotal, shipping: tt.shipping, cod: tt.cod, total: tt.total, discount: tt.discount, coupon: tt.coupon?.code || "",
       ship: coState.ship, shipLabel: (N.shippingMethods().find(m => m.value === coState.ship)?.label || "szállítás").toLowerCase(),
       pay: coState.pay, payLabel: coState.pay === "cod" ? "utánvét" : "banki átutalás",
       c
@@ -1293,13 +1495,50 @@
       else if (el.getAttribute("aria-invalid") === "true") { el.setAttribute("aria-invalid", "false"); const er = $(`[data-err="${el.name}"]`); if (er) er.hidden = true; }
     });
     box.addEventListener("submit", e => { e.preventDefault(); if (!coBusy) submitCheckout(); });
+    box.addEventListener("input", e => {
+      if (e.target.id === "co-coupon") { coCouponInput = e.target.value; coCouponMsg = ""; }
+    });
+    box.addEventListener("change", e => {
+      if (e.target.id === "co-terms") { coTerms = e.target.checked; $("[data-terms]")?.removeAttribute("aria-invalid"); }
+    });
+    box.addEventListener("keydown", e => { if (e.target.id === "co-coupon" && e.key === "Enter") { e.preventDefault(); applyCoupon(); } });
     box.addEventListener("click", async e => {
+      if (e.target.closest("[data-coupon-apply]")) { applyCoupon(); return; }
+      if (e.target.closest("[data-coupon-remove]")) { coState.coupon = ""; coCouponInput = ""; coCouponMsg = ""; saveCo(); renderCheckout(); return; }
       if (e.target.closest("[data-summary-toggle]")) { coSummaryOpen = !coSummaryOpen; renderCheckout(); return; }
       if (e.target.closest("[data-copy-order]") && coDone) {
         try { await navigator.clipboard.writeText(orderText(coDone)); toast("A rendelés a vágólapra került."); }
         catch { toast("A másolás nem sikerült – jelöld ki a szöveget a részleteknél."); }
       }
     });
+  }
+
+  /* ---------------- tájékoztató oldalak ---------------- */
+  function renderInfo() {
+    const body = $("[data-info-body]");
+    if (!body) return;
+    const s = N.settings();
+    const pages = s.pages || {};
+    const key = new URLSearchParams(location.search).get("p") || "aszf";
+    const hasCompany = !!(s.companyName || s.email || s.phone);
+    const list = N.INFO_PAGES.filter(pg => pages[pg.key]).map(pg => ({ key: pg.key, label: pg.label }));
+    if (hasCompany) list.push({ key: "impresszum", label: t("info.impresszum") });
+    const nav = $("[data-info-nav]");
+    if (nav) nav.innerHTML = list.map(x => `<a href="/info?p=${x.key}"${x.key === key ? ' aria-current="page"' : ""}>${esc(x.label)}</a>`).join("");
+    let title, html;
+    if (key === "impresszum") {
+      title = t("info.impresszum");
+      const row = (k, v) => v ? `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>` : "";
+      html = `<dl>${row("Webshop", s.shopName)}${row("Üzemeltető", s.companyName)}${row("Székhely", s.companyAddress)}${row("Adószám", s.taxNumber)}${row("Cégjegyzékszám / nyilvántartási szám", s.regNumber)}${row("E-mail", s.email)}${row("Telefon", s.phone)}${row("Tárhelyszolgáltató", "Cloudflare, Inc. – 101 Townsend St, San Francisco, CA 94107, USA – cloudflare.com")}</dl>`;
+    } else {
+      const meta = N.INFO_PAGES.find(pg => pg.key === key);
+      title = meta?.label || "Információk";
+      html = pages[key] ? N.mdToHtml(pages[key].body) : `<p class="muted">${esc(t("info.missing"))}</p>`;
+    }
+    document.title = `${title} – NS Card`;
+    $("[data-info-title]").textContent = title;
+    $("[data-info-crumb]").textContent = title;
+    body.innerHTML = html;
   }
 
   /* ---------------- Stripe visszatérés ---------------- */
@@ -1336,6 +1575,7 @@
     else if (page === "products") renderList();
     else if (page === "product") renderProduct();
     else if (page === "checkout") renderCheckout();
+    else if (page === "info") renderInfo();
     if (openDrawerEl?.matches("[data-cart]")) renderCart();
     if (searchOpen) renderSheet();
     updateCount(false);

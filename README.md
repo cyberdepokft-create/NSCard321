@@ -30,3 +30,11 @@ Jelszócsere: az `public/assets/js/admin.js` fájlban az `AUTH.hash` értéke a 
 A Megjelenés beállításai a katalógus `settings.theme` és `settings.texts` mezőjébe kerülnek, publikáláskor élesednek.
 
 A szövegek listája a `public/assets/js/texts.js` fájlban van (a forrás a fejlesztői `texts.json`, amiből a `build_pages.py` generálja a HTML-t is).
+
+### 4.2 újdonságok
+
+- **Kedvencek**: szív ikon a termékeken, „Kedvencek” szűrő a terméklistán (`/products?fav=1`).
+- **Nemrég megnézett** termékek a termékoldalon, **képnagyító** (lapozható, teljes képernyős), **megosztás** gomb.
+- **Kuponkódok** (Beállítások → Kuponkódok): százalékos, fix összegű vagy ingyenes szállítás, minimum rendelési értékkel. A kártyás fizetésnél a szerver is ellenőrzi.
+- **Oldalak** menü: ÁSZF, adatkezelési tájékoztató, szállítás és elállás, rólunk (sablonnal), az impresszum a cégadatokból készül. Ha az ÁSZF vagy az adatkezelés ki van töltve, a pénztárban kötelező elfogadni.
+- **Keresőoptimalizálás**: schema.org adatok, kanonikus címek, `/sitemap.xml` (Pages Function), a termékoldal címét és megosztási képét a szerver írja be (`functions/product.js`).

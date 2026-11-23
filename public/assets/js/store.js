@@ -57,8 +57,19 @@
     payTransfer: true,
     payCod: true,
     codFee: 0,
-    lowStock: 3
+    lowStock: 3,
+    companyName: "",
+    companyAddress: "",
+    taxNumber: "",
+    regNumber: ""
   });
+
+  const INFO_PAGES = [
+    { key: "aszf", label: "Általános szerződési feltételek", short: "ÁSZF" },
+    { key: "adatkezeles", label: "Adatkezelési tájékoztató", short: "Adatkezelés" },
+    { key: "szallitas", label: "Szállítás, fizetés és elállás", short: "Szállítás és elállás" },
+    { key: "rolunk", label: "Rólunk", short: "Rólunk" }
+  ];
 
   const KEYS = {
     published: "nsc.published.v3",
@@ -66,7 +77,10 @@
     cart: "nsc.cart.v1",
     remote: "nsc.remote.v1",
     checkout: "nsc.checkout.v1",
-    lastOrder: "nsc.lastOrder.v1"
+    lastOrder: "nsc.lastOrder.v1",
+    fav: "nsc.fav.v1",
+    recent: "nsc.recent.v1",
+    coupon: "nsc.coupon.v1"
   };
 
   /* ---------- segédfüggvények ---------- */
@@ -159,10 +173,88 @@
     if (!s.shopName) s.shopName = DEFAULT_SETTINGS.shopName;
     if (!s.shipHome && !s.shipLocker && !s.shipPickup) s.shipHome = true;
     s.categories = sanitizeCategories(r.categories);
+    s.coupons = sanitizeCoupons(r.coupons);
+    s.pages = sanitizePages(r.pages);
     s.texts = sanitizeTexts(r.texts, r);
     s.theme = sanitizeTheme(r.theme);
     return s;
   }
+
+  /* ---------- kuponok és tájékoztató oldalak ---------- */
+  function sanitizeCoupons(raw) {
+    const out = [];
+    const seen = new Set();
+    for (const c of Array.isArray(raw) ? raw.slice(0, 60) : []) {
+      const code = String(c?.code || "").toUpperCase().replace(/[^A-Z0-9_-]/g, "").slice(0, 24);
+      if (!code || seen.has(code)) continue;
+      seen.add(code);
+      const type = ["percent", "fixed", "ship"].includes(c?.type) ? c.type : "percent";
+      let value = int(c?.value);
+      if (type === "percent") value = Math.min(90, Math.max(1, value || 10));
+      if (type === "ship") value = 0;
+      out.push({ code, type, value, minOrder: int(c?.minOrder), active: c?.active !== false, note: String(c?.note || "").trim().slice(0, 80) });
+    }
+    return out;
+  }
+  function sanitizePages(raw) {
+    const out = {};
+    const src = raw && typeof raw === "object" ? raw : {};
+    for (const pg of INFO_PAGES) {
+      const body = String(src[pg.key]?.body || "").replace(/\r\n/g, "\n").trim().slice(0, 40000);
+      if (body) out[pg.key] = { body };
+    }
+    return out;
+  }
+  function couponDiscount(coupon, subtotal) {
+    if (!coupon || !subtotal) return 0;
+    if (coupon.type === "percent") return Math.round(subtotal * coupon.value / 100);
+    if (coupon.type === "fixed") return Math.min(coupon.value, subtotal);
+    return 0;
+  }
+  function findCoupon(code, subtotal) {
+    const c = String(code || "").trim().toUpperCase();
+    if (!c) return { ok: false, reason: "empty" };
+    const coupon = (settings().coupons || []).find(x => x.code === c && x.active);
+    if (!coupon) return { ok: false, reason: "invalid" };
+    if (coupon.minOrder && subtotal < coupon.minOrder) return { ok: false, reason: "min", coupon };
+    return { ok: true, coupon, discount: couponDiscount(coupon, subtotal), freeShip: coupon.type === "ship" };
+  }
+
+  /* Egyszerű, biztonságos szövegformázás a tájékoztató oldalakhoz: ## cím, ### alcím, - lista, **félkövér**, [link](https://…) */
+  function mdToHtml(md) {
+    const inline = t => esc(t)
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\[([^\]]+)\]\(((?:https?:\/\/|mailto:|tel:|\/)[^)\s]+)\)/g, (m, a, href) => `<a href="${href}"${/^https?:/.test(href) ? ' target="_blank" rel="noopener"' : ""}>${a}</a>`);
+    const blocks = String(md || "").replace(/\r\n/g, "\n").split(/\n{2,}/);
+    return blocks.map(b => {
+      const lines = b.split("\n").filter(l => l.trim());
+      if (!lines.length) return "";
+      if (lines.every(l => /^\s*[-*•]\s+/.test(l))) return `<ul>${lines.map(l => `<li>${inline(l.replace(/^\s*[-*•]\s+/, ""))}</li>`).join("")}</ul>`;
+      if (lines.every(l => /^\s*\d+[.)]\s+/.test(l))) return `<ol>${lines.map(l => `<li>${inline(l.replace(/^\s*\d+[.)]\s+/, ""))}</li>`).join("")}</ol>`;
+      const first = lines[0];
+      if (/^###\s+/.test(first)) return `<h3>${inline(first.replace(/^###\s+/, ""))}</h3>` + (lines.length > 1 ? `<p>${lines.slice(1).map(inline).join("<br>")}</p>` : "");
+      if (/^##?\s+/.test(first)) return `<h2>${inline(first.replace(/^##?\s+/, ""))}</h2>` + (lines.length > 1 ? `<p>${lines.slice(1).map(inline).join("<br>")}</p>` : "");
+      return `<p>${lines.map(inline).join("<br>")}</p>`;
+    }).join("\n");
+  }
+
+  /* ---------- kedvencek és nemrég megnézett ---------- */
+  const favorites = {
+    list() { const v = store.get(KEYS.fav); return Array.isArray(v) ? v.map(Number).filter(Boolean) : []; },
+    has(id) { return favorites.list().includes(Number(id)); },
+    toggle(id) {
+      const n = Number(id);
+      const list = favorites.list();
+      const on = !list.includes(n);
+      store.set(KEYS.fav, on ? [n, ...list].slice(0, 100) : list.filter(x => x !== n));
+      window.dispatchEvent(new CustomEvent("nsc:fav", { detail: { id: n, on } }));
+      return on;
+    }
+  };
+  const recent = {
+    list() { const v = store.get(KEYS.recent); return Array.isArray(v) ? v.map(Number).filter(Boolean) : []; },
+    push(id) { const n = Number(id); store.set(KEYS.recent, [n, ...recent.list().filter(x => x !== n)].slice(0, 12)); }
+  };
 
   /* ---------- szövegek ---------- */
   const TEXT_GROUPS = window.NSC_TEXT_GROUPS || [];
@@ -574,6 +666,7 @@
     get CATEGORIES() { return categories(); },
     FONTS, PRESETS, SECTION_LIST, THEME_DEFAULTS, TEXT_GROUPS, TEXT_DEFAULTS,
     t, sanitizeTheme, sanitizeTexts, themeVars, applyTheme, setPreview,
+    INFO_PAGES, sanitizeCoupons, sanitizePages, couponDiscount, findCoupon, mdToHtml, favorites, recent,
     store, clone, fmtFt, esc, int, categoryLabel, categories, imageUrl, slugify,
     sanitizeProduct, sanitizeCatalog, sanitizeSettings, sanitizeCategories, sanitizePayload, buildPayload,
     normalizeRemote, rawUrl, resolveRemote, setLocalRemote, fetchWithTimeout, fetchPublished,

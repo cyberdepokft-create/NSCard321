@@ -3,3 +3,5 @@ Disallow: /admin
 Disallow: /checkout
 Disallow: /success
 Disallow: /cancel
+
+Sitemap: https://www.nscard.hu/sitemap.xml

@@ -66,13 +66,38 @@ export async function onRequestPost({ request, env }) {
     pickup: { on: !!settings.shipPickup, price: settings.shippingPickup, label: "Személyes átvétel" }
   };
   const method = methods[body?.shipping]?.on ? body.shipping : Object.keys(methods).find(k => methods[k].on) || "home";
-  const free = method !== "pickup" && Number(settings.freeShippingFrom) > 0 && subtotal >= Number(settings.freeShippingFrom);
+
+  // kuponkód: a szerver a publikált beállításokból ellenőrzi
+  const code = String(body?.coupon || "").trim().toUpperCase();
+  let coupon = null;
+  if (code) {
+    coupon = (Array.isArray(settings.coupons) ? settings.coupons : []).find(c => String(c?.code || "").toUpperCase() === code && c.active !== false) || null;
+    if (!coupon) return json({ error: "A kuponkód nem érvényes. Távolítsd el, vagy próbálj másikat." }, 409);
+    if (Number(coupon.minOrder) > 0 && subtotal < Number(coupon.minOrder)) return json({ error: `A(z) ${code} kupon csak ${Number(coupon.minOrder).toLocaleString("hu-HU")} Ft feletti rendelésnél használható.` }, 409);
+  }
+  const discount = !coupon ? 0 : coupon.type === "percent" ? Math.round(subtotal * Math.min(90, Number(coupon.value) || 0) / 100)
+    : coupon.type === "fixed" ? Math.min(subtotal, Math.round(Number(coupon.value) || 0)) : 0;
+  const couponShip = coupon?.type === "ship" && method !== "pickup";
+
+  const free = couponShip || (method !== "pickup" && Number(settings.freeShippingFrom) > 0 && subtotal >= Number(settings.freeShippingFrom));
   const shipping = free ? 0 : Math.round(Number(methods[method].price) || 0);
   if (shipping > 0) {
     params.append(`line_items[${i}][price_data][currency]`, "huf");
     params.append(`line_items[${i}][price_data][unit_amount]`, String(shipping * 100));
     params.append(`line_items[${i}][price_data][product_data][name]`, `Szállítás – ${methods[method].label.toLowerCase()}`);
     params.append(`line_items[${i}][quantity]`, "1");
+  }
+
+  if (discount > 0) {
+    const cp = new URLSearchParams({ amount_off: String(discount * 100), currency: "huf", duration: "once", max_redemptions: "1", name: `Kupon ${code}`.slice(0, 40) });
+    const cr = await fetch("https://api.stripe.com/v1/coupons", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`, "Content-Type": "application/x-www-form-urlencoded" },
+      body: cp
+    });
+    const cd = await cr.json().catch(() => ({}));
+    if (!cr.ok || !cd.id) return json({ error: cd?.error?.message || "A kupon nem alkalmazható a kártyás fizetésnél." }, 502);
+    params.append("discounts[0][coupon]", cd.id);
   }
 
   const c = body?.customer || {};
@@ -84,7 +109,8 @@ export async function onRequestPost({ request, env }) {
   if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(c.email || ""))) params.append("customer_email", String(c.email));
   const meta = {
     name: c.name, phone: c.phone, shipping: methods[method].label,
-    address: method === "locker" ? c.locker : method === "pickup" ? "" : `${c.zip || ""} ${c.city || ""}, ${c.address || ""}`, note: c.note
+    address: method === "locker" ? c.locker : method === "pickup" ? "" : `${c.zip || ""} ${c.city || ""}, ${c.address || ""}`, note: c.note,
+    coupon: code || ""
   };
   for (const [k, v] of Object.entries(meta)) if (v) params.append(`metadata[${k}]`, String(v).slice(0, 480));
 
