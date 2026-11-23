@@ -19,8 +19,8 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="preload" href="/assets/fonts/archivo-black.woff" as="font" type="font/woff" crossorigin>
   <link rel="preload" href="/assets/fonts/dm-sans.woff" as="font" type="font/woff" crossorigin>
-  <link rel="stylesheet" href="/assets/css/shop.css?v=4.3.0">
-  <script src="/assets/js/theme-boot.js?v=4.3.0"></script>
+  <link rel="stylesheet" href="/assets/css/shop.css?v=4.4.0">
+  <script src="/assets/js/theme-boot.js?v=4.4.0"></script>
 </head>
 <body data-page="info">
   <div class="sky" aria-hidden="true"><i></i><i></i><i></i><b></b><b></b><b></b><b></b><b></b><b></b><b></b><b></b></div>
@@ -30,7 +30,7 @@
     <div class="wrap hdr">
       <button class="icon-btn only-mobile" type="button" data-open-menu aria-controls="menu" aria-expanded="false" aria-label="Menü megnyitása"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
       <a class="brand" href="/" aria-label="NS Card kezdőlap"><img src="/img/brand/wordmark.webp" alt="NS Card" width="135" height="48"></a>
-      <nav class="nav" aria-label="Fő menü"><a href="/" data-t="nav.home">Kezdőlap</a><a href="/products" data-t="nav.products">Termékek</a><a href="/#rendeles" data-t="nav.ship">Szállítás és fizetés</a><a href="/#kapcsolat" data-contact-nav data-t="nav.contact">Kapcsolat</a></nav>
+      <nav class="nav" aria-label="Fő menü"><a href="/" data-t="nav.home">Kezdőlap</a><a href="/products" data-mega-trigger aria-haspopup="true" aria-controls="mega" data-t="nav.products">Termékek</a><a href="/#rendeles" data-t="nav.ship">Szállítás és fizetés</a><a href="/#kapcsolat" data-contact-nav data-t="nav.contact">Kapcsolat</a></nav>
       <form class="search" role="search" action="/products" data-search-form>
         <label class="sr-only" for="q-desktop">Keresés a termékek között</label>
         <input id="q-desktop" name="q" type="search" placeholder="Keresés: tin, ETB, Mega…" data-t-ph="search.placeholder" autocomplete="off" data-q aria-autocomplete="list" aria-controls="suggest-desktop">
@@ -43,6 +43,7 @@
         <button class="cart-btn" type="button" data-open-cart aria-controls="cart" aria-label="Kosár megnyitása"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.5L20.5 8H6.2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="20" r="1.5" fill="currentColor"/><circle cx="17" cy="20" r="1.5" fill="currentColor"/></svg><span class="cart-label" data-t="cart.button">Kosár</span><span class="cart-count" data-cart-count>0</span></button>
       </div>
     </div>
+    <div class="mega" id="mega" data-mega hidden><div class="wrap mega-inner" data-mega-body></div></div>
   </header>
 
   <div class="search-sheet" id="search-sheet" role="dialog" aria-modal="true" aria-label="Keresés" data-search-sheet>
@@ -64,7 +65,7 @@
   <aside class="drawer drawer-left" id="menu" aria-label="Menü" data-menu>
     <div class="drawer-head"><img src="/img/brand/wordmark.webp" alt="NS Card" width="101" height="36"><button class="icon-btn" type="button" data-close aria-label="Menü bezárása"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
     <div class="drawer-body">
-      <nav class="menu-links" aria-label="Mobil menü"><a href="/" data-t="nav.home">Kezdőlap</a><a href="/products" data-t="nav.products">Termékek</a><a href="/#rendeles" data-t="nav.ship">Szállítás és fizetés</a><a href="/#kapcsolat" data-contact-nav data-t="nav.contact">Kapcsolat</a></nav>
+      <nav class="menu-links" aria-label="Mobil menü"><a href="/" data-t="nav.home">Kezdőlap</a><a href="/products" data-mega-trigger aria-haspopup="true" aria-controls="mega" data-t="nav.products">Termékek</a><a href="/#rendeles" data-t="nav.ship">Szállítás és fizetés</a><a href="/#kapcsolat" data-contact-nav data-t="nav.contact">Kapcsolat</a></nav>
       <div class="menu-cats" data-menu-cats></div>
     </div>
   </aside>
@@ -122,8 +123,8 @@
       <div class="foot-bottom"><span>© <span data-year>2026</span> NS Card</span><nav class="foot-legal" data-foot-legal aria-label="Jogi információk"></nav><span data-t="footer.note">Az árak forintban értendők.</span></div>
     </div>
   </footer>
-  <script src="/assets/js/texts.js?v=4.3.0" defer></script>
-  <script src="/assets/js/store.js?v=4.3.0" defer></script>
-  <script src="/assets/js/shop.js?v=4.3.0" defer></script>
+  <script src="/assets/js/texts.js?v=4.4.0" defer></script>
+  <script src="/assets/js/store.js?v=4.4.0" defer></script>
+  <script src="/assets/js/shop.js?v=4.4.0" defer></script>
 </body>
 </html>

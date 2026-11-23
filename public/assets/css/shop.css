@@ -1092,3 +1092,51 @@ html[data-fx]:not([data-fx~="ticker"]) .ticker-track span:nth-child(n + 8) { dis
 .foot-legal a { color: var(--muted); }
 .foot-legal:empty { display: none; }
 .menu-links a .count { float: right; color: var(--dim); font-weight: 700; }
+
+.order-sum { display: grid; gap: 8px; padding: 16px 18px; border-radius: var(--r-m); background: var(--ink-3); }
+
+/* ---------- 4.4: lenyíló kategória menü, szettek, jelvények ---------- */
+.mega { position: absolute; left: 0; right: 0; top: 100%; z-index: 39; padding: 18px 0 22px; background: color-mix(in srgb, var(--ink) 94%, transparent); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-bottom: 1px solid var(--line-2); box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .7); animation: megaIn .22s cubic-bezier(.2, .8, .2, 1); }
+@keyframes megaIn { from { opacity: 0; transform: translateY(-8px); } }
+.mega-inner { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 22px; }
+.mega-cats { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; align-content: start; }
+.mega-cats a { --c: var(--spark); position: relative; overflow: hidden; display: grid; grid-template-rows: 96px auto; justify-items: start; gap: 8px; padding: 12px 14px 14px; border-radius: var(--r-m); text-decoration: none; border: 1px solid color-mix(in srgb, var(--c) 28%, var(--line)); background: linear-gradient(150deg, color-mix(in srgb, var(--c) 16%, var(--ink-2)), var(--ink-2)); transition: border-color .2s, transform .2s; }
+.mega-cats a:hover, .mega-cats a:focus-visible { border-color: color-mix(in srgb, var(--c) 70%, transparent); transform: translateY(-2px); }
+.mega-cats img { width: 100%; height: 96px; object-fit: contain; filter: drop-shadow(0 10px 14px rgba(0, 0, 0, .5)); transition: transform .3s cubic-bezier(.2, .8, .2, 1); }
+.mega-cats a:hover img { transform: translateY(-4px) scale(1.05); }
+.mega-cats b { display: block; font-size: .95rem; line-height: 1.25; }
+.mega-cats small { color: var(--dim); font-size: .8rem; }
+.mega-side { display: grid; gap: 8px; align-content: start; padding-left: 22px; border-left: 1px solid var(--line); }
+.mega-side h3 { font-size: .82rem; color: var(--dim); font-weight: 700; margin-bottom: 2px; }
+.mega-side a { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--r-s); text-decoration: none; font-weight: 700; background: var(--ink-2); }
+.mega-side a:hover { background: var(--ink-3); }
+.mega-side a span { color: var(--dim); font-size: .84rem; font-weight: 600; }
+@media (max-width: 860px) { .mega { display: none !important; } }
+
+.set-chips { display: flex; gap: 8px; overflow-x: auto; margin: -6px calc(var(--pad) * -1) 14px; padding: 0 var(--pad) 4px; scrollbar-width: none; align-items: center; }
+.set-chips::-webkit-scrollbar { display: none; }
+.set-chips > span { flex: none; color: var(--dim); font-size: .84rem; font-weight: 700; margin-right: 2px; }
+.set-chips .chip { padding: 7px 13px; font-size: .84rem; }
+
+.cat-badges { position: absolute; right: 14px; bottom: 14px; z-index: 2; display: flex; gap: 6px; }
+.cat-badges span { font-size: .72rem; font-weight: 800; padding: 4px 9px; border-radius: 99px; background: var(--paper); color: var(--ink); }
+.cat-badges .b-new { background: var(--spark); color: var(--on-spark); }
+.cat-badges .b-sale { background: var(--ember); color: var(--on-ember); }
+.cat-card::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, .14) 48%, transparent 60%); transform: translateX(-110%); transition: transform .8s ease; }
+.cat-card:hover::after { transform: translateX(110%); }
+@media (max-width: 760px) { .cat-badges { right: 10px; bottom: 10px; } .cat-badges span { font-size: .66rem; padding: 3px 7px; } }
+html[data-fx]:not([data-fx~="glow"]) .cat-card::after { display: none; }
+
+/* termékkártya: második kép rámutatáskor */
+.pcard-media .img-2 { position: absolute; inset: 0; margin: auto; opacity: 0; transition: opacity .35s ease; }
+@media (hover: hover) { .pcard:hover .pcard-media .img-2 { opacity: 1; } .pcard:hover .pcard-media img.img-1 { opacity: 0; } }
+.pcard-media img.img-1 { transition: opacity .35s ease, transform .35s cubic-bezier(.2, .8, .2, 1); }
+
+/* kosár ajánló */
+.cart-reco { margin-top: 8px; padding-top: 14px; border-top: 1px solid var(--line); }
+.cart-reco h3 { font-size: .9rem; color: var(--dim); font-weight: 700; margin-bottom: 8px; }
+.cart-reco .rc { display: grid; grid-template-columns: 52px 1fr auto; gap: 10px; align-items: center; padding: 8px 0; }
+.cart-reco img { width: 52px; height: 52px; object-fit: contain; border-radius: var(--r-xs); background: var(--ink-3); padding: 4px; }
+.cart-reco a { text-decoration: none; font-weight: 700; font-size: .88rem; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cart-reco small { color: var(--gold); font-weight: 800; }
+.cart-reco .btn { --h: 36px; padding: 0 12px; font-size: .82rem; }

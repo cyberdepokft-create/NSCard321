@@ -694,6 +694,37 @@
     }
     $("[data-settings-note]").textContent = "";
     renderCoupons();
+    renderStripe();
+  }
+
+  /* --- Stripe állapot (a kulcs soha nem jut el a böngészőbe, csak az állapota) --- */
+  let stripeInfo = null;
+  async function renderStripe(force = false) {
+    const box = $("[data-stripe-box]");
+    if (!box) return;
+    if (!stripeInfo || force) {
+      box.innerHTML = '<p class="muted">Stripe állapot ellenőrzése…</p>';
+      try {
+        const res = await fetch("/api/stripe-status", { cache: "no-store", headers: { Accept: "application/json" } });
+        stripeInfo = res.ok ? await res.json() : { unavailable: true };
+      } catch { stripeInfo = { unavailable: true }; }
+    }
+    const i = stripeInfo;
+    const on = $("[data-settings-form]").elements.payCard?.checked;
+    const steps = `<ol>
+      <li><a class="link" href="https://dashboard.stripe.com/register" target="_blank" rel="noopener">Stripe fiók</a> létrehozása, majd az éles fizetéshez a cég- és bankszámla adatok megadása a Stripe-ban.</li>
+      <li>Stripe → <strong>Developers → API keys</strong>: másold ki a <strong>Secret key</strong>-t. Próbához a teszt kulcs (<code>sk_test_…</code>), élesítéshez az éles (<code>sk_live_…</code>). <a class="link" href="https://dashboard.stripe.com/test/apikeys" target="_blank" rel="noopener">Teszt kulcsok</a> · <a class="link" href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noopener">Éles kulcsok</a></li>
+      <li>Cloudflare → Workers &amp; Pages → <strong>nscard-webshop → Settings → Variables and Secrets → Add</strong>: típus <strong>Secret</strong>, név <code>STRIPE_SECRET_KEY</code>, érték a kulcs. Mentés után a Deployments fülön a legutóbbi telepítésnél: <strong>Retry deployment</strong>.</li>
+      <li>Itt kapcsold be a kártyás fizetést, mentsd a beállításokat, és publikálj.</li>
+    </ol>`;
+    let head, body = "";
+    if (i.unavailable) { head = '<span class="pill hidden">Nem ellenőrizhető</span>'; body = '<p class="muted">Az állapot csak a Cloudflare-en futó boltban ellenőrizhető (helyi előnézetben nem).</p>' + steps; }
+    else if (!i.configured) { head = '<span class="pill out">Nincs beállítva</span>'; body = steps; }
+    else if (!i.ok) { head = '<span class="pill out">Hibás kulcs</span>'; body = `<p class="warn">${esc(i.error || "A Stripe elutasította a kulcsot.")}</p>` + steps; }
+    else if (i.mode === "test" || i.livemode === false) { head = '<span class="pill low">Kész – teszt mód</span>'; body = '<p class="muted">Pénzmozgás nincs. Próbafizetéshez a Stripe teszt kártyája: <code>4242 4242 4242 4242</code>, bármilyen jövőbeli lejárat és CVC. Élesítéshez cseréld a kulcsot <code>sk_live_…</code>-ra.</p>'; }
+    else { head = '<span class="pill in">Kész – éles mód</span>'; body = '<p class="muted">A kártyás fizetések valódiak. A befizetések a Stripe irányítópultján látszanak, a vásárló a Stripe-tól kap nyugtát (Settings → Emails → Successful payments).</p>'; }
+    if (on && !(i.configured && i.ok)) body = '<p class="warn">A kártyás fizetés be van kapcsolva, de a Stripe még nincs kész – a vásárlók hibaüzenetet kapnának. Kapcsold ki, amíg a kulcs nincs beállítva.</p>' + body;
+    box.innerHTML = `<div class="st-head"><b>Stripe</b><span style="display:flex;gap:8px;align-items:center">${head}<button class="btn btn-ghost btn-sm" type="button" data-stripe-recheck>Újraellenőrzés</button></span></div>${body}`;
   }
 
   function onSettingsSubmit(e) {
@@ -1485,6 +1516,8 @@ A termék átvételétől számított 14 napon belül indoklás nélkül elállh
     });
     $$('input[name="pg-view"]').forEach(r => r.addEventListener("change", () => { $("[data-page-split]").dataset.view = r.value; }));
     $("[data-cp-add]")?.addEventListener("submit", e => { e.preventDefault(); addCoupon(e.currentTarget); });
+    $("[data-stripe-box]")?.addEventListener("click", e => { if (e.target.closest("[data-stripe-recheck]")) renderStripe(true); });
+    $("[data-settings-form]")?.elements.payCard?.addEventListener("change", () => renderStripe());
     $("#cp-type")?.addEventListener("change", e => {
       $("[data-cp-unit]").textContent = e.target.value === "percent" ? "%" : "Ft";
       $("#cp-value").disabled = e.target.value === "ship";

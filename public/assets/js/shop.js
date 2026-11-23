@@ -274,7 +274,8 @@
         <div class="pcard-media">
           <div class="tags">${tagsHTML(p)}</div>
           ${favBtn(p)}
-          ${img ? `<img src="${esc(img)}" alt="" loading="lazy" decoding="async">` : ""}
+          ${img ? `<img${p.images[1] ? ' class="img-1"' : ""} src="${esc(img)}" alt="" loading="lazy" decoding="async">` : ""}
+          ${p.images[1] ? `<img class="img-2" src="${esc(imageUrl(p.images[1]))}" alt="" loading="lazy" decoding="async">` : ""}
         </div>
         <div class="pcard-body">
           <h3><a href="${productUrl(p)}">${esc(p.name)}</a></h3>
@@ -333,7 +334,11 @@
     const subtotal = cart.subtotal();
     const s = N.settings();
     const free = s.freeShippingFrom > 0 && subtotal >= s.freeShippingFrom;
-    body.innerHTML = lines.map(l => lineHTML(l)).join("");
+    const inCart = new Set(lines.map(l => l.product.id));
+    const cartCats = new Set(lines.map(l => l.product.category));
+    const reco = N.products().filter(p => N.isBuyable(p) && !inCart.has(p.id))
+      .sort((a, b) => (cartCats.has(b.category) - cartCats.has(a.category)) || (b.flags.includes("popular") - a.flags.includes("popular")) || (a.price - b.price)).slice(0, 3);
+    body.innerHTML = lines.map(l => lineHTML(l)).join("") + (reco.length ? `<div class="cart-reco"><h3>Ehhez jól jöhet még</h3>${reco.map(p => `<div class="rc"><img src="${esc(imageUrl(p.images[0]))}" alt="" loading="lazy"><span><a href="${productUrl(p)}">${esc(p.name)}</a><small>${fmtFt(p.price)}</small></span><button class="btn btn-ghost" type="button" data-add="${p.id}" aria-label="${esc(t("card.add"))}: ${esc(p.name)}">${ICON.plus}</button></div>`).join("")}</div>` : "");
     foot.innerHTML = `
       ${freeShipHTML(subtotal)}
       <div class="sum-row"><span>Részösszeg</span><strong>${fmtFt(subtotal)}</strong></div>
@@ -360,7 +365,8 @@
     if (res.ok) {
       const flew = flyToCart(snap);
       setTimeout(() => updateCount(true), flew ? 640 : 0);
-      showAdded(p, qty);
+      if (openDrawerEl?.matches("[data-cart]")) toast(`${t("added.title")}: ${p?.name || ""}`);
+      else showAdded(p, qty);
     } else if (res.reason === "max") {
       toast(`Ebből a termékből most ${p?.stock} db rendelhető, és mind a kosaradban van.`);
     } else {
@@ -446,7 +452,9 @@
       const buy = items.filter(N.isBuyable);
       const imgs = items.filter(p => p.images[0]).sort((a, b) => (N.isBuyable(b) - N.isBuyable(a)) || (b.price - a.price)).map(p => imageUrl(p.images[0]));
       const meta = N.categoryMeta(c.value);
-      return { ...c, color: meta.color, count: items.length, inStock: buy.length, from: buy.length ? Math.min(...buy.map(p => p.price)) : 0, cover: c.image ? imageUrl(c.image) : "", imgs: [...new Set(imgs)] };
+      const fresh = items.filter(p => p.flags.includes("new")).length;
+      const sale = items.filter(p => p.oldPrice || p.flags.includes("sale")).length;
+      return { ...c, color: meta.color, fresh, sale, count: items.length, inStock: buy.length, from: buy.length ? Math.min(...buy.map(p => p.price)) : 0, cover: c.image ? imageUrl(c.image) : "", imgs: [...new Set(imgs)] };
     }).filter(c => c.count > 0);
   }
   const catThumb = c => c.cover || c.imgs[0] || "";
@@ -498,6 +506,21 @@
     const favN = N.favorites.list().filter(id => N.byId(id)).length;
     const menuCats = $("[data-menu-cats]");
     if (menuCats) menuCats.innerHTML = (favN ? `<a href="/products?fav=1"><span>${esc(t("fav.title"))}</span><span>${favN}</span></a>` : "") + (cats.length ? `<p>${esc(t("cats.title"))}</p>${cats.map(c => `<a href="/products?cat=${esc(c.value)}" style="--c:${esc(c.color)}">${catThumb(c) ? `<img src="${esc(catThumb(c))}" alt="" loading="lazy">` : ""}<span class="mc-name">${esc(c.label)}</span><span>${c.count}</span></a>`).join("")}` : "") + (installEvt ? `<button class="btn btn-ghost btn-block" type="button" data-install style="margin-top:14px">Telepítés a kezdőképernyőre</button>` : "");
+    const mega = $("[data-mega-body]");
+    if (mega) {
+      const all = N.products();
+      const saleN = all.filter(p => p.oldPrice || p.flags.includes("sale")).length;
+      const newN = all.filter(p => p.flags.includes("new")).length;
+      const soonN = all.filter(N.isSoon).length;
+      mega.innerHTML = `<div class="mega-cats">${cats.map(c => `<a href="/products?cat=${esc(c.value)}" style="--c:${esc(c.color)}">${catThumb(c) ? `<img src="${esc(catThumb(c))}" alt="" loading="lazy">` : "<span></span>"}<span><b>${esc(c.label)}</b><small>${c.count} termék${c.from ? ` · ${fmtFt(c.from)}-tól` : ""}</small></span></a>`).join("")}</div>
+        <div class="mega-side"><h3>Gyors szűrők</h3>
+          <a href="/products">${esc(t("link.all"))}<span>${all.length}</span></a>
+          ${newN ? `<a href="/products?sort=newest">Újdonságok<span>${newN}</span></a>` : ""}
+          ${saleN ? `<a href="/products?sale=1">Akciós termékek<span>${saleN}</span></a>` : ""}
+          ${soonN ? `<a href="/products?soon=1">Hamarosan érkezik<span>${soonN}</span></a>` : ""}
+          ${favN ? `<a href="/products?fav=1">${esc(t("fav.title"))}<span>${favN}</span></a>` : ""}
+        </div>`;
+    }
     const footCats = $("[data-foot-cats]");
     if (footCats) footCats.innerHTML = `<li><a href="/products">${esc(t("link.all"))}</a></li>` + cats.map(c => `<li><a href="/products?cat=${esc(c.value)}">${esc(c.label)}</a></li>`).join("");
     const pages = s.pages || {};
@@ -536,6 +559,27 @@
     $$("[data-contact-nav]").forEach(a => { a.hidden = (!s.email && !s.phone) || !sectionOn("contact"); });
     $$('a[href="/#rendeles"]').forEach(a => { a.hidden = !sectionOn("steps"); });
     $$("[data-year]").forEach(el => { el.textContent = new Date().getFullYear(); });
+  }
+
+  function bindMega() {
+    const mega = $("[data-mega]");
+    const header = $(".site-header");
+    if (!mega || !header) return;
+    let t1 = 0;
+    const desktop = () => !mobileMQ.matches;
+    const show = () => { if (!desktop()) return; clearTimeout(t1); mega.hidden = false; $$("[data-mega-trigger]").forEach(a => a.setAttribute("aria-expanded", "true")); };
+    const hide = (delay = 160) => { clearTimeout(t1); t1 = setTimeout(() => { mega.hidden = true; $$("[data-mega-trigger]").forEach(a => a.setAttribute("aria-expanded", "false")); }, delay); };
+    $$(".nav [data-mega-trigger]").forEach(a => {
+      a.addEventListener("mouseenter", () => { clearTimeout(t1); t1 = setTimeout(show, 90); });
+      a.addEventListener("focus", show);
+      a.addEventListener("keydown", e => { if (e.key === "ArrowDown") { e.preventDefault(); show(); $("a", mega)?.focus(); } });
+    });
+    $$(".nav a:not([data-mega-trigger]), .search, .hdr-actions").forEach(el => el.addEventListener("mouseenter", () => hide(60)));
+    header.addEventListener("mouseleave", () => hide());
+    mega.addEventListener("mouseenter", () => clearTimeout(t1));
+    mega.addEventListener("focusout", e => { if (!mega.contains(e.relatedTarget) && !e.relatedTarget?.matches?.("[data-mega-trigger]")) hide(0); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape" && !mega.hidden) { hide(0); $(".nav [data-mega-trigger]")?.focus(); } });
+    mega.addEventListener("click", e => { if (e.target.closest("a")) hide(0); });
   }
 
   function bindChrome() {
@@ -706,6 +750,7 @@
           <strong>${esc(c.label)}</strong>
           <small>${c.count} termék${c.from ? ` · <b>${fmtFt(c.from)}</b>-tól` : ""}</small>
           ${c.desc ? `<em>${esc(c.desc)}</em>` : ""}
+          ${c.fresh || c.sale ? `<span class="cat-badges">${c.fresh ? `<span class="b-new">${c.fresh} új</span>` : ""}${c.sale ? `<span class="b-sale">${c.sale} akciós</span>` : ""}</span>` : ""}
         </a>`;
       }).join("");
     }
@@ -920,7 +965,7 @@
   }
 
   /* ---------------- terméklista ---------------- */
-  const filters = { cat: "all", q: "", sort: "featured", instock: false, soon: false, sale: false, min: "", max: "", fav: false };
+  const filters = { cat: "all", q: "", sort: "featured", instock: false, soon: false, sale: false, min: "", max: "", fav: false, set: "" };
 
   function readFilters() {
     const u = new URLSearchParams(location.search);
@@ -933,6 +978,7 @@
     filters.min = u.get("min") || "";
     filters.max = u.get("max") || "";
     filters.fav = u.get("fav") === "1";
+    filters.set = u.get("set") || "";
   }
   function writeFilters() {
     if (page !== "products") return;
@@ -944,6 +990,7 @@
     if (filters.min) u.set("min", filters.min);
     if (filters.max) u.set("max", filters.max);
     if (filters.fav) u.set("fav", "1");
+    if (filters.set) u.set("set", filters.set);
     const qs = u.toString();
     history.replaceState(null, "", qs ? `?${qs}` : location.pathname);
   }
@@ -952,6 +999,7 @@
     let list = N.products();
     if (filters.fav) { const fav = N.favorites.list(); list = list.filter(p => fav.includes(p.id)); }
     if (filters.cat !== "all") list = list.filter(p => p.category === filters.cat);
+    if (filters.set) list = list.filter(p => p.set === filters.set);
     if (filters.q) {
       const words = norm(filters.q).split(/\s+/).filter(Boolean);
       list = list.filter(p => {
@@ -990,6 +1038,17 @@
     if (active && chips.scrollWidth > chips.clientWidth) chips.scrollLeft = Math.max(0, active.offsetLeft - 24);
   }
 
+  function renderSetChips() {
+    const box = $("[data-set-chips]");
+    if (!box) return;
+    const pool = N.products().filter(p => (filters.cat === "all" || p.category === filters.cat) && p.set);
+    const sets = [...new Set(pool.map(p => p.set))].sort((a, b) => a.localeCompare(b, "hu"));
+    if (filters.set && !sets.includes(filters.set)) filters.set = "";
+    box.hidden = sets.length < 2;
+    if (box.hidden) { box.innerHTML = ""; return; }
+    box.innerHTML = `<span>Szett:</span><button class="chip" type="button" data-set="" aria-pressed="${!filters.set}">Mind</button>` + sets.map(x => `<button class="chip" type="button" data-set="${esc(x)}" aria-pressed="${filters.set === x}">${esc(x)} <span>${pool.filter(p => p.set === x).length}</span></button>`).join("");
+  }
+
   function renderCatHero() {
     const hero = $("[data-cat-hero]");
     if (!hero) return;
@@ -1011,6 +1070,7 @@
     if (cl) cl.innerHTML = catBtn("all", t("link.all"), all.length) + (favN || filters.fav ? `<button type="button" data-fav-chip aria-pressed="${!!filters.fav}">♥ ${esc(t("fav.title"))}<span>${favN}</span></button>` : "") + cats.map(c => catBtn(c.value, c.label, c.count)).join("");
     renderChips();
     renderCatHero();
+    renderSetChips();
     $$("[data-view]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === (root.getAttribute("data-cols-m") || "2"))));
 
     $$("[data-f]").forEach(el => {
@@ -1044,9 +1104,10 @@
     document.addEventListener("click", e => {
       const b = e.target.closest("button");
       if (!b) return;
+      if (b.matches("[data-set]")) { filters.set = b.dataset.set; writeFilters(); renderList(); revealScan(); return; }
       if (b.matches("[data-fav-chip]")) { filters.fav = !filters.fav; if (filters.fav) filters.cat = "all"; writeFilters(); renderList(); revealScan(); return; }
       if (b.matches("[data-cat]")) {
-        filters.cat = b.dataset.cat; filters.fav = false; writeFilters(); renderList(); revealScan();
+        filters.cat = b.dataset.cat; filters.fav = false; filters.set = ""; writeFilters(); renderList(); revealScan();
         if (b.classList.contains("chip")) b.scrollIntoView({ inline: "center", block: "nearest", behavior: motionOK() ? "smooth" : "auto" });
       } else if (b.matches("[data-reset-filters]")) {
         Object.assign(filters, { q: "", instock: false, soon: false, sale: false, min: "", max: "" });
@@ -1091,7 +1152,11 @@
     };
     let tag = $("#pdp-ld");
     if (!tag) { tag = document.createElement("script"); tag.type = "application/ld+json"; tag.id = "pdp-ld"; document.head.appendChild(tag); }
-    tag.textContent = JSON.stringify(ld);
+    tag.textContent = JSON.stringify([ld, { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Kezdőlap", item: `${SITE}/` },
+      { "@type": "ListItem", position: 2, name: N.categoryLabel(p.category), item: `${SITE}/products?cat=${encodeURIComponent(p.category)}` },
+      { "@type": "ListItem", position: 3, name: p.name, item: url }
+    ] }]);
     const og = (prop, val) => { let m = $(`meta[property="${prop}"]`); if (!m) { m = document.createElement("meta"); m.setAttribute("property", prop); document.head.appendChild(m); } m.setAttribute("content", val); };
     og("og:title", `${p.name} – NS Card`);
     og("og:url", url);
@@ -1662,7 +1727,16 @@
       if (d.payment_status === "paid" || d.status === "complete") {
         cart.clear(); updateCount(false);
         el.className = "notice success";
-        el.innerHTML = `<strong>Sikeres fizetés.</strong> Köszönjük${d.customer_name ? `, ${esc(d.customer_name)}` : ""}! A ${fmtFt(d.amount_total)} összegű rendelésről e-mailben küldünk visszaigazolást.`;
+        el.innerHTML = `<strong>Sikeres fizetés.</strong> Köszönjük${d.customer_name ? `, ${esc(d.customer_name)}` : ""}! A ${fmtFt(d.amount_total)} összegű rendelésről ${d.email ? `a(z) <strong>${esc(d.email)}</strong> címre ` : ""}küldünk visszaigazolást.`;
+        if (d.items?.length) {
+          const box = document.createElement("div");
+          box.className = "order-sum";
+          box.innerHTML = `<p class="muted">Rendelés azonosító: <strong>${esc(d.order || "")}</strong>${d.shipping ? ` · ${esc(d.shipping)}` : ""}</p>
+            ${d.items.map(x => `<div class="sum-row"><span>${esc(x.name)} × ${x.qty}</span><strong>${fmtFt(x.total)}</strong></div>`).join("")}
+            ${d.discount ? `<div class="sum-row discount"><span>Kedvezmény${d.coupon ? ` (${esc(d.coupon)})` : ""}</span><strong>−${fmtFt(d.discount)}</strong></div>` : ""}
+            <div class="sum-row total"><span>Fizetve</span><strong>${fmtFt(d.amount_total)}</strong></div>`;
+          el.after(box);
+        }
       } else {
         el.textContent = `A fizetés még feldolgozás alatt áll (${d.payment_status || d.status}).`;
       }
@@ -1701,6 +1775,7 @@
   }
 
   bindChrome();
+  bindMega();
   {
     const tt = $("[data-to-top]");
     let ticking = false;

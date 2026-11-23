@@ -56,6 +56,9 @@ export async function onRequestPost({ request, env }) {
     params.append(`line_items[${i}][price_data][currency]`, "huf");
     params.append(`line_items[${i}][price_data][unit_amount]`, String(price * 100));
     params.append(`line_items[${i}][price_data][product_data][name]`, String(p.name).slice(0, 250));
+    const img = Array.isArray(p.images) ? String(p.images[0] || "") : "";
+    const imgUrl = /^https:\/\//.test(img) ? img : img && !/^data:/.test(img) ? `${new URL(request.url).origin}/${img.replace(/^\.?\/+/, "")}` : "";
+    if (imgUrl) params.append(`line_items[${i}][price_data][product_data][images][0]`, imgUrl);
     params.append(`line_items[${i}][quantity]`, String(qty));
     i++;
   }
@@ -104,6 +107,10 @@ export async function onRequestPost({ request, env }) {
   const origin = new URL(request.url).origin;
   params.append("mode", "payment");
   params.append("locale", "hu");
+  params.append("submit_type", "pay");
+  params.append("billing_address_collection", "auto");
+  params.append("phone_number_collection[enabled]", "false");
+  params.append("custom_text[submit][message]", "A fizetés után e-mailben visszaigazoljuk a rendelést, és értesítünk a feladásról.");
   params.append("success_url", `${origin}/success?session_id={CHECKOUT_SESSION_ID}`);
   params.append("cancel_url", `${origin}/cancel`);
   if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(c.email || ""))) params.append("customer_email", String(c.email));

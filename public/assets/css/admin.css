@@ -412,6 +412,15 @@ a.stat:hover { border-color: var(--line-2); }
 .faq-item .tools button[disabled] { opacity: .3; }
 .faq-item .tools svg { width: 16px; height: 16px; fill: none; }
 
+/* ---------- Stripe ---------- */
+.stripe-box { margin: 4px 0 8px 56px; padding: 14px 16px; border-radius: var(--r-m); background: var(--bg); border: 1px solid var(--line-2); display: grid; gap: 10px; }
+.stripe-box .st-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.stripe-box .st-head b { font-size: .95rem; }
+.stripe-box ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; color: var(--muted); font-size: .9rem; }
+.stripe-box ol strong, .stripe-box code { color: var(--text); }
+.stripe-box .warn { color: var(--gold); font-size: .88rem; }
+@media (max-width: 860px) { .stripe-box { margin-left: 0; } }
+
 /* ---------- kuponok ---------- */
 .cp-rows { display: grid; gap: 8px; }
 .cp-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 14px; align-items: center; padding: 10px 12px; border-radius: var(--r-m); background: var(--surface-2); }

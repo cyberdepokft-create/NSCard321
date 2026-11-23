@@ -8,7 +8,7 @@ export async function onRequestGet({ request, env }) {
   if (!env.STRIPE_SECRET_KEY) return json({ error: "A kártyás fizetés nincs beállítva." }, 503);
   const id = new URL(request.url).searchParams.get("session_id") || "";
   if (!/^cs_[A-Za-z0-9_]+$/.test(id)) return json({ error: "Hibás azonosító." }, 400);
-  const res = await fetch(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(id)}`, {
+  const res = await fetch(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(id)}?expand[]=line_items`, {
     headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}` }
   });
   const s = await res.json();
@@ -17,6 +17,12 @@ export async function onRequestGet({ request, env }) {
     status: s.status,
     payment_status: s.payment_status,
     amount_total: Math.round((s.amount_total || 0) / 100),
-    customer_name: s.customer_details?.name || s.metadata?.name || ""
+    customer_name: s.customer_details?.name || s.metadata?.name || "",
+    email: s.customer_details?.email || s.customer_email || "",
+    shipping: s.metadata?.shipping || "",
+    coupon: s.metadata?.coupon || "",
+    discount: Math.round((s.total_details?.amount_discount || 0) / 100),
+    items: (s.line_items?.data || []).map(li => ({ name: li.description, qty: li.quantity, total: Math.round((li.amount_total || 0) / 100) })),
+    order: String(s.id || "").slice(-8).toUpperCase()
   });
 }
