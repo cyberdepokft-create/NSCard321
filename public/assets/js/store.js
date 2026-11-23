@@ -63,8 +63,30 @@
     taxNumber: "",
     regNumber: "",
     dispatchCutoff: 14,
-    deliveryText: "1–3 munkanap"
+    deliveryText: "1–3 munkanap",
+    bankDetails: "",
+    stockSyncedAt: "",
+    lockerMap: true,
+    vatRate: "27%",
+    invoiceAuto: false,
+    invoiceElectronic: true,
+    invoiceSend: true,
+    billingoBlockId: 0,
+    analyticsToken: ""
   });
+
+  /* Single kártyák állapota és nyelve */
+  const CONDITIONS = [
+    { value: "NM", label: "Near Mint (NM)", short: "NM" },
+    { value: "LP", label: "Lightly Played (LP)", short: "LP" },
+    { value: "MP", label: "Moderately Played (MP)", short: "MP" },
+    { value: "HP", label: "Heavily Played (HP)", short: "HP" },
+    { value: "DMG", label: "Damaged (DMG)", short: "DMG" }
+  ];
+  const LANGS = [
+    { value: "EN", label: "Angol" }, { value: "JP", label: "Japán" }, { value: "DE", label: "Német" }, { value: "FR", label: "Francia" },
+    { value: "IT", label: "Olasz" }, { value: "ES", label: "Spanyol" }, { value: "KO", label: "Koreai" }, { value: "ZH", label: "Kínai" }
+  ];
 
   const INFO_PAGES = [
     { key: "aszf", label: "Általános szerződési feltételek", short: "ÁSZF" },
@@ -82,7 +104,8 @@
     lastOrder: "nsc.lastOrder.v1",
     fav: "nsc.fav.v1",
     recent: "nsc.recent.v1",
-    coupon: "nsc.coupon.v1"
+    coupon: "nsc.coupon.v1",
+    live: "nsc.live.v1"
   };
 
   /* ---------- segédfüggvények ---------- */
@@ -124,7 +147,8 @@
   /* ---------- termék / katalógus normalizálás (régi formátumokkal is kompatibilis) ---------- */
   function normalizeAvailability(raw, badge) {
     const v = String(raw || "").trim().toLowerCase();
-    if (["coming_soon", "hamarosan", "soon", "preorder", "pre-order", "pre_order"].includes(v)) return "coming_soon";
+    if (["preorder", "pre-order", "pre_order", "elorendeles", "előrendelés"].includes(v)) return "preorder";
+    if (["coming_soon", "hamarosan", "soon"].includes(v)) return "coming_soon";
     if (!v && /hamarosan/i.test(String(badge || ""))) return "coming_soon";
     return "in_stock";
   }
@@ -155,7 +179,14 @@
       badge,
       flags,
       images,
-      hidden: !!r.hidden
+      hidden: !!r.hidden,
+      releaseDate: /^\d{4}-\d{2}-\d{2}$/.test(String(r.releaseDate || "")) ? String(r.releaseDate) : "",
+      condition: CONDITIONS.some(c => c.value === r.condition) ? r.condition : "",
+      lang: LANGS.some(l => l.value === r.lang) ? r.lang : "",
+      cardNo: String(r.cardNo || "").trim().slice(0, 20),
+      rarity: String(r.rarity || "").trim().slice(0, 40),
+      grade: String(r.grade || "").trim().slice(0, 24),
+      ean: /^\d{8,14}$/.test(String(r.ean || "").trim()) ? String(r.ean).trim() : ""
     };
   }
 
@@ -186,6 +217,11 @@
     s.pages = sanitizePages(r.pages);
     s.faq = sanitizeFaq(r.faq);
     s.dispatchCutoff = Math.min(23, Math.max(0, s.dispatchCutoff));
+    s.vatRate = s.vatRate === "AAM" ? "AAM" : "27%";
+    if (!/^\d{4}-\d{2}-\d{2}T/.test(s.stockSyncedAt)) s.stockSyncedAt = "";
+    s.analyticsToken = /^[a-f0-9]{32}$/i.test(s.analyticsToken) ? s.analyticsToken : "";
+    s.posts = sanitizePosts(r.posts);
+    s.releases = sanitizeReleases(r.releases);
     s.texts = sanitizeTexts(r.texts, r);
     s.theme = sanitizeTheme(r.theme);
     return s;
@@ -216,6 +252,36 @@
     }
     return out;
   }
+  /* cikkek és megjelenési naptár */
+  function sanitizePosts(raw) {
+    const out = [];
+    const seen = new Set();
+    for (const p of Array.isArray(raw) ? raw.slice(0, 80) : []) {
+      const title = String(p?.title || "").trim().slice(0, 140);
+      if (!title) continue;
+      let slug = slugify(p?.slug || title) || `cikk-${out.length + 1}`;
+      while (seen.has(slug)) slug += "-2";
+      seen.add(slug);
+      out.push({
+        slug, title,
+        date: /^\d{4}-\d{2}-\d{2}$/.test(String(p?.date || "")) ? p.date : new Date().toISOString().slice(0, 10),
+        excerpt: String(p?.excerpt || "").trim().slice(0, 280),
+        cover: String(p?.cover || "").trim().slice(0, 600),
+        body: String(p?.body || "").replace(/\r\n/g, "\n").trim().slice(0, 40000),
+        tag: String(p?.tag || "").trim().slice(0, 30),
+        published: p?.published !== false
+      });
+    }
+    return out;
+  }
+  function sanitizeReleases(raw) {
+    return (Array.isArray(raw) ? raw.slice(0, 60) : []).map(r => ({
+      date: /^\d{4}-\d{2}(-\d{2})?$/.test(String(r?.date || "")) ? String(r.date) : "",
+      title: String(r?.title || "").trim().slice(0, 120),
+      note: String(r?.note || "").trim().slice(0, 200),
+      productId: Number(r?.productId) > 0 ? Math.round(Number(r.productId)) : 0
+    })).filter(r => r.date && r.title).sort((a, b) => a.date.localeCompare(b.date));
+  }
   function sanitizeFaq(raw) {
     return (Array.isArray(raw) ? raw : []).slice(0, 24).map(x => ({ q: String(x?.q || "").trim().slice(0, 160), a: String(x?.a || "").trim().slice(0, 1200) })).filter(x => x.q && x.a);
   }
@@ -237,19 +303,31 @@
   /* Egyszerű, biztonságos szövegformázás a tájékoztató oldalakhoz: ## cím, ### alcím, - lista, **félkövér**, [link](https://…) */
   function mdToHtml(md) {
     const inline = t => esc(t)
+      .replace(/!\[([^\]]*)\]\((https:\/\/[^\s)]+)\)/g, '<img src="$2" alt="$1" loading="lazy">')
       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
       .replace(/\[([^\]]+)\]\(((?:https?:\/\/|mailto:|tel:|\/)[^)\s]+)\)/g, (m, a, href) => `<a href="${href}"${/^https?:/.test(href) ? ' target="_blank" rel="noopener"' : ""}>${a}</a>`);
-    const blocks = String(md || "").replace(/\r\n/g, "\n").split(/\n{2,}/);
-    return blocks.map(b => {
-      const lines = b.split("\n").filter(l => l.trim());
-      if (!lines.length) return "";
-      if (lines.every(l => /^\s*[-*•]\s+/.test(l))) return `<ul>${lines.map(l => `<li>${inline(l.replace(/^\s*[-*•]\s+/, ""))}</li>`).join("")}</ul>`;
-      if (lines.every(l => /^\s*\d+[.)]\s+/.test(l))) return `<ol>${lines.map(l => `<li>${inline(l.replace(/^\s*\d+[.)]\s+/, ""))}</li>`).join("")}</ol>`;
-      const first = lines[0];
-      if (/^###\s+/.test(first)) return `<h3>${inline(first.replace(/^###\s+/, ""))}</h3>` + (lines.length > 1 ? `<p>${lines.slice(1).map(inline).join("<br>")}</p>` : "");
-      if (/^##?\s+/.test(first)) return `<h2>${inline(first.replace(/^##?\s+/, ""))}</h2>` + (lines.length > 1 ? `<p>${lines.slice(1).map(inline).join("<br>")}</p>` : "");
-      return `<p>${lines.map(inline).join("<br>")}</p>`;
-    }).join("\n");
+    const out = [];
+    let para = [], list = null, ltype = "";
+    const flushP = () => { if (para.length) { out.push(`<p>${para.map(inline).join("<br>")}</p>`); para = []; } };
+    const flushL = () => { if (list) { out.push(`<${ltype}>${list.join("")}</${ltype}>`); list = null; } };
+    for (const raw of String(md || "").replace(/\r\n/g, "\n").split("\n")) {
+      const l = raw.trim();
+      let m;
+      if (!l) { flushP(); flushL(); continue; }
+      if ((m = l.match(/^(#{1,3})\s+(.*)$/))) { flushP(); flushL(); out.push(m[1].length === 3 ? `<h3>${inline(m[2])}</h3>` : `<h2>${inline(m[2])}</h2>`); continue; }
+      if ((m = l.match(/^[-*•]\s+(.*)$/)) || (m = l.match(/^\d+[.)]\s+(.*)$/))) {
+        const type = /^\d/.test(l) ? "ol" : "ul";
+        flushP();
+        if (list && ltype !== type) flushL();
+        ltype = type;
+        (list = list || []).push(`<li>${inline(m[1])}</li>`);
+        continue;
+      }
+      flushL();
+      para.push(l);
+    }
+    flushP(); flushL();
+    return out.join("\n");
   }
 
   /* ---------- kedvencek és nemrég megnézett ---------- */
@@ -334,8 +412,12 @@
     { id: "pack", label: "Csomagbontó" },
     { id: "featured", label: "Kiemelt termékek" },
     { id: "soon", label: "Hamarosan érkezik" },
+    { id: "releases", label: "Megjelenési naptár" },
+    { id: "reviews", label: "Vásárlói vélemények" },
     { id: "steps", label: "Így rendelhetsz" },
+    { id: "blog", label: "Cikkek" },
     { id: "faq", label: "Gyakori kérdések" },
+    { id: "newsletter", label: "Hírlevél" },
     { id: "contact", label: "Kapcsolat" }
   ];
 
@@ -375,7 +457,14 @@
     (Array.isArray(r.sections) ? r.sections : []).forEach(sct => {
       if (SECTION_LIST.some(x => x.id === sct?.id) && !seen.has(sct.id)) { seen.add(sct.id); sections.push({ id: sct.id, on: sct.on !== false }); }
     });
-    SECTION_LIST.forEach(x => { if (!seen.has(x.id)) sections.push({ id: x.id, on: true }); });
+    // az új szekciók az alap sorrend szerinti helyükre kerülnek (nem a lista végére)
+    SECTION_LIST.forEach((x, i) => {
+      if (seen.has(x.id)) return;
+      const prev = SECTION_LIST.slice(0, i).reverse().find(y => seen.has(y.id));
+      const at = prev ? sections.findIndex(y => y.id === prev.id) + 1 : 0;
+      sections.splice(at, 0, { id: x.id, on: true });
+      seen.add(x.id);
+    });
     return {
       preset: String(r.preset || d.preset),
       colors,
@@ -574,11 +663,36 @@
       const changed = !current || JSON.stringify(current.products) !== JSON.stringify(next.products) || JSON.stringify(current.settings) !== JSON.stringify(next.settings);
       current = next;
       if (!previewMode) store.set(KEYS.published, { version: VERSION, updatedAt: next.updatedAt, products: next.products, settings: next.settings });
+      liveBase = new Map(next.products.map(p => [p.id, p.stock]));
       if (changed) emit();
+      if (options.live !== false) fetchLive(next).then(applyLive);
     } catch (err) {
       if (!current) { current = { products: [], settings: sanitizeSettings(null), updatedAt: null, source: "error" }; emit(); }
     }
     return current;
+  }
+
+  /* ---------- élő adatok: eladott darabok a szinkron óta, értékelések, szerver funkciók ---------- */
+  let live = store.get(KEYS.live) || { features: {}, ratings: {} };
+  let liveBase = null; // a katalógus eredeti (le nem vont) készlete
+  async function fetchLive(cat) {
+    if (previewMode || !/^https?:$/.test(location.protocol)) return null;
+    try {
+      const since = encodeURIComponent(cat?.settings?.stockSyncedAt || "");
+      const res = await fetchWithTimeout(`/api/live?since=${since}`, 4000, { cache: "no-cache" });
+      if (!res.ok || !/json/.test(res.headers.get("content-type") || "")) return null;
+      const d = await res.json();
+      return d && typeof d === "object" ? d : null;
+    } catch { return null; }
+  }
+  function applyLive(d) {
+    if (!current || !d) return;
+    live = { features: d.features || {}, ratings: d.ratings || {}, at: Date.now() };
+    store.set(KEYS.live, { features: live.features, ratings: live.ratings });
+    const sold = d.sold || {};
+    liveBase = liveBase || new Map(current.products.map(p => [p.id, p.stock]));
+    current.products.forEach(p => { const b = liveBase.has(p.id) ? liveBase.get(p.id) : p.stock; p.stock = Math.max(0, b - int(sold[p.id], 0)); });
+    emit();
   }
 
   let previewMode = false;
@@ -598,11 +712,20 @@
   const settings = () => current?.settings || sanitizeSettings(null);
   const byId = id => products().find(p => p.id === Number(id)) || null;
   const isSoon = p => p?.availability === "coming_soon";
+  const isPreorder = p => p?.availability === "preorder";
   const isBuyable = p => !!p && !isSoon(p) && p.stock > 0;
+  const rating = id => { const r = live.ratings?.[id]; return Array.isArray(r) && r[1] > 0 ? { avg: Number(r[0]) || 0, count: Number(r[1]) || 0 } : null; };
+  const fmtDate = (iso, opts = { year: "numeric", month: "long", day: "numeric" }) => {
+    const m = String(iso || "").match(/^(\d{4})-(\d{2})(?:-(\d{2}))?$/);
+    if (!m) return "";
+    const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3] || 1));
+    return m[3] ? d.toLocaleDateString("hu-HU", opts) : d.toLocaleDateString("hu-HU", { year: "numeric", month: "long" });
+  };
 
   function stockInfo(p) {
     const low = settings().lowStock;
     if (isSoon(p)) return { key: "soon", label: t("stock.soon") };
+    if (isPreorder(p)) return p.stock > 0 ? { key: "pre", label: p.releaseDate ? `Előrendelhető · ${fmtDate(p.releaseDate, { month: "short", day: "numeric" })}` : "Előrendelhető" } : { key: "out", label: "Az előrendelési keret betelt" };
     if (p.stock <= 0) return { key: "out", label: t("stock.out") };
     if (p.stock <= low) return { key: "low", label: t("stock.low", { n: p.stock }) };
     return { key: "in", label: t("stock.in") };
@@ -685,7 +808,8 @@
     get CATEGORIES() { return categories(); },
     FONTS, PRESETS, SECTION_LIST, THEME_DEFAULTS, TEXT_GROUPS, TEXT_DEFAULTS,
     t, sanitizeTheme, sanitizeTexts, themeVars, applyTheme, setPreview,
-    categoryMeta, CAT_TINTS, sanitizeFaq, INFO_PAGES, sanitizeCoupons, sanitizePages, couponDiscount, findCoupon, mdToHtml, favorites, recent,
+    categoryMeta, CAT_TINTS, sanitizeFaq, CONDITIONS, LANGS, sanitizePosts, sanitizeReleases, isPreorder, rating, fmtDate, fetchLive,
+    get live() { return live; }, INFO_PAGES, sanitizeCoupons, sanitizePages, couponDiscount, findCoupon, mdToHtml, favorites, recent,
     store, clone, fmtFt, esc, int, categoryLabel, categories, imageUrl, slugify,
     sanitizeProduct, sanitizeCatalog, sanitizeSettings, sanitizeCategories, sanitizePayload, buildPayload,
     normalizeRemote, rawUrl, resolveRemote, setLocalRemote, fetchWithTimeout, fetchPublished,

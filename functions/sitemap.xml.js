@@ -32,8 +32,10 @@ export async function onRequestGet({ request, env }) {
     { loc: `${SITE}/products`, pr: "0.9" },
     ...(Array.isArray(settings.categories) ? settings.categories : []).filter(c => c && !c.hidden && products.some(p => p.category === c.value)).map(c => ({ loc: `${SITE}/products?cat=${encodeURIComponent(c.value)}`, pr: "0.7" })),
     ...products.map(p => ({ loc: `${SITE}/product?id=${Number(p.id)}`, pr: "0.8" })),
-    ...Object.keys(settings.pages || {}).map(k => ({ loc: `${SITE}/info?p=${encodeURIComponent(k)}`, pr: "0.3" }))
+    ...Object.keys(settings.pages || {}).map(k => ({ loc: `${SITE}/info?p=${encodeURIComponent(k)}`, pr: "0.3" })),
+    ...((Array.isArray(settings.posts) ? settings.posts : []).some(p => p && p.published !== false) ? [{ loc: `${SITE}/blog`, pr: "0.6" }] : []),
+    ...(Array.isArray(settings.posts) ? settings.posts : []).filter(p => p && p.slug && p.published !== false).map(p => ({ loc: `${SITE}/blog/${encodeURIComponent(p.slug)}`, pr: "0.6", mod: /^\d{4}-\d{2}-\d{2}$/.test(String(p.date || "")) ? p.date : "" }))
   ];
-  const body = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(u => `  <url><loc>${xmlEsc(u.loc)}</loc><lastmod>${lastmod}</lastmod><priority>${u.pr}</priority></url>`).join("\n")}\n</urlset>\n`;
+  const body = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(u => `  <url><loc>${xmlEsc(u.loc)}</loc><lastmod>${u.mod || lastmod}</lastmod><priority>${u.pr}</priority></url>`).join("\n")}\n</urlset>\n`;
   return new Response(body, { headers: { "Content-Type": "application/xml; charset=utf-8", "Cache-Control": "public, max-age=600" } });
 }

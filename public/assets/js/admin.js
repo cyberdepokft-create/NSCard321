@@ -16,6 +16,9 @@
 
   const VIEWS = {
     attekintes: "Áttekintés",
+    rendelesek: "Rendelések",
+    kozosseg: "Közösség",
+    tartalom: "Cikkek és naptár",
     termekek: "Termékek",
     kategoriak: "Kategóriák",
     oldalak: "Oldalak",
@@ -26,6 +29,9 @@
 
   const VIEW_SUB = {
     attekintes: "A bolt állapota, teendők és alacsony készlet egy helyen.",
+    rendelesek: "Beérkezett rendelések, fizetés, csomagolás, feladás és számla.",
+    kozosseg: "Vásárlói vélemények, hírlevél feliratkozók és „újra kapható” értesítők.",
+    tartalom: "Cikkek, útmutatók és a megjelenési naptár.",
     termekek: "Termékek hozzáadása, árak, készlet és képek.",
     kategoriak: "A webshop menüjének és szűrőinek kategóriái.",
     oldalak: "ÁSZF, adatkezelési tájékoztató, szállítás, rólunk és impresszum.",
@@ -288,6 +294,7 @@
     const low = state.draft.settings.lowStock;
     if (p.hidden) return { key: "hidden", label: "Rejtett" };
     if (p.availability === "coming_soon") return { key: "soon", label: "Hamarosan" };
+    if (p.availability === "preorder") return p.stock > 0 ? { key: "pre", label: "Előrendelés" } : { key: "out", label: "Előrendelés betelt" };
     if (p.stock <= 0) return { key: "out", label: "Elfogyott" };
     if (p.stock <= low) return { key: "low", label: "Alacsony" };
     return { key: "in", label: "Készleten" };
@@ -313,9 +320,22 @@
     try {
       const pending = [];
       products().forEach(p => p.images.forEach((src, i) => { if (/^data:image\//.test(src)) pending.push({ p, i }); }));
+      (state.draft.settings.posts || []).forEach(post => { if (/^data:image\//.test(post.cover || "")) pending.push({ post }); });
       let done = 0;
       setProgress(pending.length ? `Képek feltöltése (0/${pending.length})` : "Katalógus mentése", 5);
-      for (const { p, i } of pending) {
+      for (const { p, i, post } of pending) {
+        if (post) {
+          const [, mime2, b642] = post.cover.match(/^data:(image\/[a-z+]+);base64,(.*)$/) || [];
+          if (b642) {
+            const dir2 = g.path.includes("/") ? g.path.slice(0, g.path.lastIndexOf("/") + 1) : "";
+            const fp = `${dir2}images/blog-${post.slug}-${Date.now().toString(36)}.${mime2 === "image/png" ? "png" : mime2 === "image/jpeg" ? "jpg" : "webp"}`;
+            const r2 = await putFile(fp, b642, `Cikk borítókép: ${post.title}`, { knownNew: true });
+            post.cover = `https://cdn.jsdelivr.net/gh/${g.owner}/${g.repo}@${r2.commit.sha}/${fp}`;
+          }
+          done++;
+          setProgress(`Képek feltöltése (${done}/${pending.length})`, 5 + Math.round(done / pending.length * 75));
+          continue;
+        }
         const src = p.images[i];
         const [, mime, b64] = src.match(/^data:(image\/[a-z+]+);base64,(.*)$/) || [];
         if (!b64) continue;
@@ -330,6 +350,7 @@
         setProgress(`Képek feltöltése (${done}/${pending.length})`, 5 + Math.round(done / pending.length * 75));
       }
       setProgress("Katalógus mentése", 85);
+      const before = state.live?.products || [];
       const payload = N.buildPayload(state.draft.products, state.draft.settings, { updatedBy: "NS Card admin" });
       await putFile(g.path, b64FromString(JSON.stringify(payload, null, 2)), `Katalógus frissítése – ${new Date().toLocaleString("hu-HU")}`);
       state.live = { products: N.clone(payload.products), settings: N.clone(payload.settings), updatedAt: payload.updatedAt, source: "remote" };
@@ -340,6 +361,13 @@
       state.lastError = "";
       setProgress("", 100);
       toast("Publikálva. A bolt legfeljebb 1 percen belül frissül.");
+      // „újra kapható” értesítők: ami eddig elfogyott vagy hamarosan volt, most pedig rendelhető
+      const was = new Map(before.map(x => [x.id, x]));
+      const back = payload.products.filter(x => {
+        const o = was.get(x.id);
+        return o && !x.hidden && x.availability !== "coming_soon" && x.stock > 0 && (o.stock <= 0 || o.availability === "coming_soon");
+      }).map(x => x.id);
+      if (back.length) setTimeout(() => window.NSCAdminOps?.notifyBack(back), 4000);
       return true;
     } catch (e) {
       state.lastError = e.message || "A publikálás nem sikerült.";
@@ -407,6 +435,7 @@
     else if (state.view === "megjelenes") renderStudio();
     else if (state.view === "oldalak") renderPages();
     else if (state.view === "publikalas") renderPublish();
+    else window.NSCAdminOps?.render(state.view);
   }
 
   function renderAll() { renderStatus(); renderView(); }
@@ -442,6 +471,7 @@
     if (!todo.length) todo.push({ cls: "ok", text: "Minden rendben, nincs teendő." });
     $("[data-todo]").innerHTML = todo.map(t => `<li class="${t.cls}"><span>${esc(t.text)}</span>${t.btn ? `<button class="btn btn-ghost" type="button" data-act="${t.act}">${t.btn}</button>` : "<span></span>"}</li>`).join("");
 
+    window.NSCAdminOps?.dashboard();
     const cb = $("[data-cat-break]");
     if (cb) {
       const rowsData = cats().map((c, i) => {
@@ -695,6 +725,7 @@
     $("[data-settings-note]").textContent = "";
     renderCoupons();
     renderStripe();
+    window.NSCAdminOps?.renderIntegrations();
   }
 
   /* --- Stripe állapot (a kulcs soha nem jut el a böngészőbe, csak az állapota) --- */
@@ -756,6 +787,9 @@
     raw.coupons = state.draft.settings.coupons;
     raw.pages = state.draft.settings.pages;
     raw.faq = state.draft.settings.faq;
+    raw.posts = state.draft.settings.posts;
+    raw.releases = state.draft.settings.releases;
+    raw.stockSyncedAt = state.draft.settings.stockSyncedAt;
     state.draft.settings = N.sanitizeSettings(raw);
     saveDraft();
     renderStatus();
@@ -901,6 +935,19 @@
     f.elements.hidden.checked = !!d.hidden;
     $$('input[name="flags"]', f).forEach(c => { c.checked = d.flags.includes(c.value); });
     f.elements.badge.value = d.badge;
+    if (!$("[data-e-conds]").children.length) {
+      $("[data-e-conds]").innerHTML = `<option value="">– nincs megadva –</option>` + N.CONDITIONS.map(c => `<option value="${c.value}">${esc(c.label)}</option>`).join("");
+      $("[data-e-langs]").innerHTML = `<option value="">– nincs megadva –</option>` + N.LANGS.map(l => `<option value="${l.value}">${esc(l.label)}</option>`).join("");
+    }
+    f.elements.releaseDate.value = d.releaseDate || "";
+    f.elements.condition.value = d.condition || "";
+    f.elements.lang.value = d.lang || "";
+    f.elements.cardNo.value = d.cardNo || "";
+    f.elements.rarity.value = d.rarity || "";
+    f.elements.grade.value = d.grade || "";
+    f.elements.ean.value = d.ean || "";
+    $("[data-e-single]").open = d.category === "single" || !!(d.condition || d.lang || d.cardNo || d.grade);
+    updateAvHint();
     $$("[data-e-err]").forEach(el => { el.hidden = true; });
     $$(".input", f).forEach(el => el.removeAttribute("aria-invalid"));
     $("[data-ed-title]").textContent = p ? "Termék szerkesztése" : "Új termék";
@@ -942,8 +989,23 @@
       hidden: f.elements.hidden.checked,
       flags: $$('input[name="flags"]:checked', f).map(c => c.value),
       badge: f.elements.badge.value.trim(),
+      releaseDate: f.elements.releaseDate.value,
+      condition: f.elements.condition.value,
+      lang: f.elements.lang.value,
+      cardNo: f.elements.cardNo.value.trim(),
+      rarity: f.elements.rarity.value.trim(),
+      grade: f.elements.grade.value.trim(),
+      ean: f.elements.ean.value.replace(/\D/g, ""),
       images: [...(state.edit?.images || [])]
     };
+  }
+
+  function updateAvHint() {
+    const f = editorForm();
+    const av = $('input[name="availability"]:checked', f)?.value || "in_stock";
+    const hint = $("[data-e-av-hint]");
+    if (hint) hint.textContent = av === "preorder" ? "A vásárló már most megrendelheti és kifizetheti. A készlet itt az előrendelhető darabszám." : av === "coming_soon" ? "Látszik a boltban, de még nem rendelhető. Az érdeklődők értesítést kérhetnek." : "";
+    $("[data-e-release]").hidden = av === "in_stock" && !f.elements.releaseDate.value;
   }
 
   function updateDiscountHint() {
@@ -1007,6 +1069,7 @@
     const errs = {};
     if (!raw.name) errs.name = "Add meg a termék nevét.";
     if (!(Number(raw.price) > 0)) errs.price = "Adj meg 0-nál nagyobb árat.";
+    if (raw.ean && !/^\d{8,14}$/.test(raw.ean)) { toast("Az EAN 8–14 számjegy legyen.", true); return; }
     $$("[data-e-err]").forEach(el => { const k = el.dataset.eErr; el.hidden = !errs[k]; el.textContent = errs[k] || ""; });
     const f = editorForm();
     ["name", "price"].forEach(k => f.elements[k].setAttribute("aria-invalid", String(!!errs[k])));
@@ -1787,6 +1850,8 @@ A termék átvételétől számított 14 napon belül indoklás nélkül elállh
     const f = editorForm();
     f.addEventListener("submit", onEditorSubmit);
     f.elements.price.addEventListener("input", updateDiscountHint);
+    $$('input[name="availability"]', f).forEach(r => r.addEventListener("change", updateAvHint));
+    f.elements.category.addEventListener("change", () => { if (f.elements.category.value === "single") $("[data-e-single]").open = true; });
     f.elements.oldPrice.addEventListener("input", updateDiscountHint);
     const dz = $("[data-dropzone]");
     const fileInput = $("[data-file]");
@@ -1819,9 +1884,49 @@ A termék átvételétől számított 14 napon belül indoklás nélkül elállh
     }
     go(location.hash.slice(1) || "attekintes");
     renderStatus();
+    if (state.gh.token) syncStock();
+    window.NSCAdminOps?.start();
     if (state.gh.token) verifyGh().then(() => { renderGhPill(); if (state.view === "attekintes") renderDashboard(); });
     else state.ghState = "none";
   }
+
+  /* a rendelés- és tartalomkezelő modul (admin-ops.js) ezen keresztül éri el az admin állapotát */
+  async function api(path, init = {}) {
+    if (!state.gh.token) { const e = new Error("A szerver funkciókhoz kösd össze a GitHubot (Publikálás menü)."); e.status = 401; e.notoken = true; throw e; }
+    const res = await fetch(`/api/admin/${path}`, {
+      ...init,
+      headers: { Accept: "application/json", Authorization: `Bearer ${state.gh.token}`, ...(init.body ? { "Content-Type": "application/json" } : {}), ...(init.headers || {}) }
+    });
+    const type = res.headers.get("content-type") || "";
+    if (init.raw) { if (!res.ok) throw new Error(`Hiba (${res.status})`); return res; }
+    const data = /json/.test(type) ? await res.json().catch(() => ({})) : {};
+    if (!res.ok) {
+      const e = new Error(data.error || (res.status === 404 && !/json/.test(type) ? "A szerver funkciók csak a Cloudflare-en futó boltban érhetők el." : `Hiba (${res.status})`));
+      e.status = res.status; e.nodb = !!data.nodb; e.local = res.status === 404 && !/json/.test(type);
+      throw e;
+    }
+    return data;
+  }
+  /* készlet: a legutóbbi szinkron óta leadott rendelések levonása (élő és piszkozat adat is) */
+  async function syncStock() {
+    if (!state.gh.token || !state.live || !state.draft) return;
+    const targets = [state.live, state.draft];
+    const sinceSet = [...new Set(targets.map(x => x.settings.stockSyncedAt || ""))];
+    try {
+      const results = {};
+      for (const since of sinceSet) results[since] = await api(`stock?since=${encodeURIComponent(since)}`);
+      let changed = 0;
+      for (const tg of targets) {
+        const r = results[tg.settings.stockSyncedAt || ""];
+        if (!r?.now) continue;
+        for (const p of tg.products) { const n = Number(r.sold?.[p.id]) || 0; if (n) { p.stock = Math.max(0, p.stock - n); changed += tg === state.draft ? n : 0; } }
+        tg.settings.stockSyncedAt = r.now;
+      }
+      if (changed) { saveDraft({ quiet: true }); renderAll(); }
+      state.stockSynced = true;
+    } catch {}
+  }
+  window.NSCAdmin = { state, N, $, $$, esc, fmtFt, fmtDate, imageUrl, ICON, go, toast, confirmDialog, saveDraft, renderStatus, renderAll, api, publish, isDirty, byId, catLabel, compressImage, syncStock };
 
   bind();
   bindStudio();

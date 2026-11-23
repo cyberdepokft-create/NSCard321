@@ -649,3 +649,200 @@ html[data-admin-mode="pro"] .tabbar [data-basic-only] { display: none !important
 }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; } }
+
+/* ======================= 5.0: rendelések, közösség, tartalom, szolgáltatások ======================= */
+.nav-badge.hot { background: var(--ember); color: var(--on-ember); }
+.nav-dot.hot { background: var(--ember); box-shadow: 0 0 0 3px rgba(255, 122, 31, .2); }
+.tabbar a { position: relative; }
+.tabbar .nav-dot { position: absolute; top: 6px; right: calc(50% - 18px); margin: 0; }
+.warn { color: var(--gold); }
+.small { font-size: .84rem; }
+.pad { padding: 20px; }
+.pill.pre { color: var(--spark); background: rgba(69, 170, 255, .12); }
+.pill svg { width: 14px; height: 14px; }
+.pill.st-new { color: var(--on-ember); background: var(--ember); }
+.pill.st-new::before { background: var(--on-ember); }
+.pill.st-pend { color: var(--gold); background: rgba(255, 210, 63, .12); }
+.pill.st-in { color: var(--clover); background: rgba(60, 203, 118, .12); }
+.pill.st-low { color: #ffcf8a; background: rgba(255, 154, 77, .14); }
+.pill.st-ship { color: var(--spark); background: rgba(69, 170, 255, .14); }
+.pill.st-done { color: var(--muted); background: var(--surface-2); }
+.pill.st-out { color: var(--danger); background: rgba(255, 93, 108, .12); }
+.pill.st-hidden { color: var(--muted); background: var(--surface-2); }
+
+.setup { display: grid; gap: 12px; padding: 8px 4px; }
+.setup h2 { font-size: 1.1rem; font-weight: 800; margin: 0; }
+.setup p { margin: 0; }
+.setup .btn { width: fit-content; }
+.card-flush > .setup { padding: 22px; }
+.empty-state { display: grid; gap: 6px; padding: 40px 20px; text-align: center; justify-items: center; }
+
+/* áttekintés: rendelés számok */
+.ostats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.ostats.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.ostats > * { display: grid; gap: 2px; padding: 14px 16px; border-radius: var(--r-m); background: var(--surface-2); text-decoration: none; color: inherit; }
+.ostats a:hover { background: var(--surface-3); }
+.ostats span { color: var(--muted); font-size: .84rem; }
+.ostats strong { font-size: 1.45rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+.ostats small { color: var(--dim); font-size: .78rem; }
+
+/* rendelés lista */
+.o-tools { display: grid; gap: 12px; margin-bottom: 14px; }
+.o-tabs { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.o-tabs::-webkit-scrollbar { display: none; }
+.o-tabs button { flex: none; display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line-2); background: none; color: var(--muted); padding: 8px 14px; border-radius: 999px; font-weight: 700; font-size: .88rem; }
+.o-tabs button b { min-width: 20px; height: 20px; padding: 0 6px; border-radius: 99px; display: inline-grid; place-items: center; font-size: .72rem; background: var(--surface-3); color: var(--text); }
+.o-tabs button[aria-pressed="true"], .o-tabs button[aria-selected="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.o-tabs button[aria-pressed="true"] b, .o-tabs button[aria-selected="true"] b { background: var(--ember); color: var(--on-ember); }
+.o-actions { display: flex; gap: 8px; align-items: center; }
+.o-actions .search-field { flex: 1; }
+.olist { display: grid; }
+.orow { display: grid; grid-template-columns: minmax(128px, .9fr) minmax(0, 2fr) minmax(0, 1.2fr) minmax(96px, .7fr) minmax(110px, .8fr); gap: 14px; align-items: center; width: 100%; padding: 14px 18px; border: 0; border-bottom: 1px solid var(--line); background: none; text-align: left; color: inherit; }
+.orow:hover { background: var(--surface-2); }
+.orow:last-child { border-bottom: 0; }
+.orow.is-new { box-shadow: inset 3px 0 0 var(--ember); }
+.orow > span { display: grid; gap: 2px; min-width: 0; }
+.orow small { color: var(--dim); font-size: .8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.orow b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.o-id b { font-variant-numeric: tabular-nums; }
+.o-total { text-align: right; justify-items: end; }
+.o-st { justify-items: start; }
+.o-st small { display: inline-flex; align-items: center; gap: 4px; }
+.o-st small svg { width: 13px; height: 13px; fill: none; stroke: currentColor; }
+em.ok { font-style: normal; color: var(--clover); }
+.olist.compact .orow { padding: 12px 4px; grid-template-columns: minmax(118px, .8fr) minmax(0, 2fr) minmax(90px, .7fr) minmax(110px, .8fr); }
+.olist.compact .o-ship { display: none; }
+
+/* rendelés adatlap */
+.order-panel { width: min(720px, 100%); display: flex; flex-direction: column; z-index: 62; }
+.order-panel > div { height: 100%; display: flex; flex-direction: column; min-height: 0; }
+.op-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 16px 22px; border-bottom: 1px solid var(--line); }
+.op-head h2 { font-family: "Archivo Black", sans-serif; font-weight: 400; font-size: 1.25rem; margin: 0; }
+.op-head p { margin: 2px 0 0; font-size: .86rem; }
+.op-head-act { display: flex; gap: 8px; }
+.op-body { flex: 1; overflow-y: auto; padding: 16px 22px 28px; display: grid; gap: 18px; align-content: start; overscroll-behavior: contain; }
+.op-status { display: flex; gap: 8px; flex-wrap: wrap; }
+.op-flow { display: flex; gap: 8px; flex-wrap: wrap; }
+.op-flow:empty { display: none; }
+.op-ship { display: grid; gap: 12px; padding: 16px; border-radius: var(--r-l); background: rgba(69, 170, 255, .07); border: 1px solid rgba(69, 170, 255, .3); }
+.op-ship h3, .op-sec h3 { font-size: .98rem; font-weight: 800; margin: 0; }
+.op-ship .btn { width: fit-content; }
+.op-sec { display: grid; gap: 10px; padding-top: 16px; border-top: 1px solid var(--line); }
+.op-kv { display: grid; gap: 2px; margin: 0; }
+.op-kv a { color: var(--spark); text-decoration: none; width: fit-content; }
+.op-kv span, .op-kv small { color: var(--muted); }
+.op-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; padding: 12px 14px; border-radius: var(--r-m); background: var(--surface-2); }
+.op-note { margin: 0; padding: 10px 12px; border-radius: var(--r-m); border-left: 3px solid var(--gold); background: var(--surface-2); }
+.op-line { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+.op-line img, .op-line > span:first-child { width: 48px; height: 48px; border-radius: 10px; background: var(--surface-2); object-fit: contain; padding: 3px; }
+.op-line > span { display: grid; gap: 1px; min-width: 0; }
+.op-line small { color: var(--dim); }
+.op-sum { display: grid; gap: 4px; padding-top: 8px; border-top: 1px dashed var(--line-2); }
+.op-sum div { display: flex; justify-content: space-between; color: var(--muted); font-variant-numeric: tabular-nums; }
+.op-sum .tot { color: var(--text); font-weight: 800; font-size: 1.05rem; padding-top: 4px; }
+.op-inv { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.op-inv svg { width: 16px; height: 16px; fill: none; stroke: currentColor; }
+.op-inv .btn svg { width: 18px; height: 18px; }
+.op-hist { list-style: none; margin: 0; padding: 0 0 0 14px; border-left: 2px solid var(--line-2); display: grid; gap: 10px; }
+.op-hist li { position: relative; display: grid; }
+.op-hist li::before { content: ""; position: absolute; left: -20px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--surface-3); border: 2px solid var(--spark); }
+.op-hist li:first-child::before { background: var(--spark); }
+.op-hist small { color: var(--dim); }
+.op-foot { display: flex; gap: 10px; align-items: center; padding: 12px 22px calc(12px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); background: var(--surface); }
+.op-foot .btn svg, .btn svg { flex: none; }
+
+/* közösség */
+.comm-tabs { margin-bottom: 14px; }
+.comm-body { display: grid; gap: 16px; }
+.rv-list { display: grid; gap: 12px; }
+.rv { padding: 16px 18px; border-radius: var(--r-l); background: var(--surface); border: 1px solid var(--line); display: grid; gap: 8px; }
+.rv.pending { border-color: rgba(255, 210, 63, .45); box-shadow: inset 3px 0 0 var(--gold); }
+.rv.rejected { opacity: .65; }
+.rv header { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.rv header small { margin-left: auto; color: var(--dim); }
+.rv h3 { margin: 0; font-size: 1rem; }
+.rv p { margin: 0; }
+.rv-prod { color: var(--spark); font-weight: 600; font-size: .88rem; }
+.stars-a { color: var(--gold); letter-spacing: 1px; }
+.stars-a i { color: var(--surface-3); font-style: normal; }
+.news-compose { gap: 14px; }
+.sub-list, .al-list, .feed-list { display: grid; }
+.sub-list > div, .al-list > div, .feed-list > div { display: grid; grid-template-columns: minmax(0, 1fr) auto auto auto; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.sub-list > div:last-child, .al-list > div:last-child, .feed-list > div:last-child { border-bottom: 0; }
+.sub-list small, .al-list small { color: var(--dim); font-size: .8rem; }
+.sub-list > div { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto auto; }
+.sub-list span, .al-list span { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.al-list > div { grid-template-columns: minmax(0, 1fr) auto auto; }
+.al-list span { display: grid; }
+.feed-list > div { grid-template-columns: minmax(0, 1fr) auto auto; }
+.feed-list span { display: grid; gap: 2px; min-width: 0; }
+.feed-list code { font-size: .8rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.feed-list .btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; }
+
+/* cikkek és naptár */
+.content-layout { display: grid; grid-template-columns: minmax(240px, .8fr) minmax(0, 2fr); gap: 20px; align-items: start; }
+.post-list { display: grid; gap: 4px; }
+.post-list button { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; text-align: left; border: 0; background: none; padding: 10px 12px; border-radius: var(--r-m); color: inherit; }
+.post-list button:hover { background: var(--surface-2); }
+.post-list button[aria-current="true"] { background: var(--surface-3); }
+.post-list span:first-child { display: grid; gap: 2px; min-width: 0; }
+.post-list b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.post-list small { color: var(--dim); }
+.cover-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.cover-row img { width: 120px; height: 68px; object-fit: cover; border-radius: 10px; }
+.rel-rows { display: grid; gap: 8px; }
+.rel-row { display: grid; grid-template-columns: 150px minmax(0, 1.4fr) minmax(0, 1.2fr) minmax(0, 1fr) 40px; gap: 8px; align-items: center; }
+.rel-add { display: grid; grid-template-columns: 150px minmax(0, 1fr) auto; gap: 8px; }
+.icon-btn.danger { color: #ffb3bb; }
+
+/* szolgáltatások */
+.int-list { display: grid; gap: 8px; }
+.int-row { border: 1px solid var(--line); border-radius: var(--r-m); background: var(--surface-2); }
+.int-row summary { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 2px 12px; align-items: center; padding: 12px 14px; cursor: pointer; list-style: none; }
+.int-row summary::-webkit-details-marker { display: none; }
+.int-row summary .pill { grid-row: span 2; }
+.int-row summary small { color: var(--muted); }
+.int-row > :not(summary) { margin: 0 14px 14px; }
+.int-row code { background: var(--surface-3); padding: 1px 6px; border-radius: 6px; font-size: .84em; word-break: break-all; }
+
+/* szerkesztő bővítés */
+.ed-more { border-bottom: 1px solid var(--line); padding: 14px 0; }
+.ed-more summary { cursor: pointer; font-weight: 800; list-style: none; display: flex; align-items: baseline; gap: 10px; }
+.ed-more summary::-webkit-details-marker { display: none; }
+.ed-more summary::before { content: "+"; display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; background: var(--surface-2); font-weight: 800; }
+.ed-more[open] summary::before { content: "–"; }
+.ed-more summary small { color: var(--dim); font-weight: 500; }
+.ed-more > :not(summary) { margin-top: 14px; }
+.pill.pre::before { background: var(--spark); }
+
+@media (max-width: 1100px) {
+  .orow { grid-template-columns: minmax(118px, .9fr) minmax(0, 2fr) minmax(90px, .7fr) minmax(110px, .8fr); }
+  .orow .o-ship { display: none; }
+  .content-layout { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 860px) {
+  .ostats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .orow, .olist.compact .orow { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "id total" "who who" "st st"; gap: 6px 12px; padding: 14px 16px; }
+  .o-id { grid-area: id; } .o-who { grid-area: who; } .o-total { grid-area: total; } .o-st { grid-area: st; display: flex !important; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .o-actions .btn span, .o-actions .btn { white-space: nowrap; }
+  .op-cols { grid-template-columns: minmax(0, 1fr); }
+  .op-head, .op-body, .op-foot { padding-left: 16px; padding-right: 16px; }
+  .rel-row { grid-template-columns: minmax(0, 1fr) 40px; }
+  .rel-row > :not(button) { grid-column: 1; }
+  .rel-row button { grid-row: 1; grid-column: 2; }
+  .rel-add { grid-template-columns: minmax(0, 1fr); }
+  .sub-list > div { grid-template-columns: minmax(0, 1fr) auto; }
+  .sub-list > div small { grid-column: 1; }
+  .sub-list > div .pill { grid-row: 1; grid-column: 2; }
+  .sub-list > div .icon-btn { grid-row: 2; grid-column: 2; width: 34px; height: 34px; }
+  .feed-list > div { grid-template-columns: minmax(0, 1fr) auto; }
+  .feed-list > div a { display: none; }
+}
+@media (max-width: 560px) {
+  .ostats.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .ostats.three strong { font-size: 1.15rem; }
+  .o-actions .btn-sm { padding: 0 10px; font-size: 0; gap: 0; }
+  .o-actions .btn-sm svg { width: 20px; height: 20px; }
+  .al-list > div { grid-template-columns: minmax(0, 1fr) auto; }
+  .al-list > div .btn { grid-column: 1 / -1; }
+}

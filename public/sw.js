@@ -1,7 +1,7 @@
 /* NS Card – service worker: gyorsabb betöltés és telepíthető alkalmazás.
  * Oldalak: hálózat elsőként (mindig a friss verzió), offline esetén a mentett példány.
  * Verziózott fájlok és képek: gyorsítótárból, háttérben frissítve. Az admin, az API és a katalógus kimarad. */
-const VERSION = "nsc-4.4.0";
+const VERSION = "nsc-5.0.0";
 const PAGES = `${VERSION}-pages`;
 const STATIC = `${VERSION}-static`;
 
@@ -18,7 +18,7 @@ self.addEventListener("activate", event => {
   })());
 });
 
-const skip = url => /^\/(admin|api\/)/.test(url.pathname) || /\/(store\/catalog\.json|sync-config\.json|sitemap\.xml|sw\.js)$/.test(url.pathname);
+const skip = url => /^\/(admin|api\/|feeds\/)/.test(url.pathname) || /\/(store\/catalog\.json|sync-config\.json|sitemap\.xml|sw\.js)$/.test(url.pathname);
 
 self.addEventListener("fetch", event => {
   const req = event.request;

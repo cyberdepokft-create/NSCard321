@@ -44,6 +44,9 @@
   ICON.zoom = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5M11 8v6M8 11h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
   ICON.left = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 6-6 6 6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   ICON.right = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 6 6 6-6 6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  ICON.cal = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5" stroke="currentColor" stroke-width="2"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+  ICON.pin = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s-6.5-6.2-6.5-11.2A6.5 6.5 0 0 1 12 3.3a6.5 6.5 0 0 1 6.5 6.5C18.5 14.8 12 21 12 21Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="10" r="2.4" stroke="currentColor" stroke-width="2"/></svg>';
+  ICON.bell = '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15L6 16Zm4 4a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg>';
   const SITE = "https://www.nscard.hu";
 
   const productUrl = p => `/product?id=${p.id}`;
@@ -254,12 +257,25 @@
   function tagsHTML(p) {
     const tg = [];
     if (N.isSoon(p)) tg.push(`<span class="tag tag-soon">${esc(t("stock.soon"))}</span>`);
+    if (N.isPreorder(p)) tg.push(`<span class="tag tag-pre">${esc(t("pre.label"))}</span>`);
+    if (p.grade) tg.push(`<span class="tag tag-grade">${esc(p.grade)}</span>`);
     if (p.oldPrice) tg.push(`<span class="tag tag-sale">−${N.discount(p)}%</span>`);
     else if (p.flags.includes("sale")) tg.push(`<span class="tag tag-sale">${esc(t("tag.sale"))}</span>`);
     if (p.flags.includes("new")) tg.push(`<span class="tag tag-new">${esc(t("tag.new"))}</span>`);
     if (p.flags.includes("rare")) tg.push(`<span class="tag tag-rare">${esc(t("tag.rare"))}</span>`);
     if (p.badge) tg.push(`<span class="tag">${esc(p.badge)}</span>`);
     return tg.slice(0, 3).join("");
+  }
+  const starsHTML = (avg, cls = "stars") => `<span class="${cls}" style="--r:${Math.max(0, Math.min(5, avg)) / 5 * 100}%" aria-hidden="true"></span>`;
+  function ratingLine(p) {
+    const r = N.rating(p.id);
+    return r ? `<span class="rating" title="${r.avg.toLocaleString("hu-HU")} / 5 (${r.count} vélemény)">${starsHTML(r.avg)}<small>${r.count}</small><span class="sr-only">${r.avg.toLocaleString("hu-HU")} csillag, ${r.count} vélemény</span></span>` : "";
+  }
+  const condLabel = v => (N.CONDITIONS.find(c => c.value === v) || {}).short || "";
+  const langLabel = v => (N.LANGS.find(l => l.value === v) || {}).label || "";
+  function singleMeta(p) {
+    const bits = [p.condition ? `<b>${esc(condLabel(p.condition))}</b>` : "", p.lang ? esc(langLabel(p.lang)) : "", p.cardNo ? `#${esc(p.cardNo)}` : "", p.rarity ? esc(p.rarity) : ""].filter(Boolean);
+    return bits.length ? `<span class="single-meta">${bits.join('<i aria-hidden="true"></i>')}</span>` : "";
   }
   const rarity = p => p.flags.includes("rare") ? "rare" : p.flags.includes("new") ? "new" : (p.oldPrice || p.flags.includes("sale")) ? "sale" : "";
 
@@ -279,6 +295,7 @@
         </div>
         <div class="pcard-body">
           <h3><a href="${productUrl(p)}">${esc(p.name)}</a></h3>
+          ${singleMeta(p)}${ratingLine(p)}
           <span class="stock stock-${st.key}">${esc(st.label)}</span>
         </div>
         <div class="pcard-buy">
@@ -530,6 +547,7 @@
       sectionOn("steps") ? `<li><a href="/#rendeles">${esc(t("nav.ship"))}</a></li>` : "",
       pages.szallitas ? `<li><a href="/info?p=szallitas">${esc(N.INFO_PAGES[2].short)}</a></li>` : "",
       pages.rolunk ? `<li><a href="/info?p=rolunk">${esc(N.INFO_PAGES[3].short)}</a></li>` : "",
+      (s.posts || []).some(x => x.published) ? `<li><a href="/blog">Cikkek és útmutatók</a></li>` : "",
       `<li><a href="/checkout">${esc(t("checkout.title"))}</a></li>`,
       (s.email || s.phone) && sectionOn("contact") ? `<li><a href="/#kapcsolat">${esc(t("nav.contact"))}</a></li>` : ""
     ].join("");
@@ -556,6 +574,14 @@
       social.innerHTML = links.join("");
       social.hidden = !links.length;
     }
+    const fn = $("[data-foot-news]");
+    if (fn) {
+      const on = !!N.live.features?.db;
+      if (on && !fn.dataset.ready) { fn.dataset.ready = "1"; fn.innerHTML = `<p>${esc(t("news.title"))}</p>${newsFormHTML("footer", true)}`; }
+      fn.hidden = !on;
+    }
+    const ml = $("[data-menu-extra]");
+    if (ml) ml.innerHTML = (s.posts || []).some(x => x.published) ? `<a href="/blog">Cikkek és útmutatók</a>` : "";
     $$("[data-contact-nav]").forEach(a => { a.hidden = (!s.email && !s.phone) || !sectionOn("contact"); });
     $$('a[href="/#rendeles"]').forEach(a => { a.hidden = !sectionOn("steps"); });
     $$("[data-year]").forEach(el => { el.textContent = new Date().getFullYear(); });
@@ -781,6 +807,12 @@
     if (soonLink) soonLink.hidden = !(soon.length && sectionOn("soon"));
 
     showSection("steps", true);
+    renderReleases(list, s);
+    renderHomeReviews();
+    renderHomeBlog(s);
+    const nb = $("[data-news-home]");
+    if (nb && !nb.dataset.ready && N.live.features?.db) { nb.dataset.ready = "1"; nb.innerHTML = newsFormHTML("home"); }
+    showSection("newsletter", !!N.live.features?.db);
 
     const cl = $("[data-contact-list]");
     if (cl) {
@@ -965,7 +997,7 @@
   }
 
   /* ---------------- terméklista ---------------- */
-  const filters = { cat: "all", q: "", sort: "featured", instock: false, soon: false, sale: false, min: "", max: "", fav: false, set: "" };
+  const filters = { cat: "all", q: "", sort: "featured", instock: false, soon: false, sale: false, pre: false, min: "", max: "", fav: false, set: "", cond: "", lang: "" };
 
   function readFilters() {
     const u = new URLSearchParams(location.search);
@@ -979,6 +1011,9 @@
     filters.max = u.get("max") || "";
     filters.fav = u.get("fav") === "1";
     filters.set = u.get("set") || "";
+    filters.pre = u.get("pre") === "1";
+    filters.cond = u.get("cond") || "";
+    filters.lang = u.get("lang") || "";
   }
   function writeFilters() {
     if (page !== "products") return;
@@ -986,7 +1021,9 @@
     if (filters.cat !== "all") u.set("cat", filters.cat);
     if (filters.q) u.set("q", filters.q);
     if (filters.sort !== "featured") u.set("sort", filters.sort);
-    ["instock", "soon", "sale"].forEach(k => filters[k] && u.set(k, "1"));
+    ["instock", "soon", "sale", "pre"].forEach(k => filters[k] && u.set(k, "1"));
+    if (filters.cond) u.set("cond", filters.cond);
+    if (filters.lang) u.set("lang", filters.lang);
     if (filters.min) u.set("min", filters.min);
     if (filters.max) u.set("max", filters.max);
     if (filters.fav) u.set("fav", "1");
@@ -1003,13 +1040,16 @@
     if (filters.q) {
       const words = norm(filters.q).split(/\s+/).filter(Boolean);
       list = list.filter(p => {
-        const hay = norm([p.name, p.set, p.line, p.description, p.badge, N.categoryLabel(p.category)].join(" "));
+        const hay = norm([p.name, p.set, p.line, p.description, p.badge, p.cardNo, p.rarity, p.grade, N.categoryLabel(p.category)].join(" "));
         return words.every(w => hay.includes(w));
       });
     }
     if (filters.instock && !filters.soon) list = list.filter(N.isBuyable);
     if (filters.soon && !filters.instock) list = list.filter(N.isSoon);
     if (filters.sale) list = list.filter(p => p.oldPrice || p.flags.includes("sale"));
+    if (filters.pre) list = list.filter(N.isPreorder);
+    if (filters.cond) list = list.filter(p => p.condition === filters.cond);
+    if (filters.lang) list = list.filter(p => p.lang === filters.lang);
     const min = Number(filters.min), max = Number(filters.max);
     if (filters.min !== "" && min > 0) list = list.filter(p => p.price >= min);
     if (filters.max !== "" && max > 0) list = list.filter(p => p.price <= max);
@@ -1024,7 +1064,21 @@
     return list.map((p, i) => ({ p, i })).sort((a, b) => rank(a.p) - rank(b.p) || by(a.p, b.p) || a.i - b.i).map(x => x.p);
   }
 
-  const activeFilterCount = () => ["instock", "soon", "sale"].filter(k => filters[k]).length + (filters.min ? 1 : 0) + (filters.max ? 1 : 0);
+  const activeFilterCount = () => ["instock", "soon", "sale", "pre"].filter(k => filters[k]).length + (filters.min ? 1 : 0) + (filters.max ? 1 : 0) + (filters.cond ? 1 : 0) + (filters.lang ? 1 : 0);
+
+  /* single kártyák: állapot és nyelv szűrő (csak ha van ilyen adat a listában) */
+  function renderSingleFilters() {
+    const box = $("[data-single-filters]");
+    if (!box) return;
+    const pool = N.products().filter(p => filters.cat === "all" || p.category === filters.cat);
+    const conds = N.CONDITIONS.filter(c => pool.some(p => p.condition === c.value));
+    const langs = N.LANGS.filter(l => pool.some(p => p.lang === l.value));
+    if (filters.cond && !conds.some(c => c.value === filters.cond)) filters.cond = "";
+    if (filters.lang && !langs.some(l => l.value === filters.lang)) filters.lang = "";
+    box.hidden = !conds.length && !langs.length;
+    const row = (key, label, items) => items.length ? `<div><h2>${label}</h2><div class="mini-chips">${[{ value: "", label: "Mind" }, ...items].map(x => `<button type="button" data-sf="${key}" data-v="${esc(x.value)}" aria-pressed="${filters[key] === x.value}">${esc(x.short || x.label)}</button>`).join("")}</div></div>` : "";
+    box.innerHTML = row("cond", "Kártya állapota", conds) + row("lang", "Nyelv", langs);
+  }
 
   function renderChips() {
     const chips = $("[data-chips]");
@@ -1071,6 +1125,7 @@
     renderChips();
     renderCatHero();
     renderSetChips();
+    renderSingleFilters();
     $$("[data-view]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === (root.getAttribute("data-cols-m") || "2"))));
 
     $$("[data-f]").forEach(el => {
@@ -1105,12 +1160,13 @@
       const b = e.target.closest("button");
       if (!b) return;
       if (b.matches("[data-set]")) { filters.set = b.dataset.set; writeFilters(); renderList(); revealScan(); return; }
+      if (b.matches("[data-sf]")) { filters[b.dataset.sf] = b.dataset.v; writeFilters(); renderList(); revealScan(); return; }
       if (b.matches("[data-fav-chip]")) { filters.fav = !filters.fav; if (filters.fav) filters.cat = "all"; writeFilters(); renderList(); revealScan(); return; }
       if (b.matches("[data-cat]")) {
         filters.cat = b.dataset.cat; filters.fav = false; filters.set = ""; writeFilters(); renderList(); revealScan();
         if (b.classList.contains("chip")) b.scrollIntoView({ inline: "center", block: "nearest", behavior: motionOK() ? "smooth" : "auto" });
       } else if (b.matches("[data-reset-filters]")) {
-        Object.assign(filters, { q: "", instock: false, soon: false, sale: false, min: "", max: "" });
+        Object.assign(filters, { q: "", instock: false, soon: false, sale: false, pre: false, min: "", max: "", cond: "", lang: "" });
         $$("[data-q]").forEach(i => { i.value = ""; });
         writeFilters(); renderList(); revealScan();
       } else if (b.matches("[data-clear-q]")) { filters.q = ""; $$("[data-q]").forEach(i => { i.value = ""; }); writeFilters(); renderList(); revealScan(); }
@@ -1147,9 +1203,12 @@
       image: p.images.map(src => { const u = imageUrl(src); return /^https?:/.test(u) ? u : `${location.origin}${u}`; }),
       description: p.description || p.line || `${p.name} – ${N.categoryLabel(p.category)}`,
       brand: { "@type": "Brand", name: "Pokémon TCG" },
-      offers: { "@type": "Offer", url, priceCurrency: "HUF", price: p.price, itemCondition: "https://schema.org/NewCondition",
-        availability: N.isSoon(p) ? "https://schema.org/PreOrder" : p.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock", seller: { "@type": "Organization", name: "NS Card" } }
+      offers: { "@type": "Offer", url, priceCurrency: "HUF", price: p.price, itemCondition: ["LP", "MP", "HP", "DMG"].includes(p.condition) ? "https://schema.org/UsedCondition" : "https://schema.org/NewCondition",
+        availability: N.isSoon(p) || N.isPreorder(p) ? "https://schema.org/PreOrder" : p.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock", seller: { "@type": "Organization", name: "NS Card" } }
     };
+    if (p.ean) ld.gtin13 = p.ean;
+    const rr = N.rating(p.id);
+    if (rr) ld.aggregateRating = { "@type": "AggregateRating", ratingValue: rr.avg, reviewCount: rr.count, bestRating: 5, worstRating: 1 };
     let tag = $("#pdp-ld");
     if (!tag) { tag = document.createElement("script"); tag.type = "application/ld+json"; tag.id = "pdp-ld"; document.head.appendChild(tag); }
     tag.textContent = JSON.stringify([ld, { "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
@@ -1256,11 +1315,14 @@
         <div class="pdp-info">
           <div class="pdp-meta"><span>${esc(N.categoryLabel(p.category))}</span>${p.set ? `<span>· ${esc(p.set)}</span>` : ""}<div class="tags">${tagsHTML(p)}</div></div>
           <h1 class="display">${esc(p.name)}</h1>
+          ${N.rating(p.id) ? `<a class="pdp-rating" href="#velemenyek">${starsHTML(N.rating(p.id).avg)}<span>${N.rating(p.id).avg.toLocaleString("hu-HU")} · ${N.rating(p.id).count} vélemény</span></a>` : ""}
           ${p.line ? `<p class="muted" style="font-size:1.1rem">${esc(p.line)}</p>` : ""}
+          ${specsHTML(p)}
           <div class="pdp-price">${p.oldPrice ? `<s>${fmtFt(p.oldPrice)}</s>` : ""}<strong>${fmtFt(p.price)}</strong>${p.oldPrice ? `<span class="save">−${N.discount(p)}%</span>` : ""}</div>
           ${st.key === "low" ? `<div class="urgency"><span>${esc(st.label)} – siess, ha szeretnéd!</span><div class="bar"><i style="width:${Math.max(8, Math.min(100, p.stock / Math.max(1, s.lowStock + 1) * 100))}%"></i></div></div>` : `<span class="stock stock-${st.key}" style="font-size:1rem">${esc(st.label)}${inCart ? ` · ebből ${inCart} db már a kosaradban` : ""}</span>`}
           ${st.key === "low" && inCart ? `<span class="muted" style="font-size:.9rem">Ebből ${inCart} db már a kosaradban.</span>` : ""}
-          ${buyable && dispatchText(s) ? `<div class="dispatch">${ICON.truck}<span data-dispatch>${dispatchText(s)}</span></div>` : ""}
+          ${N.isPreorder(p) || (N.isSoon(p) && p.releaseDate) ? `<div class="pre-note">${ICON.cal}<span>${N.isPreorder(p) ? esc(t("pre.note", { date: p.releaseDate ? N.fmtDate(p.releaseDate) : "hamarosan" })) : `Várható megjelenés: <b>${esc(N.fmtDate(p.releaseDate))}</b>`}</span></div>` : ""}
+          ${buyable && !N.isPreorder(p) && dispatchText(s) ? `<div class="dispatch">${ICON.truck}<span data-dispatch>${dispatchText(s)}</span></div>` : ""}
           ${buyable ? `
             <div class="buy-row">
               <div class="stepper lg" role="group" aria-label="Mennyiség">
@@ -1268,8 +1330,8 @@
                 <output aria-live="polite">${pdpQty}</output>
                 <button type="button" data-pdp-qty="1" aria-label="Eggyel több" ${pdpQty >= maxQty ? "disabled" : ""}>+</button>
               </div>
-              <button class="btn btn-primary" type="button" data-pdp-add ${maxQty <= 0 ? "disabled" : ""}>${ICON.cart}${maxQty <= 0 ? "A teljes készlet a kosaradban" : esc(t("pdp.add"))}</button>
-            </div>` : `${s.email ? `<a class="btn btn-ghost" href="mailto:${esc(s.email)}?subject=${encodeURIComponent(`Értesítés kérése: ${p.name}`)}&body=${encodeURIComponent(`Kérem, értesítsenek, ha a(z) ${p.name} rendelhető lesz.\n\nKöszönöm!`)}">${ICON.mail}${esc(t("notify.button"))}</a>` : ""}<div class="notice">${N.isSoon(p) ? "Ez a termék hamarosan érkezik, még nem rendelhető." : "Ez a termék jelenleg elfogyott."}${s.email ? ` Írj nekünk a <a href="mailto:${esc(s.email)}?subject=${encodeURIComponent(`Érdeklődés: ${p.name}`)}">${esc(s.email)}</a> címre, és szólunk, ha elérhető.` : ""}</div>`}
+              <button class="btn btn-primary" type="button" data-pdp-add ${maxQty <= 0 ? "disabled" : ""}>${ICON.cart}${maxQty <= 0 ? "A teljes készlet a kosaradban" : esc(N.isPreorder(p) ? "Előrendelem" : t("pdp.add"))}</button>
+            </div>` : N.live.features?.db ? `<div data-notify-slot></div>` : `${s.email ? `<a class="btn btn-ghost" href="mailto:${esc(s.email)}?subject=${encodeURIComponent(`Értesítés kérése: ${p.name}`)}&body=${encodeURIComponent(`Kérem, értesítsenek, ha a(z) ${p.name} rendelhető lesz.\n\nKöszönöm!`)}">${ICON.mail}${esc(t("notify.button"))}</a>` : ""}<div class="notice">${N.isSoon(p) ? "Ez a termék hamarosan érkezik, még nem rendelhető." : "Ez a termék jelenleg elfogyott."}${s.email ? ` Írj nekünk a <a href="mailto:${esc(s.email)}?subject=${encodeURIComponent(`Érdeklődés: ${p.name}`)}">${esc(s.email)}</a> címre, és szólunk, ha elérhető.` : ""}</div>`}
           <div class="pdp-tools">
             ${favBtn(p, "btn btn-ghost btn-sm")}
             <button class="btn btn-ghost btn-sm" type="button" data-share>${ICON.share}${esc(t("pdp.share"))}</button>
@@ -1285,6 +1347,10 @@
           </div>
         </div>
       </div>`;
+
+    const slot = $("[data-notify-slot]");
+    if (slot) slot.replaceWith(notifyForm(p));
+    renderReviews(p);
 
     const track = $("[data-track]");
     if (track && pdpImage) { track.style.scrollBehavior = "auto"; track.scrollLeft = pdpImage * track.clientWidth; track.style.scrollBehavior = ""; }
@@ -1389,8 +1455,9 @@
   }
 
   /* ---------------- pénztár ---------------- */
-  const CO_FIELDS = ["name", "email", "phone", "zip", "city", "address", "locker", "note", "ship", "pay", "coupon"];
-  let coState = Object.assign({ ship: "home", pay: "" }, N.store.get(N.KEYS.checkout) || {});
+  const CO_FIELDS = ["name", "email", "phone", "zip", "city", "address", "locker", "lockerId", "lockerProvider", "note", "ship", "pay", "coupon",
+    "billSame", "billName", "billZip", "billCity", "billAddress", "billCompany", "billTax", "wantCompany"];
+  let coState = Object.assign({ ship: "home", pay: "", billSame: "1" }, N.store.get(N.KEYS.checkout) || {});
   let coDone = null;
   let coError = "";
   let coBusy = false;
@@ -1505,19 +1572,22 @@
             </div>
             <div class="form-grid">
               ${coState.ship === "pickup" ? "" : coState.ship === "locker"
-                ? fieldHTML("locker", "Csomagautomata neve és címe", 'placeholder="Pl. Foxpost – Budapest, Váci út 1." required', "full")
-                : `${fieldHTML("zip", "Irányítószám", 'autocomplete="postal-code" inputmode="numeric" maxlength="4" required', "zip")}
-                   ${fieldHTML("city", "Település", 'autocomplete="address-level2" required')}
+                ? `${s.lockerMap !== false ? lockerPickHTML() : ""}${fieldHTML("locker", s.lockerMap !== false ? "Az automata neve és címe" : "Csomagautomata neve és címe", 'placeholder="Pl. Foxpost – Budapest, Váci út 1." required', "full")}`
+                : `${fieldHTML("zip", "Irányítószám", 'autocomplete="postal-code" inputmode="numeric" maxlength="4" required data-zip-for="city"', "zip")}
+                   ${fieldHTML("city", "Település", 'autocomplete="address-level2" required list="zip-city-list"')}
                    ${fieldHTML("address", "Utca, házszám, emelet, ajtó", 'autocomplete="street-address" required', "full")}`}
             </div>
+            ${lines.some(l => N.isPreorder(l.product)) ? `<div class="notice pre-note">${ICON.cal}<span>Előrendelt termék is van a kosaradban. ${lines.some(l => !N.isPreorder(l.product)) ? "A teljes rendelést a megjelenés után, egyben adjuk fel – ha a készleten lévő termékeket előbb kérnéd, írd meg a megjegyzésben." : "A megjelenés után azonnal feladjuk."}</span></div>` : ""}
           </section>
+          ${billingHTML()}
           <section class="co-section" aria-labelledby="co-h3">
-            <h2 id="co-h3"><b>3</b>Fizetés</h2>
+            <h2 id="co-h3"><b>4</b>Fizetés</h2>
             ${pays.length ? `<div class="options" role="radiogroup" aria-label="Fizetési mód">${pays.map(p => `
               <label class="option"><input type="radio" name="pay" value="${p.v}" ${coState.pay === p.v ? "checked" : ""}>
                 <span><strong>${p.t}</strong><small>${p.d}</small></span><span></span></label>`).join("")}</div>`
               : `<div class="notice error">Az online rendelés még nincs beállítva. Kérjük, vedd fel velünk a kapcsolatot.</div>`}
             <div class="form-grid">${fieldHTML("note", "Megjegyzés a rendeléshez (nem kötelező)", 'rows="3"', "full")}</div>
+            <div class="hp" aria-hidden="true"><label>Weboldal <input name="website" tabindex="-1" autocomplete="off" data-hp></label></div>
           </section>
           ${coError ? `<div class="notice error" role="alert" style="margin-bottom:16px">${coError}</div>` : ""}
           ${needTerms(s) ? `<label class="terms" data-terms><input type="checkbox" id="co-terms" ${coTerms ? "checked" : ""}><span>${esc(t("checkout.terms"))} ${s.pages.aszf ? '<a href="/info?p=aszf" target="_blank" rel="noopener">ÁSZF</a>' : ""}${s.pages.aszf && s.pages.adatkezeles ? " · " : ""}${s.pages.adatkezeles ? '<a href="/info?p=adatkezeles" target="_blank" rel="noopener">Adatkezelés</a>' : ""}</span></label>` : ""}
@@ -1526,7 +1596,7 @@
               ${coBusy ? "Folyamatban…" : `${esc(coState.pay === "card" ? t("checkout.pay") : t("checkout.submit"))} · ${fmtFt(tt.total)}`}
             </button>
           </div>
-          <p class="muted" style="font-size:.86rem;margin-top:12px">${coState.pay === "card" ? "A gomb a Stripe biztonságos fizetési oldalára visz." : "A gomb megnyitja a levelezőprogramodat a kitöltött rendeléssel – a levél elküldésével adod le a rendelést."}</p>
+          <p class="muted" style="font-size:.86rem;margin-top:12px">${coState.pay === "card" ? "A gomb a Stripe biztonságos fizetési oldalára visz." : N.live.features?.db ? "A gombbal leadod a rendelést, a visszaigazolást e-mailben küldjük." : "A gomb megnyitja a levelezőprogramodat a kitöltött rendeléssel – a levél elküldésével adod le a rendelést."}</p>
         </form>
         ${summaryHTML(s)}
       </div>`;
@@ -1547,12 +1617,22 @@
     if (coState.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(coState.email)) errs.email = "Ez nem tűnik érvényes e-mail címnek.";
     need("phone", "Add meg a telefonszámod.");
     if (coState.phone && String(coState.phone).replace(/\D/g, "").length < 8) errs.phone = "Ellenőrizd a telefonszámot.";
-    if (coState.ship === "locker") need("locker", "Add meg a csomagautomatát.");
+    if (coState.ship === "locker") need("locker", "Válaszd ki vagy add meg a csomagautomatát.");
     else if (coState.ship !== "pickup") {
       need("zip", "Add meg az irányítószámot.");
       if (coState.zip && !/^\d{4}$/.test(String(coState.zip).trim())) errs.zip = "4 számjegy.";
       need("city", "Add meg a települést.");
       need("address", "Add meg a címet.");
+    }
+    if (needBilling()) {
+      need("billZip", "Add meg a számlázási irányítószámot.");
+      if (coState.billZip && !/^\d{4}$/.test(String(coState.billZip).trim())) errs.billZip = "4 számjegy.";
+      need("billCity", "Add meg a települést.");
+      need("billAddress", "Add meg a számlázási címet.");
+    }
+    if (coState.wantCompany === "1") {
+      need("billCompany", "Add meg a cég nevét.");
+      if (coState.billTax && !/^\d{8}-?\d-?\d{2}$/.test(String(coState.billTax).trim())) errs.billTax = "Formátum: 12345678-1-12";
     }
     $$("[data-err]").forEach(el => { const k = el.dataset.err; el.hidden = !errs[k]; el.textContent = errs[k] || ""; $(`#co-${k}`)?.setAttribute("aria-invalid", String(!!errs[k])); });
     const first = Object.keys(errs)[0];
@@ -1586,6 +1666,10 @@
     L.push("Vásárló:", o.c.name, o.c.email, o.c.phone);
     if (o.ship === "pickup") L.push("Személyes átvétel");
     else if (o.c.locker) L.push(`Csomagautomata: ${o.c.locker}`); else L.push(`${o.c.zip} ${o.c.city}, ${o.c.address}`);
+    const b = o.c.billing;
+    if (b && !b.same) L.push("", "Számlázási cím:", `${b.company || b.name || o.c.name}`, `${b.zip} ${b.city}, ${b.address}`);
+    else if (b?.company) L.push("", `Számla: ${b.company}`);
+    if (b?.taxNumber) L.push(`Adószám: ${b.taxNumber}`);
     if (o.c.note) L.push("", `Megjegyzés: ${o.c.note}`);
     return L.join("\n");
   }
@@ -1593,6 +1677,23 @@
   const mailtoFor = (o, s) => `mailto:${encodeURIComponent(s.email)}?subject=${encodeURIComponent(`Rendelés ${o.id}`)}&body=${encodeURIComponent(orderText(o))}`;
 
   function doneHTML(o, s) {
+    if (o.server) {
+      const pay = o.pay === "transfer"
+        ? `<div class="pay-box"><strong>Utalási adatok</strong>${o.bankDetails ? `<p>${esc(o.bankDetails).replace(/\n/g, "<br>")}</p>` : "<p>Az utalási adatokat e-mailben küldjük.</p>"}<dl><dt>Összeg</dt><dd>${fmtFt(o.total)}</dd><dt>Közlemény</dt><dd>${esc(o.id)}</dd></dl><small>A csomagot az összeg beérkezése után adjuk fel.</small></div>`
+        : o.pay === "cod" ? `<p class="muted">Fizetés a csomag átvételekor: <strong>${fmtFt(o.total)}</strong>.</p>` : "";
+      return `
+      <div class="done panel">
+        <span class="done-ico">${ICON.check}</span>
+        <h2 class="display" style="font-size:1.7rem">Köszönjük, megkaptuk a rendelésed!</h2>
+        <p class="muted">Rendelésszám</p>
+        <p class="order-id">${esc(o.id)}</p>
+        ${pay}
+        ${o.preorder ? `<div class="notice pre-note">${ICON.cal}<span>Az előrendelt termékeket a megjelenés után küldjük.</span></div>` : ""}
+        <p class="muted">${o.emailed ? `A visszaigazolást elküldtük ide: <strong>${esc(o.email)}</strong>. Ha nem látod, nézd meg a Promóciók vagy Spam mappát is.` : "Hamarosan e-mailben is visszaigazoljuk a rendelést."} A feladásról csomagkövetési számmal értesítünk.</p>
+        <div class="order-sum">${o.lines.map(l => `<div class="sum-row"><span>${esc(l.name)} × ${l.qty}</span><strong>${fmtFt(l.qty * l.price)}</strong></div>`).join("")}<div class="sum-row total"><span>Fizetendő</span><strong>${fmtFt(o.total)}</strong></div></div>
+        <div class="hero-actions" style="margin:0"><a class="btn btn-primary" href="/products">Vásárlás folytatása</a><button class="btn btn-ghost" type="button" data-copy-id>Rendelésszám másolása</button></div>
+      </div>`;
+    }
     return `
       <div class="done panel">
         <p class="muted">Rendelésszám</p>
@@ -1617,8 +1718,11 @@
     const lines = cart.lines();
     const c = Object.fromEntries(CO_FIELDS.map(k => [k, String(coState[k] || "").trim()]));
     if (coState.ship === "locker") { c.zip = c.city = c.address = ""; }
-    else if (coState.ship === "pickup") { c.zip = c.city = c.address = c.locker = ""; }
-    else c.locker = "";
+    else if (coState.ship === "pickup") { c.zip = c.city = c.address = c.locker = c.lockerId = c.lockerProvider = ""; }
+    else c.locker = c.lockerId = c.lockerProvider = "";
+    const company = coState.wantCompany === "1";
+    c.billing = { same: !needBilling(), name: c.billName || c.name, zip: c.billZip, city: c.billCity, address: c.billAddress, company: company ? c.billCompany : "", taxNumber: company ? c.billTax : "" };
+    const honey = $("[data-hp]")?.value || "";
 
     if (coState.pay === "card") {
       coBusy = true; renderCheckout();
@@ -1626,10 +1730,11 @@
         const res = await fetch("/api/create-checkout-session", {
           method: "POST",
           headers: { "Content-Type": "application/json", Accept: "application/json" },
-          body: JSON.stringify({ items: lines.map(l => ({ id: l.product.id, qty: l.qty })), customer: c, shipping: coState.ship, coupon: tt.coupon?.code || "" })
+          body: JSON.stringify({ items: lines.map(l => ({ id: l.product.id, qty: l.qty })), customer: c, shipping: coState.ship, coupon: tt.coupon?.code || "", website: honey })
         });
         const data = await res.json().catch(() => ({}));
-        if (!res.ok || !data.url) throw new Error(data.error || "");
+        if (!res.ok || !data.url) { stockConflict(data); throw new Error(data.error || ""); }
+        if (data.order) N.store.set(N.KEYS.lastOrder, { id: data.order, pay: "card", at: Date.now() });
         location.href = data.url;
         return;
       } catch (err) {
@@ -1637,6 +1742,37 @@
         coBusy = false; renderCheckout();
         return;
       }
+    }
+
+    // szerver oldali rendelés (adatbázissal); ha még nincs bekapcsolva, a levelezős rendelés marad
+    if (N.live.features?.db !== false) {
+      coBusy = true; renderCheckout();
+      let data = null, res = null;
+      try {
+        res = await fetch("/api/orders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Accept: "application/json" },
+          body: JSON.stringify({ items: lines.map(l => ({ id: l.product.id, qty: l.qty })), customer: c, shipping: coState.ship, pay: coState.pay, coupon: tt.coupon?.code || "", website: honey })
+        });
+        data = /json/.test(res.headers.get("content-type") || "") ? await res.json().catch(() => null) : null;
+      } catch {}
+      coBusy = false;
+      if (res && res.ok && data?.id) {
+        coDone = { server: true, id: data.id, total: data.total, pay: data.pay, method: data.method, preorder: data.preorder, emailed: data.emailed, email: c.email, bankDetails: data.bankDetails || s.bankDetails || "",
+          lines: lines.map(l => ({ id: l.product.id, name: l.product.name, qty: l.qty, price: l.product.price })) };
+        N.store.set(N.KEYS.lastOrder, { id: data.id, pay: data.pay, at: Date.now() });
+        cart.clear();
+        renderCheckout();
+        window.scrollTo({ top: 0, behavior: motionOK() ? "smooth" : "auto" });
+        return;
+      }
+      if (res && data && !data.fallback) {
+        stockConflict(data);
+        coError = esc(data.error || "A rendelés most nem sikerült. Próbáld újra.");
+        renderCheckout();
+        return;
+      }
+      if (!s.email) { coError = "A rendelés most nem küldhető el. Próbáld újra később."; renderCheckout(); return; }
     }
 
     const order = {
@@ -1662,9 +1798,11 @@
     box.addEventListener("input", e => {
       const el = e.target;
       if (!el.name || !CO_FIELDS.includes(el.name)) return;
-      coState[el.name] = el.value;
+      coState[el.name] = el.type === "checkbox" ? (el.checked ? "1" : "0") : el.value;
+      if (el.name === "locker") { coState.lockerId = ""; coState.lockerProvider = ""; }
       saveCo();
-      if (el.type === "radio") { coError = ""; renderCheckout(); }
+      if (el.dataset.zipFor) zipFill(el);
+      if (el.type === "radio" || el.type === "checkbox") { coError = ""; renderCheckout(); }
       else if (el.getAttribute("aria-invalid") === "true") { el.setAttribute("aria-invalid", "false"); const er = $(`[data-err="${el.name}"]`); if (er) er.hidden = true; }
     });
     box.addEventListener("submit", e => { e.preventDefault(); if (!coBusy) submitCheckout(); });
@@ -1679,11 +1817,360 @@
       if (e.target.closest("[data-coupon-apply]")) { applyCoupon(); return; }
       if (e.target.closest("[data-coupon-remove]")) { coState.coupon = ""; coCouponInput = ""; coCouponMsg = ""; saveCo(); renderCheckout(); return; }
       if (e.target.closest("[data-summary-toggle]")) { coSummaryOpen = !coSummaryOpen; renderCheckout(); return; }
+      if (e.target.closest("[data-locker-open]")) { openLockerMap(); return; }
+      if (e.target.closest("[data-locker-clear]")) { coState.locker = coState.lockerId = coState.lockerProvider = ""; saveCo(); renderCheckout(); return; }
+      if (e.target.closest("[data-copy-id]") && coDone) { try { await navigator.clipboard.writeText(coDone.id); toast("A rendelésszám a vágólapra került."); } catch { toast(coDone.id); } return; }
       if (e.target.closest("[data-copy-order]") && coDone) {
         try { await navigator.clipboard.writeText(orderText(coDone)); toast("A rendelés a vágólapra került."); }
         catch { toast("A másolás nem sikerült – jelöld ki a szöveget a részleteknél."); }
       }
     });
+  }
+
+  /* ---------------- számlázási adatok, csomagautomata, irányítószám ---------------- */
+  const needBilling = () => coState.ship !== "home" || coState.billSame === "0";
+  function billingHTML() {
+    const home = coState.ship === "home";
+    const company = coState.wantCompany === "1";
+    return `
+          <section class="co-section" aria-labelledby="co-hb">
+            <h2 id="co-hb"><b>3</b>Számlázási adatok</h2>
+            ${home ? `<label class="check"><input type="checkbox" name="billSame" ${coState.billSame !== "0" ? "checked" : ""}> A számlázási cím megegyezik a szállítási címmel</label>` : `<p class="muted" style="margin:0 0 12px;font-size:.92rem">A számlához kérjük a címed.</p>`}
+            ${needBilling() ? `<div class="form-grid">
+              ${fieldHTML("billName", "Név a számlán (ha eltér)", 'autocomplete="billing name" placeholder="Üresen hagyva a fenti név"', "full")}
+              ${fieldHTML("billZip", "Irányítószám", 'autocomplete="billing postal-code" inputmode="numeric" maxlength="4" required data-zip-for="billCity"', "zip")}
+              ${fieldHTML("billCity", "Település", 'autocomplete="billing address-level2" required list="zip-city-list"')}
+              ${fieldHTML("billAddress", "Utca, házszám", 'autocomplete="billing street-address" required', "full")}
+            </div>` : ""}
+            <label class="check"><input type="checkbox" name="wantCompany" ${company ? "checked" : ""}> Cég nevére kérem a számlát</label>
+            ${company ? `<div class="form-grid">${fieldHTML("billCompany", "Cégnév", 'autocomplete="organization" required')}${fieldHTML("billTax", "Adószám", 'inputmode="numeric" placeholder="12345678-1-12"')}</div>` : ""}
+          </section>`;
+  }
+
+  function lockerPickHTML() {
+    const chosen = coState.locker && coState.lockerId;
+    return `<div class="locker-pick full">
+      ${chosen ? `<div class="locker-chosen">${ICON.pin}<span><strong>${esc(coState.locker.split(" – ")[1]?.split(",")[0] || coState.locker)}</strong><small>${esc(coState.locker)}</small></span><button class="btn btn-ghost btn-sm" type="button" data-locker-open>Csere</button></div>`
+        : `<button class="btn btn-primary btn-block locker-btn" type="button" data-locker-open>${ICON.pin}Automata kiválasztása térképen</button>`}
+      <p class="hint">Foxpost és Packeta Z-BOX automaták és átvevőpontok. Más szolgáltató automatáját alább kézzel is megadhatod.</p>
+    </div>`;
+  }
+
+  let lockerMsg = null;
+  function openLockerMap() {
+    closeLockerMap();
+    const box = document.createElement("div");
+    box.className = "locker-modal";
+    box.dataset.lockerModal = "";
+    box.setAttribute("role", "dialog");
+    box.setAttribute("aria-modal", "true");
+    box.setAttribute("aria-label", "Csomagautomata választó");
+    box.innerHTML = `<div class="lm-card"><div class="lm-head"><strong>Válassz csomagautomatát</strong><button class="icon-btn" type="button" data-locker-close aria-label="Bezárás">${ICON.close}</button></div>
+      <iframe src="https://cdn.foxpost.hu/apt-finder/v1/app/" title="Foxpost csomagautomata kereső" allow="geolocation" loading="eager"></iframe>
+      <p class="lm-foot">Keress rá a címedre, majd kattints a „Kiválasztom” gombra.</p></div>`;
+    document.body.appendChild(box);
+    lock(true);
+    box.addEventListener("click", e => { if (e.target === box || e.target.closest("[data-locker-close]")) closeLockerMap(); });
+    lockerMsg = e => {
+      if (e.origin !== "https://cdn.foxpost.hu") return;
+      let apt = e.data;
+      try { if (typeof apt === "string") apt = JSON.parse(apt); } catch { return; }
+      if (!apt || typeof apt !== "object" || !(apt.place_id || apt.operator_id) || !apt.name) return;
+      const brand = /z-?box|z-?pont|packeta/i.test(String(apt.variant || "")) ? `Packeta ${apt.variant}` : String(apt.variant || "FOXPOST");
+      const addr = apt.address || [apt.zip, apt.city].filter(Boolean).join(" ") + (apt.street ? `, ${apt.street}` : "");
+      coState.locker = `${brand} – ${apt.name}${addr ? `, ${addr}` : ""}`.slice(0, 230);
+      coState.lockerId = String(apt.place_id || apt.operator_id).slice(0, 40);
+      coState.lockerProvider = brand.slice(0, 30);
+      saveCo();
+      closeLockerMap();
+      renderCheckout();
+      toast(`Kiválasztva: ${apt.name}`);
+    };
+    window.addEventListener("message", lockerMsg);
+    $("[data-locker-close]", box).focus();
+  }
+  function closeLockerMap() {
+    const box = $("[data-locker-modal]");
+    if (lockerMsg) { window.removeEventListener("message", lockerMsg); lockerMsg = null; }
+    if (box) { box.remove(); if (!openDrawerEl && !searchOpen) lock(false); }
+  }
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && $("[data-locker-modal]")) closeLockerMap(); });
+
+  /* irányítószám → település (Magyar Posta adatok, MIT licenc: pbakondy/hu-postal-codes) */
+  let zipData = null, zipLoading = null;
+  const loadZips = () => zipData ? Promise.resolve(zipData) : (zipLoading = zipLoading || fetch(`/assets/data/zip.json?v=${encodeURIComponent(document.querySelector('script[src*="shop.js"]')?.src.split("v=")[1] || "1")}`).then(r => r.ok ? r.json() : {}).then(d => (zipData = d)).catch(() => ({})));
+  async function zipFill(el) {
+    const zip = el.value.replace(/\D/g, "");
+    if (zip.length !== 4) return;
+    const data = await loadZips();
+    const cities = String(data[zip] || "").split("|").filter(Boolean);
+    const target = document.getElementById(`co-${el.dataset.zipFor}`);
+    let dl = $("#zip-city-list");
+    if (!dl) { dl = document.createElement("datalist"); dl.id = "zip-city-list"; document.body.appendChild(dl); }
+    dl.innerHTML = cities.map(c => `<option value="${esc(c)}">`).join("");
+    if (!target || !cities.length) return;
+    if (!target.value.trim() || target.dataset.auto === "1" || !cities.includes(target.value.trim())) {
+      target.value = cities[0];
+      target.dataset.auto = "1";
+      coState[el.dataset.zipFor] = cities[0];
+      saveCo();
+      target.setAttribute("aria-invalid", "false");
+      const er = $(`[data-err="${el.dataset.zipFor}"]`); if (er) er.hidden = true;
+    }
+  }
+
+  /* a szerver jelezte, hogy közben elfogyott: a kosarat a valós készlethez igazítjuk */
+  function stockConflict(data) {
+    if (!data || !data.productId || typeof data.left !== "number") return;
+    if (data.left > 0) cart.set(data.productId, data.left); else cart.remove(data.productId);
+    N.load({ fresh: true });
+  }
+
+  /* ---------------- termékoldal: adatok, értesítő, vélemények ---------------- */
+  function specsHTML(p) {
+    const rows = [
+      p.set ? ["Szett", p.set] : null,
+      p.cardNo ? ["Kártyaszám", p.cardNo] : null,
+      p.rarity ? ["Ritkaság", p.rarity] : null,
+      p.condition ? ["Állapot", (N.CONDITIONS.find(c => c.value === p.condition) || {}).label] : null,
+      p.lang ? ["Nyelv", langLabel(p.lang)] : null,
+      p.grade ? ["Értékelés (grading)", p.grade] : null,
+      p.releaseDate ? ["Megjelenés", N.fmtDate(p.releaseDate)] : null
+    ].filter(Boolean);
+    if (rows.length < 2 && !p.condition) return "";
+    return `<dl class="specs">${rows.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>`;
+  }
+
+  const notifyForms = new Map();
+  function notifyForm(p) {
+    if (notifyForms.has(p.id)) return notifyForms.get(p.id);
+    const f = document.createElement("form");
+    f.className = "notify-box";
+    f.noValidate = true;
+    f.innerHTML = `<strong>${ICON.bell}${esc(t("notify.title"))}</strong><p>${esc(N.isSoon(p) ? "Szólunk, amint rendelhető lesz." : t("notify.text"))}</p>
+      <div class="nf-row"><label class="sr-only" for="nf-${p.id}">E-mail cím</label><input class="input" id="nf-${p.id}" type="email" name="email" autocomplete="email" inputmode="email" placeholder="E-mail címed" required><button class="btn btn-primary" type="submit">Kérem az értesítést</button></div>
+      <div class="hp" aria-hidden="true"><input name="website" tabindex="-1" autocomplete="off"></div><p class="nf-msg" role="status"></p>`;
+    f.addEventListener("submit", async e => {
+      e.preventDefault();
+      const msg = $(".nf-msg", f), email = f.email.value.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.textContent = "Adj meg érvényes e-mail címet."; f.email.focus(); return; }
+      const btn = $("button", f); btn.disabled = true;
+      try {
+        const res = await fetch("/api/notify", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, productId: p.id, website: f.website.value }) });
+        const d = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(d.error || "");
+        f.innerHTML = `<strong>${ICON.check}${esc(t("notify.ok"))}</strong>`;
+      } catch (err) { msg.textContent = err.message || "Most nem sikerült. Próbáld újra később."; btn.disabled = false; }
+    });
+    notifyForms.set(p.id, f);
+    return f;
+  }
+
+  const revState = { id: 0, data: null, loading: false, open: false };
+  function renderReviews(p) {
+    const box = $("[data-reviews]");
+    if (!box) return;
+    const on = !!N.live.features?.db;
+    box.hidden = !on;
+    if (!on) return;
+    if (revState.id !== p.id) { revState.id = p.id; revState.data = null; revState.open = false; box.innerHTML = ""; delete box.dataset.painted; }
+    if (!revState.data && !revState.loading) {
+      revState.loading = true;
+      fetch(`/api/reviews?product=${p.id}`).then(r => r.ok ? r.json() : { reviews: [] }).catch(() => ({ reviews: [] })).then(d => {
+        revState.loading = false; revState.data = d; paintReviews(p);
+      });
+      return;
+    }
+    if (revState.data && !box.dataset.painted) paintReviews(p);
+  }
+  function paintReviews(p) {
+    const box = $("[data-reviews]");
+    const d = revState.data || { reviews: [] };
+    if (!box) return;
+    box.dataset.painted = "1";
+    const list = d.reviews || [];
+    const dist = [5, 4, 3, 2, 1].map(n => ({ n, c: list.filter(r => r.rating === n).length }));
+    box.innerHTML = `
+      <div class="sec-head"><div><h2 class="display" id="velemenyek">${esc(t("rev.title"))}</h2>${list.length ? `<p>${starsHTML(d.avg, "stars lg")} <b>${Number(d.avg).toLocaleString("hu-HU")}</b> / 5 · ${list.length} vélemény</p>` : ""}</div><button class="btn btn-ghost" type="button" data-rev-write aria-expanded="${revState.open}">${esc(t("rev.write"))}</button></div>
+      <div class="rev-layout">
+        ${list.length ? `<div class="rev-dist">${dist.map(x => `<div><span>${x.n}★</span><i><b style="width:${list.length ? x.c / list.length * 100 : 0}%"></b></i><small>${x.c}</small></div>`).join("")}</div>` : ""}
+        <div class="rev-list">${list.length ? list.slice(0, 12).map(r => `<article class="rev">
+          <header>${starsHTML(r.rating)}<strong>${esc(r.name)}</strong>${r.verified ? `<span class="verified">${ICON.check}Ellenőrzött vásárlás</span>` : ""}<time>${esc(new Date(r.date).toLocaleDateString("hu-HU"))}</time></header>
+          ${r.title ? `<h3>${esc(r.title)}</h3>` : ""}<p>${esc(r.body)}</p>${r.reply ? `<div class="rev-reply"><b>NS Card:</b> ${esc(r.reply)}</div>` : ""}</article>`).join("") : `<p class="muted">${esc(t("rev.empty"))}</p>`}</div>
+      </div>
+      <form class="panel rev-form" data-rev-form ${revState.open ? "" : "hidden"} novalidate>
+        <div class="field"><span class="label" id="rf-r">Értékelés</span><div class="star-pick" role="radiogroup" aria-labelledby="rf-r">${[1, 2, 3, 4, 5].map(n => `<label><input type="radio" name="rating" value="${n}"><span aria-hidden="true">★</span><span class="sr-only">${n} csillag</span></label>`).join("")}</div></div>
+        <div class="form-grid">
+          <div class="field"><label for="rf-name">Neved (megjelenik)</label><input class="input" id="rf-name" name="name" maxlength="60" autocomplete="given-name" required></div>
+          <div class="field"><label for="rf-title">Cím (nem kötelező)</label><input class="input" id="rf-title" name="title" maxlength="100"></div>
+          <div class="field full"><label for="rf-body">Véleményed</label><textarea class="textarea" id="rf-body" name="body" rows="4" maxlength="1500" required placeholder="Milyen volt a termék, a csomagolás, a szállítás?"></textarea></div>
+          <div class="field"><label for="rf-email">E-mail (nem jelenik meg)</label><input class="input" id="rf-email" name="email" type="email" autocomplete="email"></div>
+          <div class="field"><label for="rf-order">Rendelésszám (nem kötelező)</label><input class="input" id="rf-order" name="orderId" placeholder="NSC-…" value="${esc(N.store.get(N.KEYS.lastOrder)?.id || "")}"><span class="hint">Az e-mail és a rendelésszám egyezésekor „Ellenőrzött vásárlás” jelölést kap.</span></div>
+        </div>
+        <div class="hp" aria-hidden="true"><input name="website" tabindex="-1" autocomplete="off"></div>
+        <p class="form-msg" data-rev-msg role="status"></p>
+        <button class="btn btn-primary" type="submit">Vélemény elküldése</button>
+      </form>`;
+    const f = $("[data-rev-form]", box);
+    f.addEventListener("submit", async e => {
+      e.preventDefault();
+      const msg = $("[data-rev-msg]", f);
+      const body = { productId: p.id, rating: Number(f.rating.value), name: f.name.value, title: f.title.value, body: f.body.value, email: f.email.value, orderId: f.orderId.value, website: f.website.value };
+      if (!body.rating) { msg.textContent = "Válassz 1–5 csillagot."; return; }
+      const btn = $('button[type="submit"]', f); btn.disabled = true;
+      try {
+        const res = await fetch("/api/reviews", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+        const d = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(d.error || "");
+        f.innerHTML = `<p class="notice success">${esc(t("rev.thanks"))}</p>`;
+      } catch (err) { msg.textContent = err.message || "Most nem sikerült elküldeni. Próbáld újra később."; btn.disabled = false; }
+    });
+    $("[data-rev-write]", box).addEventListener("click", e => {
+      revState.open = !f.hidden ? false : true;
+      f.hidden = !revState.open;
+      e.currentTarget.setAttribute("aria-expanded", String(revState.open));
+      if (revState.open) f.querySelector("input[name=rating]")?.focus();
+    });
+  }
+
+  /* ---------------- kezdőlap: megjelenések, vélemények, cikkek, hírlevél ---------------- */
+  function renderReleases(list, s) {
+    const box = $("[data-releases]");
+    if (!box) return;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const start = new Date(today - 14 * 864e5).toISOString().slice(0, 10);
+    const used = new Set();
+    const rows = (s.releases || []).filter(r => r.date.padEnd(10, "-31") >= start).map(r => {
+      const p = r.productId ? N.byId(r.productId) : null;
+      if (p) used.add(p.id);
+      return { date: r.date, title: r.title, note: r.note, p };
+    });
+    list.filter(p => p.releaseDate && (N.isPreorder(p) || N.isSoon(p)) && !used.has(p.id) && p.releaseDate >= start)
+      .forEach(p => rows.push({ date: p.releaseDate, title: p.name, note: p.set, p }));
+    rows.sort((a, b) => a.date.localeCompare(b.date));
+    const items = rows.slice(0, 8);
+    box.innerHTML = items.map(r => {
+      const m = r.date.match(/^(\d{4})-(\d{2})(?:-(\d{2}))?/);
+      const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3] || 1));
+      const month = d.toLocaleDateString("hu-HU", { month: "short" }).replace(".", "");
+      const past = d < today;
+      const st = r.p ? (N.isPreorder(r.p) && N.isBuyable(r.p) ? `<span class="rel-st pre">Előrendelhető</span>` : N.isBuyable(r.p) ? `<span class="rel-st in">Kapható</span>` : `<span class="rel-st soon">Hamarosan</span>`) : past ? `<span class="rel-st">Megjelent</span>` : "";
+      const inner = `<span class="rel-date${past ? " past" : ""}"><b>${m[3] ? Number(m[3]) : "–"}</b><small>${esc(month)}</small></span>
+        ${r.p?.images[0] ? `<img src="${esc(imageUrl(r.p.images[0]))}" alt="" loading="lazy">` : `<span class="rel-ph" aria-hidden="true">${ICON.cal}</span>`}
+        <span class="rel-txt"><strong>${esc(r.title)}</strong>${r.note ? `<small>${esc(r.note)}</small>` : ""}</span>${st}`;
+      return r.p ? `<a class="rel" href="${productUrl(r.p)}">${inner}</a>` : `<div class="rel">${inner}</div>`;
+    }).join("");
+    showSection("releases", items.length > 0);
+  }
+
+  const homeRev = { loading: false, data: null };
+  function renderHomeReviews() {
+    const box = $("[data-home-reviews]");
+    if (!box) return;
+    if (!N.live.features?.db) { showSection("reviews", false); return; }
+    if (!homeRev.data) {
+      if (!homeRev.loading) {
+        homeRev.loading = true;
+        fetch("/api/reviews?latest=6").then(r => r.ok ? r.json() : null).catch(() => null).then(d => { homeRev.data = d || { reviews: [] }; renderHomeReviews(); });
+      }
+      showSection("reviews", false);
+      return;
+    }
+    const list = homeRev.data.reviews || [];
+    const head = $("[data-reviews-sub]");
+    if (head && homeRev.data.count) head.textContent = t("reviews.text", { n: homeRev.data.count, avg: Number(homeRev.data.avg).toLocaleString("hu-HU") });
+    box.innerHTML = list.map(r => {
+      const p = N.byId(r.productId);
+      return `<figure class="hrev">${starsHTML(r.rating)}<blockquote>${esc(r.body.length > 220 ? r.body.slice(0, 217) + "…" : r.body)}</blockquote><figcaption><strong>${esc(r.name)}</strong>${r.verified ? `<span class="verified">${ICON.check}Ellenőrzött vásárlás</span>` : ""}${p ? `<a href="${productUrl(p)}">${esc(p.name)}</a>` : ""}</figcaption></figure>`;
+    }).join("");
+    showSection("reviews", list.length > 0);
+  }
+
+  function postCard(x, big = false) {
+    return `<a class="post-card${big ? " big" : ""}" href="/blog/${encodeURIComponent(x.slug)}">
+      <span class="pc-cover">${x.cover ? `<img src="${esc(imageUrl(x.cover))}" alt="" loading="lazy">` : `<img src="/img/brand/mark.webp" alt="" class="pc-mark" loading="lazy">`}</span>
+      <span class="pc-body">${x.tag ? `<em>${esc(x.tag)}</em>` : ""}<strong>${esc(x.title)}</strong>${x.excerpt ? `<small>${esc(x.excerpt)}</small>` : ""}<time>${esc(N.fmtDate(x.date))}</time></span></a>`;
+  }
+  const publishedPosts = s => (s.posts || []).filter(x => x.published).sort((a, b) => b.date.localeCompare(a.date));
+  function renderHomeBlog(s) {
+    const box = $("[data-home-blog]");
+    if (!box) return;
+    const posts = publishedPosts(s).slice(0, 3);
+    box.innerHTML = posts.map(x => postCard(x)).join("");
+    showSection("blog", posts.length > 0);
+  }
+
+  function newsFormHTML(source, compact = false) {
+    return `<form class="news-form${compact ? " compact" : ""}" data-news-form data-source="${esc(source)}" novalidate>
+      <div class="nf-row"><label class="sr-only" for="nw-${source}">E-mail cím</label><input class="input" id="nw-${source}" type="email" name="email" autocomplete="email" inputmode="email" placeholder="E-mail címed" required><button class="btn btn-primary" type="submit">${esc(t("news.button"))}</button></div>
+      <label class="check consent"><input type="checkbox" name="consent" required> <span>${esc(t("news.consent"))}${N.settings().pages?.adatkezeles ? ` <a href="/info?p=adatkezeles" target="_blank" rel="noopener">Adatkezelés</a>` : ""}</span></label>
+      <div class="hp" aria-hidden="true"><input name="website" tabindex="-1" autocomplete="off"></div>
+      <p class="nf-msg" role="status"></p></form>`;
+  }
+  document.addEventListener("submit", async e => {
+    const f = e.target.closest?.("[data-news-form]");
+    if (!f) return;
+    e.preventDefault();
+    const msg = $(".nf-msg", f);
+    const email = f.email.value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg.textContent = "Adj meg érvényes e-mail címet."; f.email.focus(); return; }
+    if (!f.consent.checked) { msg.textContent = "A feliratkozáshoz pipáld be a hozzájárulást."; f.consent.focus(); return; }
+    const btn = $('button[type="submit"]', f); btn.disabled = true;
+    try {
+      const res = await fetch("/api/subscribe", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, consent: true, source: f.dataset.source, website: f.website.value }) });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(d.error || "");
+      f.innerHTML = `<p class="nf-done">${ICON.check}<span>${esc(d.already ? "Már feliratkoztál, köszönjük!" : d.confirm ? t("news.ok") : t("news.okDirect"))}</span></p>`;
+    } catch (err) { msg.textContent = err.message || "Most nem sikerült. Próbáld újra később."; btn.disabled = false; }
+  });
+
+  /* ---------------- cikkek ---------------- */
+  function renderBlog() {
+    const box = $("[data-blog]");
+    if (!box) return;
+    const s = N.settings();
+    const posts = publishedPosts(s);
+    const slug = decodeURIComponent((location.pathname.match(/^\/blog\/([^/?#]+)/) || [])[1] || "");
+    const title = $("[data-blog-title]"), crumb = $("[data-blog-crumb]");
+    if (!slug) {
+      document.title = `${t("blog.page")} – NS Card`;
+      if (title) title.textContent = t("blog.page");
+      if (crumb) crumb.innerHTML = `<li><a href="/">${esc(t("nav.home"))}</a></li><li aria-current="page">${esc(t("blog.page"))}</li>`;
+      box.innerHTML = posts.length ? `<div class="post-grid">${posts.map((x, i) => postCard(x, i === 0)).join("")}</div>` : emptyHTML("Még nincs cikk", "Hamarosan jönnek az első útmutatók.", `<a class="btn btn-primary" href="/products">${esc(t("hero.cta"))}</a>`);
+      return;
+    }
+    const x = posts.find(y => y.slug === slug);
+    if (!x) {
+      if (N.data && N.data.source !== "cache") box.innerHTML = emptyHTML("A cikk nem található", "Lehet, hogy átneveztük vagy lekerült.", '<a class="btn btn-primary" href="/blog">Összes cikk</a>');
+      return;
+    }
+    document.title = `${x.title} – NS Card`;
+    if (title) title.textContent = x.title;
+    if (crumb) crumb.innerHTML = `<li><a href="/">${esc(t("nav.home"))}</a></li><li><a href="/blog">${esc(t("blog.page"))}</a></li><li aria-current="page">${esc(x.title)}</li>`;
+    const more = posts.filter(y => y.slug !== x.slug).slice(0, 3);
+    box.innerHTML = `<article class="post panel prose">
+        <p class="post-meta">${x.tag ? `<em>${esc(x.tag)}</em>` : ""}<time datetime="${esc(x.date)}">${esc(N.fmtDate(x.date))}</time></p>
+        ${x.cover ? `<img class="post-cover" src="${esc(imageUrl(x.cover))}" alt="">` : ""}
+        ${x.excerpt ? `<p class="lead">${esc(x.excerpt)}</p>` : ""}
+        ${N.mdToHtml(x.body)}
+        <div class="post-share"><button class="btn btn-ghost btn-sm" type="button" data-share-post>${ICON.share}Megosztás</button><a class="btn btn-primary btn-sm" href="/products">${esc(t("hero.cta"))}</a></div>
+      </article>
+      ${more.length ? `<section class="section-tight"><div class="sec-head"><h2 class="display">További cikkek</h2><a class="link-more" href="/blog">Összes${ICON.arrow}</a></div><div class="post-grid">${more.map(y => postCard(y)).join("")}</div></section>` : ""}`;
+    $("[data-share-post]", box)?.addEventListener("click", () => {
+      const data = { title: x.title, url: location.href };
+      if (navigator.share) navigator.share(data).catch(() => {});
+      else navigator.clipboard?.writeText(location.href).then(() => toast("A cikk linkje a vágólapra került."), () => toast(location.href));
+    });
+  }
+
+  /* Cloudflare Web Analytics (ha az adminban token van megadva; a Pages beépített elemzése enélkül is működik) */
+  function analytics(s) {
+    if (!s.analyticsToken || N.previewMode || document.querySelector("script[data-cf-beacon]")) return;
+    const sc = document.createElement("script");
+    sc.defer = true;
+    sc.src = "https://static.cloudflareinsights.com/beacon.min.js";
+    sc.setAttribute("data-cf-beacon", JSON.stringify({ token: s.analyticsToken }));
+    document.head.appendChild(sc);
   }
 
   /* ---------------- tájékoztató oldalak ---------------- */
@@ -1768,6 +2255,8 @@
     else if (page === "product") renderProduct();
     else if (page === "checkout") renderCheckout();
     else if (page === "info") renderInfo();
+    else if (page === "blog") renderBlog();
+    analytics(s);
     if (openDrawerEl?.matches("[data-cart]")) renderCart();
     if (searchOpen) renderSheet();
     updateCount(false);
@@ -1794,6 +2283,13 @@
   if (page === "product") bindProduct();
   if (page === "checkout") bindCheckout();
   if (page === "success") renderSuccess();
+  {
+    const hl = new URLSearchParams(location.search).get("hirlevel");
+    if (hl) {
+      setTimeout(() => toast(hl === "ok" ? "Feliratkozás megerősítve. Köszönjük!" : hl === "leiratkozva" ? "Leiratkoztál a hírlevélről." : "Ez a link már nem érvényes."), 400);
+      history.replaceState(null, "", location.pathname);
+    }
+  }
 
   /* Admin élő előnézet: a szülő (admin) ablak küldi a még nem publikált beállításokat */
   if (window.parent !== window) {

@@ -1,134 +1,81 @@
-/* Cloudflare Pages Function – Stripe Checkout indítása.
- * Csak GitHubról telepített Pages projektben fut (a feltöltött mappás telepítés nem futtat függvényeket).
- * Szükséges környezeti változó: STRIPE_SECRET_KEY (Settings → Variables and Secrets, típus: Secret).
- * Az árakat és a készletet a szerver a publikált katalógusból ellenőrzi, a böngészőtől csak azonosítót és darabszámot fogad el.
- */
-const json = (data, status = 200) => new Response(JSON.stringify(data), {
-  status,
-  headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" }
-});
-
-async function loadCatalog(request, env) {
-  const origin = new URL(request.url).origin;
-  let remote = null;
-  try {
-    const cfg = await env.ASSETS.fetch(new URL("/sync-config.json", origin));
-    if (cfg.ok) remote = await cfg.json();
-  } catch {}
-  if (remote?.owner && remote?.repo) {
-    const path = String(remote.path || "public/store/catalog.json").replace(/^\/+/, "");
-    const url = `https://raw.githubusercontent.com/${remote.owner}/${remote.repo}/${remote.branch || "main"}/${path}?v=${Date.now()}`;
-    try {
-      const res = await fetch(url, { cf: { cacheTtl: 0 } });
-      if (res.ok) return await res.json();
-    } catch {}
-  }
-  const local = await env.ASSETS.fetch(new URL("/store/catalog.json", origin));
-  return local.json();
-}
+/* POST /api/create-checkout-session – Stripe Checkout indítása.
+ * Szükséges: STRIPE_SECRET_KEY (Cloudflare Secret). Az árakat, a kupont és a készletet a szerver a publikált katalógusból ellenőrzi.
+ * Ha van adatbázis (DB), a rendelés „Fizetésre vár” állapotban azonnal létrejön és 45 percig foglalja a készletet. */
+import { json, readJson, loadCatalog, originOf, absUrl, clientIp } from "../../lib/core.js";
+import { getDb, rateLimit } from "../../lib/db.js";
+import { priceOrder, sanitizeCustomer, validateCustomer, insertOrder, availableMap, saveOrder, setStatus } from "../../lib/orders.js";
+import { stripe } from "../../lib/stripe.js";
 
 export async function onRequestPost({ request, env }) {
   if (!env.STRIPE_SECRET_KEY) return json({ error: "A kártyás fizetés nincs beállítva (hiányzó STRIPE_SECRET_KEY)." }, 503);
+  const body = await readJson(request);
+  if (!body) return json({ error: "Hibás kérés." }, 400);
+  const DB = await getDb(env).catch(() => null);
+  if (DB && !(await rateLimit(DB, `card:${clientIp(request)}`, 12, 600))) return json({ error: "Túl sok próbálkozás. Próbáld újra néhány perc múlva." }, 429);
 
-  let body;
-  try { body = await request.json(); } catch { return json({ error: "Hibás kérés." }, 400); }
-  const items = Array.isArray(body?.items) ? body.items : [];
-  if (!items.length || items.length > 50) return json({ error: "A kosár üres." }, 400);
+  const catalog = await loadCatalog(request, env, { fresh: true });
+  const settings = catalog.settings || {};
+  if (settings.payCard !== true) return json({ error: "A kártyás fizetés jelenleg nem elérhető." }, 403);
+  const sold = DB ? await availableMap(DB, catalog) : {};
+  const priced = priceOrder(catalog, { ...body, pay: "card" }, sold);
+  if (!priced.ok) return json({ error: priced.error, productId: priced.productId, left: priced.left }, priced.status);
+  const customer = sanitizeCustomer(body.customer, priced.method);
+  if (DB) { const bad = validateCustomer(customer, priced.method); if (bad) return json({ error: bad }, 400); }
 
-  const catalog = await loadCatalog(request, env);
-  const products = Array.isArray(catalog?.products) ? catalog.products : [];
-  const settings = catalog?.settings || {};
-  if (settings.payCard === false) return json({ error: "A kártyás fizetés jelenleg nem elérhető." }, 403);
-
+  const origin = originOf(request);
   const params = new URLSearchParams();
-  let subtotal = 0;
-  let i = 0;
-  for (const raw of items) {
-    const id = Number(raw?.id);
-    const qty = Math.max(1, Math.min(99, Math.round(Number(raw?.qty) || 0)));
-    const p = products.find(x => Number(x.id) === id && !x.hidden);
-    if (!p) return json({ error: "Az egyik termék már nem elérhető. Frissítsd az oldalt." }, 409);
-    const soon = String(p.availability || "").toLowerCase() === "coming_soon";
-    if (soon) return json({ error: `${p.name}: még nem rendelhető.` }, 409);
-    if (Number(p.stock) < qty) return json({ error: `${p.name}: csak ${p.stock} db rendelhető.` }, 409);
-    const price = Math.round(Number(p.price) || 0);
-    subtotal += price * qty;
+  priced.lines.forEach((l, i) => {
     params.append(`line_items[${i}][price_data][currency]`, "huf");
-    params.append(`line_items[${i}][price_data][unit_amount]`, String(price * 100));
-    params.append(`line_items[${i}][price_data][product_data][name]`, String(p.name).slice(0, 250));
-    const img = Array.isArray(p.images) ? String(p.images[0] || "") : "";
-    const imgUrl = /^https:\/\//.test(img) ? img : img && !/^data:/.test(img) ? `${new URL(request.url).origin}/${img.replace(/^\.?\/+/, "")}` : "";
-    if (imgUrl) params.append(`line_items[${i}][price_data][product_data][images][0]`, imgUrl);
-    params.append(`line_items[${i}][quantity]`, String(qty));
-    i++;
+    params.append(`line_items[${i}][price_data][unit_amount]`, String(l.price * 100));
+    params.append(`line_items[${i}][price_data][product_data][name]`, l.preorder ? `${l.name} (előrendelés)`.slice(0, 250) : l.name);
+    const img = absUrl(l.image, origin);
+    if (img) params.append(`line_items[${i}][price_data][product_data][images][0]`, img);
+    params.append(`line_items[${i}][quantity]`, String(l.qty));
+  });
+  let n = priced.lines.length;
+  if (priced.shipping > 0) {
+    params.append(`line_items[${n}][price_data][currency]`, "huf");
+    params.append(`line_items[${n}][price_data][unit_amount]`, String(priced.shipping * 100));
+    params.append(`line_items[${n}][price_data][product_data][name]`, `Szállítás – ${priced.methodLabel.toLowerCase()}`);
+    params.append(`line_items[${n}][quantity]`, "1");
+    n++;
+  }
+  if (priced.discount > 0) {
+    const cp = new URLSearchParams({ amount_off: String(priced.discount * 100), currency: "huf", duration: "once", max_redemptions: "1", name: `Kupon ${priced.coupon}`.slice(0, 40) });
+    const cr = await stripe(env, "/coupons", { method: "POST", params: cp });
+    if (!cr.ok || !cr.data.id) return json({ error: cr.data?.error?.message || "A kupon nem alkalmazható a kártyás fizetésnél." }, 502);
+    params.append("discounts[0][coupon]", cr.data.id);
   }
 
-  const methods = {
-    home: { on: settings.shipHome !== false, price: settings.shippingHome, label: "Házhozszállítás" },
-    locker: { on: settings.shipLocker !== false, price: settings.shippingLocker, label: "Csomagautomata" },
-    pickup: { on: !!settings.shipPickup, price: settings.shippingPickup, label: "Személyes átvétel" }
-  };
-  const method = methods[body?.shipping]?.on ? body.shipping : Object.keys(methods).find(k => methods[k].on) || "home";
+  let order = null;
+  if (DB) order = await insertOrder(DB, priced, customer, { status: "pending_payment" });
 
-  // kuponkód: a szerver a publikált beállításokból ellenőrzi
-  const code = String(body?.coupon || "").trim().toUpperCase();
-  let coupon = null;
-  if (code) {
-    coupon = (Array.isArray(settings.coupons) ? settings.coupons : []).find(c => String(c?.code || "").toUpperCase() === code && c.active !== false) || null;
-    if (!coupon) return json({ error: "A kuponkód nem érvényes. Távolítsd el, vagy próbálj másikat." }, 409);
-    if (Number(coupon.minOrder) > 0 && subtotal < Number(coupon.minOrder)) return json({ error: `A(z) ${code} kupon csak ${Number(coupon.minOrder).toLocaleString("hu-HU")} Ft feletti rendelésnél használható.` }, 409);
-  }
-  const discount = !coupon ? 0 : coupon.type === "percent" ? Math.round(subtotal * Math.min(90, Number(coupon.value) || 0) / 100)
-    : coupon.type === "fixed" ? Math.min(subtotal, Math.round(Number(coupon.value) || 0)) : 0;
-  const couponShip = coupon?.type === "ship" && method !== "pickup";
-
-  const free = couponShip || (method !== "pickup" && Number(settings.freeShippingFrom) > 0 && subtotal >= Number(settings.freeShippingFrom));
-  const shipping = free ? 0 : Math.round(Number(methods[method].price) || 0);
-  if (shipping > 0) {
-    params.append(`line_items[${i}][price_data][currency]`, "huf");
-    params.append(`line_items[${i}][price_data][unit_amount]`, String(shipping * 100));
-    params.append(`line_items[${i}][price_data][product_data][name]`, `Szállítás – ${methods[method].label.toLowerCase()}`);
-    params.append(`line_items[${i}][quantity]`, "1");
-  }
-
-  if (discount > 0) {
-    const cp = new URLSearchParams({ amount_off: String(discount * 100), currency: "huf", duration: "once", max_redemptions: "1", name: `Kupon ${code}`.slice(0, 40) });
-    const cr = await fetch("https://api.stripe.com/v1/coupons", {
-      method: "POST",
-      headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`, "Content-Type": "application/x-www-form-urlencoded" },
-      body: cp
-    });
-    const cd = await cr.json().catch(() => ({}));
-    if (!cr.ok || !cd.id) return json({ error: cd?.error?.message || "A kupon nem alkalmazható a kártyás fizetésnél." }, 502);
-    params.append("discounts[0][coupon]", cd.id);
-  }
-
-  const c = body?.customer || {};
-  const origin = new URL(request.url).origin;
   params.append("mode", "payment");
   params.append("locale", "hu");
   params.append("submit_type", "pay");
   params.append("billing_address_collection", "auto");
-  params.append("phone_number_collection[enabled]", "false");
+  params.append("expires_at", String(Math.floor(Date.now() / 1000) + 31 * 60));
   params.append("custom_text[submit][message]", "A fizetés után e-mailben visszaigazoljuk a rendelést, és értesítünk a feladásról.");
   params.append("success_url", `${origin}/success?session_id={CHECKOUT_SESSION_ID}`);
-  params.append("cancel_url", `${origin}/cancel`);
-  if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(c.email || ""))) params.append("customer_email", String(c.email));
+  params.append("cancel_url", `${origin}/cancel${order ? `?order=${encodeURIComponent(order.id)}` : ""}`);
+  if (customer.email) params.append("customer_email", customer.email);
+  if (order) { params.append("client_reference_id", order.id); params.append("payment_intent_data[description]", `Rendelés ${order.id}`); }
   const meta = {
-    name: c.name, phone: c.phone, shipping: methods[method].label,
-    address: method === "locker" ? c.locker : method === "pickup" ? "" : `${c.zip || ""} ${c.city || ""}, ${c.address || ""}`, note: c.note,
-    coupon: code || ""
+    order_id: order?.id || "", name: customer.name, phone: customer.phone, shipping: priced.methodLabel,
+    address: priced.method === "locker" ? customer.locker : priced.method === "pickup" ? "" : `${customer.zip} ${customer.city}, ${customer.address}`,
+    note: customer.note, coupon: priced.coupon
   };
   for (const [k, v] of Object.entries(meta)) if (v) params.append(`metadata[${k}]`, String(v).slice(0, 480));
 
-  const res = await fetch("https://api.stripe.com/v1/checkout/sessions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${env.STRIPE_SECRET_KEY}`, "Content-Type": "application/x-www-form-urlencoded" },
-    body: params
-  });
-  const data = await res.json();
-  if (!res.ok) return json({ error: data?.error?.message || "A fizetés indítása nem sikerült." }, 502);
-  return json({ url: data.url, id: data.id });
+  const res = await stripe(env, "/checkout/sessions", { method: "POST", params });
+  if (!res.ok) {
+    if (order) { const o = { ...order, paid: false, email: customer.email, data: order.data }; try { await setStatus(DB, o, "cancelled", "rendszer"); } catch {} }
+    return json({ error: res.data?.error?.message || "A fizetés indítása nem sikerült." }, 502);
+  }
+  if (order) {
+    try { await DB.prepare("UPDATE orders SET stripe_session = ? WHERE id = ?").bind(res.data.id, order.id).run(); } catch {}
+  }
+  return json({ url: res.data.url, id: res.data.id, order: order?.id || "" });
 }
 
 export const onRequest = () => json({ error: "Csak POST kérés engedélyezett." }, 405);

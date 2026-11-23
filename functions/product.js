@@ -1,25 +1,7 @@
 /* Cloudflare Pages Function – a termékoldal címét, leírását, megosztási képét és schema.org adatait
  * már a szerver beírja a HTML-be (Google, Facebook, Messenger előnézet). Bármilyen hiba esetén a sima oldalt adja vissza. */
-const SITE = "https://www.nscard.hu";
-async function loadCatalog(request, env) {
-  const origin = new URL(request.url).origin;
-  let remote = null;
-  try {
-    const cfg = await env.ASSETS.fetch(new URL("/sync-config.json", origin));
-    if (cfg.ok) remote = await cfg.json();
-  } catch {}
-  if (remote?.owner && remote?.repo) {
-    const path = String(remote.path || "public/store/catalog.json").replace(/^\/+/, "");
-    const url = `https://raw.githubusercontent.com/${remote.owner}/${remote.repo}/${remote.branch || "main"}/${path}?m=${Math.floor(Date.now() / 60000)}`;
-    try {
-      const res = await fetch(url, { cf: { cacheTtl: 60, cacheEverything: true } });
-      if (res.ok) return await res.json();
-    } catch {}
-  }
-  const local = await env.ASSETS.fetch(new URL("/store/catalog.json", origin));
-  return local.json();
-}
-
+import { SITE, loadCatalog, availabilityOf } from "../lib/core.js";
+import { getDb } from "../lib/db.js";
 const fmtFt = v => `${Math.round(Number(v) || 0).toLocaleString("hu-HU")} Ft`;
 const absUrl = (src, base) => { const s = String(src || "").trim(); if (!s) return ""; if (/^https?:/i.test(s)) return s; return base + "/" + s.replace(/^\.?\/+/, ""); };
 
@@ -39,13 +21,23 @@ export async function onRequestGet(context) {
     const base = new URL(request.url).origin;
     const img = absUrl(Array.isArray(p.images) ? p.images[0] : "", base);
     const url = `${SITE}/product?id=${id}`;
-    const soon = String(p.availability || "").toLowerCase() === "coming_soon";
+    const av = availabilityOf(p);
+    let rating = null;
+    try {
+      const DB = await getDb(env);
+      if (DB) {
+        const r = await DB.prepare("SELECT COUNT(*) AS n, ROUND(AVG(rating), 1) AS avg FROM reviews WHERE product_id = ? AND status = 'approved'").bind(id).first();
+        if (Number(r?.n) > 0) rating = { "@type": "AggregateRating", ratingValue: Number(r.avg), reviewCount: Number(r.n), bestRating: 5, worstRating: 1 };
+      }
+    } catch {}
+    const used = ["LP", "MP", "HP", "DMG"].includes(String(p.condition || "").toUpperCase());
     const ld = {
-      "@context": "https://schema.org", "@type": "Product", name: p.name, sku: `NSC-${id}`, category: cat,
+      "@context": "https://schema.org", "@type": "Product", name: p.name, sku: `NSC-${id}`, category: cat, ...(p.ean ? { gtin13: String(p.ean) } : {}),
       image: (Array.isArray(p.images) ? p.images : []).map(x => absUrl(x, base)).filter(Boolean), description: desc,
       brand: { "@type": "Brand", name: "Pokémon TCG" },
-      offers: { "@type": "Offer", url, priceCurrency: "HUF", price: Math.round(Number(p.price) || 0), itemCondition: "https://schema.org/NewCondition",
-        availability: soon ? "https://schema.org/PreOrder" : Number(p.stock) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock", seller: { "@type": "Organization", name: "NS Card" } }
+      offers: { "@type": "Offer", url, priceCurrency: "HUF", price: Math.round(Number(p.price) || 0), itemCondition: used ? "https://schema.org/UsedCondition" : "https://schema.org/NewCondition",
+        availability: av !== "in_stock" ? "https://schema.org/PreOrder" : Number(p.stock) > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock", seller: { "@type": "Organization", name: "NS Card" } },
+      ...(rating ? { aggregateRating: rating } : {})
     };
     const ldText = JSON.stringify(ld).replace(/</g, "\\u003c");
     const setContent = v => ({ element(el) { el.setAttribute("content", v); } });

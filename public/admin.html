@@ -10,7 +10,7 @@
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="preload" href="/assets/fonts/dm-sans.woff" as="font" type="font/woff" crossorigin>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=4.4.0">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=5.0.0">
 </head>
 <body>
   <!-- Belépés -->
@@ -50,9 +50,12 @@
       <nav class="side-nav" data-nav>
         <p class="nav-label">Bolt</p>
         <a href="#attekintes" data-view-link="attekintes"><span class="nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4zm10 7h6v-9h-6zM4 20h6v-4H4zm10-16v4h6V4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span class="nav-txt">Áttekintés</span></a>
+        <a href="#rendelesek" data-view-link="rendelesek"><span class="nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12l2 4v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7l2-4Zm-2 4h16M9 11a3 3 0 0 0 6 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg></span><span class="nav-txt">Rendelések</span><b class="nav-badge hot" data-nav-orders hidden></b></a>
         <a href="#termekek" data-view-link="termekek"><span class="nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4zm0 5l9 4 9-4M3 17l9 4 9-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span class="nav-txt">Termékek</span><b class="nav-badge" data-nav-count></b></a>
         <a href="#kategoriak" data-view-link="kategoriak"><span class="nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h7v7H4zM13 5h7v7h-7zM4 14h7v6H4zM13 14h7v6h-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span class="nav-txt">Kategóriák</span><b class="nav-badge" data-nav-cat-count></b></a>
         <a href="#oldalak" data-view-link="oldalak"><span class="nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Zm7 0v5h5M9 13h7M9 17h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg></span><span class="nav-txt">Oldalak</span></a>
+        <a href="#tartalom" data-view-link="tartalom"><span class="nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 10h17M8 3v4M16 3v4M7.5 14h4M7.5 17h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span><span class="nav-txt">Cikkek és naptár</span></a>
+        <a href="#kozosseg" data-view-link="kozosseg"><span class="nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4V5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m9.5 9.2 1.3 1.3 3-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="nav-txt">Közösség</span><b class="nav-badge" data-nav-community hidden></b></a>
         <p class="nav-label" data-pro>Testreszabás</p>
         <a href="#megjelenes" data-view-link="megjelenes" data-pro><span class="nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-.5-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6H16a5 5 0 0 0 5-5c0-4.1-4-7.6-9-7.6Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="7.5" cy="11" r="1.3" fill="currentColor"/><circle cx="10.5" cy="7.5" r="1.3" fill="currentColor"/><circle cx="15" cy="7.5" r="1.3" fill="currentColor"/></svg></span><span class="nav-txt">Megjelenés</span><b class="pro-tag">Haladó</b></a>
         <p class="nav-label">Rendszer</p>
@@ -93,6 +96,7 @@
         <!-- Áttekintés -->
         <section data-view="attekintes" aria-label="Áttekintés">
           <div class="stats" data-stats></div>
+          <div class="card" data-dash-orders hidden></div>
           <div class="two-col">
             <div class="card">
               <div class="card-head"><h2>Teendők</h2></div>
@@ -217,7 +221,7 @@
                   <div class="unit-input"><label class="sr-only" for="s-shippingHome">Házhozszállítás díja</label><input class="input" id="s-shippingHome" name="shippingHome" type="number" min="0" step="10" inputmode="numeric"><span>Ft</span></div>
                 </div>
                 <div class="ship-row">
-                  <label class="toggle"><input type="checkbox" name="shipLocker"><span class="switch"></span><span><strong>Csomagautomata</strong><small>A vásárló megadja az automatát.</small></span></label>
+                  <label class="toggle"><input type="checkbox" name="shipLocker"><span class="switch"></span><span><strong>Csomagautomata</strong><small>Foxpost és Packeta Z-BOX térképes választóval, más automata kézzel.</small></span></label>
                   <div class="unit-input"><label class="sr-only" for="s-shippingLocker">Csomagautomata díja</label><input class="input" id="s-shippingLocker" name="shippingLocker" type="number" min="0" step="10" inputmode="numeric"><span>Ft</span></div>
                 </div>
                 <div class="ship-row">
@@ -229,18 +233,37 @@
                 <div class="field"><label for="s-pickupAddress">Személyes átvétel helye</label><input class="input" id="s-pickupAddress" name="pickupAddress" placeholder="pl. Budapest, XI. kerület"></div>
                 <div class="field"><label for="s-freeShippingFrom">Ingyenes szállítás ettől</label><div class="unit-input"><input class="input" id="s-freeShippingFrom" name="freeShippingFrom" type="number" min="0" step="100" inputmode="numeric"><span>Ft</span></div><span class="hint">0 = nincs ingyenes szállítás.</span></div>
                 <div class="field"><label for="s-dispatchCutoff">Napi feladási határidő</label><div class="unit-input"><input class="input" id="s-dispatchCutoff" name="dispatchCutoff" type="number" min="0" max="23" step="1" inputmode="numeric"><span>óra</span></div><span class="hint">A termékoldalon: „Rendelj 2 óra 15 percen belül, és még ma feladjuk.” 0 = kikapcsolva.</span></div>
+                <label class="toggle field"><input type="checkbox" name="lockerMap"><span class="switch"></span><span><strong>Térképes automata választó</strong><small>Foxpost / Packeta térkép a pénztárban.</small></span></label>
                 <div class="field"><label for="s-deliveryText">Várható kézbesítés</label><input class="input" id="s-deliveryText" name="deliveryText" maxlength="40" placeholder="pl. 1–3 munkanap"><span class="hint">A termékoldalon és a gyakori kérdéseknél jelenik meg.</span></div>
               </div>
             </div>
             <div class="card">
               <div class="card-head"><h2>Fizetési módok</h2></div>
               <div class="toggles">
-                <label class="toggle"><input type="checkbox" name="payTransfer"><span class="switch"></span><span><strong>Banki átutalás</strong><small>A rendelés e-mailben érkezik, az utalási adatokat te küldöd.</small></span></label>
+                <label class="toggle"><input type="checkbox" name="payTransfer"><span class="switch"></span><span><strong>Banki átutalás</strong><small>A vásárló a visszaigazoló e-mailben és a köszönő oldalon kapja meg az utalási adatokat.</small></span></label>
+                <div class="field indent"><label for="s-bankDetails">Utalási adatok</label><textarea class="textarea" id="s-bankDetails" name="bankDetails" rows="3" maxlength="400" placeholder="Kedvezményezett: …&#10;Bank: …&#10;Számlaszám: …"></textarea><span class="hint">A közleménybe a rendelésszám kerül automatikusan.</span></div>
                 <label class="toggle"><input type="checkbox" name="payCod"><span class="switch"></span><span><strong>Utánvét</strong><small>Fizetés a csomag átvételekor.</small></span></label>
                 <div class="field indent"><label for="s-codFee">Utánvételi díj</label><div class="unit-input"><input class="input" id="s-codFee" name="codFee" type="number" min="0" step="10" inputmode="numeric"><span>Ft</span></div></div>
                 <label class="toggle"><input type="checkbox" name="payCard"><span class="switch"></span><span><strong>Bankkártya, Apple Pay, Google Pay (Stripe)</strong><small>A vásárló a Stripe biztonságos oldalán fizet. Csak akkor kapcsold be, ha alább „Kész” állapotot látsz.</small></span></label>
                 <div class="stripe-box" data-stripe-box><p class="muted">Stripe állapot ellenőrzése…</p></div>
               </div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h2>Számlázás – Billingo</h2><span data-billingo-pill></span></div>
+              <p class="muted">A számlát a rendelés adatlapján egy kattintással állítod ki, vagy automatikusan, amikor a rendelés „Fizetve” állapotba kerül.</p>
+              <div class="form-grid">
+                <div class="field"><label for="s-vatRate">ÁFA</label><select class="select" id="s-vatRate" name="vatRate"><option value="27%">27% ÁFA</option><option value="AAM">Alanyi adómentes (AAM)</option></select></div>
+                <div class="field"><label for="s-billingoBlockId">Számlatömb</label><select class="select" id="s-billingoBlockId" name="billingoBlockId" data-billingo-blocks><option value="0">Automatikus (az első számlatömb)</option></select></div>
+              </div>
+              <div class="toggles">
+                <label class="toggle"><input type="checkbox" name="invoiceAuto"><span class="switch"></span><span><strong>Automatikus számla fizetéskor</strong><small>Kártyás fizetésnél azonnal, átutalásnál amikor fizetettnek jelölöd.</small></span></label>
+                <label class="toggle"><input type="checkbox" name="invoiceElectronic"><span class="switch"></span><span><strong>E-számla</strong><small>Elektronikus számla (PDF), nem papír alapú.</small></span></label>
+                <label class="toggle"><input type="checkbox" name="invoiceSend"><span class="switch"></span><span><strong>Számla küldése a vásárlónak</strong><small>A Billingo e-mailben elküldi a számlát.</small></span></label>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-head"><h2>Látogatottság</h2></div>
+              <div class="field"><label for="s-analyticsToken">Cloudflare Web Analytics token (nem kötelező)</label><input class="input" id="s-analyticsToken" name="analyticsToken" maxlength="32" spellcheck="false" placeholder="32 karakteres token"><span class="hint">Ha a Cloudflare Pages beépített Web Analytics-ét bekapcsolod, ez üresen maradhat. Sütit nem használ.</span></div>
             </div>
             <div class="card">
               <div class="card-head"><h2>Készlet</h2></div>
@@ -250,6 +273,7 @@
             </div>
             <div class="sticky-save"><span class="muted" data-settings-note></span><button class="btn btn-primary" type="submit">Beállítások mentése</button></div>
           </form>
+          <div class="card" id="integraciok"><div class="card-head"><h2>Szolgáltatások és bekötés</h2><button class="btn btn-ghost btn-sm" type="button" data-int-refresh>Újraellenőrzés</button></div><div data-integrations><p class="muted">Ellenőrzés…</p></div></div>
           <div class="card" id="kuponok">
             <div class="card-head"><h2>Kuponkódok</h2><span class="muted" data-cp-count></span></div>
             <p class="muted">A vásárló a pénztárban adja meg a kódot. A változás azonnal mentődik, publikálás után él.</p>
@@ -336,6 +360,21 @@
           </div>
         </section>
 
+        <!-- Rendelések -->
+        <section data-view="rendelesek" aria-label="Rendelések" hidden>
+          <div data-orders></div>
+        </section>
+
+        <!-- Közösség -->
+        <section data-view="kozosseg" aria-label="Közösség" hidden>
+          <div data-community></div>
+        </section>
+
+        <!-- Cikkek és naptár -->
+        <section data-view="tartalom" aria-label="Cikkek és megjelenési naptár" hidden>
+          <div data-content></div>
+        </section>
+
         <!-- Publikálás -->
         <section data-view="publikalas" aria-label="Publikálás" hidden>
           <div class="card publish-card" data-publish-card></div>
@@ -390,11 +429,11 @@
 
     <nav class="tabbar" aria-label="Admin menü">
       <a href="#attekintes" data-view-link="attekintes"><span class="tab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 13h6V4H4zm10 7h6v-9h-6zM4 20h6v-4H4zm10-16v4h6V4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span>Áttekintés</span></a>
+      <a href="#rendelesek" data-view-link="rendelesek"><span class="tab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12l2 4v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7l2-4Zm-2 4h16M9 11a3 3 0 0 0 6 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg></span><span>Rendelések</span><b class="nav-dot hot" data-nav-orders-dot hidden></b></a>
       <a href="#termekek" data-view-link="termekek"><span class="tab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4zm0 5l9 4 9-4M3 17l9 4 9-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span>Termékek</span></a>
       <a href="#kategoriak" data-view-link="kategoriak" data-basic-only><span class="tab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h7v7H4zM13 5h7v7h-7zM4 14h7v6H4zM13 14h7v6h-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span><span>Kategóriák</span></a>
       <a href="#megjelenes" data-view-link="megjelenes" data-pro><span class="tab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-.5-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6H16a5 5 0 0 0 5-5c0-4.1-4-7.6-9-7.6Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="7.5" cy="11" r="1.3" fill="currentColor"/><circle cx="10.5" cy="7.5" r="1.3" fill="currentColor"/><circle cx="15" cy="7.5" r="1.3" fill="currentColor"/></svg></span><span>Megjelenés</span></a>
       <a href="#beallitasok" data-view-link="beallitasok"><span class="tab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="6" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="18" r="2" fill="none" stroke="currentColor" stroke-width="2"/></svg></span><span>Beállítások</span></a>
-      <a href="#publikalas" data-view-link="publikalas"><span class="tab-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0-4 4m4-4 4 4M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span>Publikálás</span><b class="nav-dot" data-nav-dirty hidden></b></a>
     </nav>
 
     <div class="sheet-scrim" data-more-scrim hidden></div>
@@ -409,6 +448,9 @@
         </div>
       </div>
       <nav class="more-links">
+        <a href="#publikalas"><span class="nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0-4 4m4-4 4 4M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Publikálás<b class="nav-dot" data-nav-dirty hidden></b></a>
+        <a href="#kozosseg"><span class="nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4V5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m9.5 9.2 1.3 1.3 3-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>Közösség (vélemények, hírlevél)</a>
+        <a href="#tartalom"><span class="nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 10h17M8 3v4M16 3v4M7.5 14h4M7.5 17h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>Cikkek és megjelenési naptár</a>
         <a href="#kategoriak"><span class="nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h7v7H4zM13 5h7v7h-7zM4 14h7v6H4zM13 14h7v6h-7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>Kategóriák</a>
         <a href="#oldalak"><span class="nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l5 5v12a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Zm7 0v5h5M9 13h7M9 17h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg></span>Oldalak (ÁSZF, impresszum)</a>
         <a href="#megjelenes" data-pro><span class="nav-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 0 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-.5-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1 0-.9.7-1.6 1.6-1.6H16a5 5 0 0 0 5-5c0-4.1-4-7.6-9-7.6Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="7.5" cy="11" r="1.3" fill="currentColor"/><circle cx="10.5" cy="7.5" r="1.3" fill="currentColor"/><circle cx="15" cy="7.5" r="1.3" fill="currentColor"/></svg></span>Megjelenés</a>
@@ -449,11 +491,29 @@
             <span class="label" id="e-av-label">Elérhetőség</span>
             <div class="segmented" role="radiogroup" aria-labelledby="e-av-label">
               <label><input type="radio" name="availability" value="in_stock"><span>Rendelhető</span></label>
-              <label><input type="radio" name="availability" value="coming_soon"><span>Hamarosan érkezik</span></label>
+              <label><input type="radio" name="availability" value="preorder"><span>Előrendelés</span></label>
+              <label><input type="radio" name="availability" value="coming_soon"><span>Hamarosan</span></label>
             </div>
+            <span class="hint" data-e-av-hint></span>
           </div>
+          <div class="field" data-e-release><label for="e-releaseDate">Megjelenés dátuma</label><input class="input" id="e-releaseDate" name="releaseDate" type="date"><span class="hint">Előrendelésnél és „Hamarosan” terméknél a termékoldalon és a megjelenési naptárban látszik.</span></div>
           <label class="toggle"><input type="checkbox" name="hidden"><span class="switch"></span><span><strong>Elrejtés a boltból</strong><small>A termék megmarad az adminban, de a vásárlók nem látják.</small></span></label>
         </fieldset>
+
+        <details class="ed-more" data-e-single>
+          <summary>Single kártya adatai <small>állapot, nyelv, kártyaszám</small></summary>
+          <div class="form-grid">
+            <div class="field"><label for="e-condition">Állapot</label><select class="select" id="e-condition" name="condition" data-e-conds></select></div>
+            <div class="field"><label for="e-lang">Nyelv</label><select class="select" id="e-lang" name="lang" data-e-langs></select></div>
+            <div class="field"><label for="e-cardNo">Kártyaszám</label><input class="input" id="e-cardNo" name="cardNo" maxlength="20" placeholder="pl. 199/165"></div>
+            <div class="field"><label for="e-rarity">Ritkaság</label><input class="input" id="e-rarity" name="rarity" maxlength="40" placeholder="pl. Special Illustration Rare"></div>
+            <div class="field"><label for="e-grade">Grading (nem kötelező)</label><input class="input" id="e-grade" name="grade" maxlength="24" placeholder="pl. PSA 10"></div>
+          </div>
+        </details>
+        <details class="ed-more">
+          <summary>Azonosítók <small>EAN – az ár-összehasonlítókhoz</small></summary>
+          <div class="field"><label for="e-ean">EAN / vonalkód</label><input class="input" id="e-ean" name="ean" inputmode="numeric" maxlength="14" placeholder="pl. 0820650857383"><span class="hint">A doboz hátulján lévő vonalkód száma. Az Árukereső Shopping és a Google ezzel párosítja a terméket.</span></div>
+        </details>
 
         <fieldset>
           <legend>Képek</legend>
@@ -486,6 +546,9 @@
     </form>
   </aside>
 
+  <div class="scrim" data-order-scrim></div>
+  <aside class="editor order-panel" data-order-panel aria-labelledby="op-title" role="dialog" aria-modal="true"><div data-order-body></div></aside>
+
   <div class="confirm" data-confirm hidden role="alertdialog" aria-modal="true" aria-labelledby="cf-title" aria-describedby="cf-text">
     <div class="confirm-card">
       <h2 id="cf-title" data-cf-title></h2>
@@ -497,8 +560,9 @@
 
   <div class="toast" role="status" aria-live="polite" data-toast></div>
 
-  <script src="/assets/js/texts.js?v=4.4.0" defer></script>
-  <script src="/assets/js/store.js?v=4.4.0" defer></script>
-  <script src="/assets/js/admin.js?v=4.4.0" defer></script>
+  <script src="/assets/js/texts.js?v=5.0.0" defer></script>
+  <script src="/assets/js/store.js?v=5.0.0" defer></script>
+  <script src="/assets/js/admin.js?v=5.0.0" defer></script>
+  <script src="/assets/js/admin-ops.js?v=5.0.0" defer></script>
 </body>
 </html>

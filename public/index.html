@@ -19,8 +19,8 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="preload" href="/assets/fonts/archivo-black.woff" as="font" type="font/woff" crossorigin>
   <link rel="preload" href="/assets/fonts/dm-sans.woff" as="font" type="font/woff" crossorigin>
-  <link rel="stylesheet" href="/assets/css/shop.css?v=4.4.0">
-  <script src="/assets/js/theme-boot.js?v=4.4.0"></script>
+  <link rel="stylesheet" href="/assets/css/shop.css?v=5.0.0">
+  <script src="/assets/js/theme-boot.js?v=5.0.0"></script>
   <link rel="canonical" href="https://www.nscard.hu/">
   <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "OnlineStore", "@id": "https://www.nscard.hu/#store", "name": "NS Card", "url": "https://www.nscard.hu/", "logo": "https://www.nscard.hu/img/brand/logo.webp", "image": "https://www.nscard.hu/img/brand/og.jpg", "currenciesAccepted": "HUF", "areaServed": "HU"}, {"@type": "WebSite", "@id": "https://www.nscard.hu/#site", "url": "https://www.nscard.hu/", "name": "NS Card", "inLanguage": "hu", "publisher": {"@id": "https://www.nscard.hu/#store"}, "potentialAction": {"@type": "SearchAction", "target": "https://www.nscard.hu/products?q={search_term_string}", "query-input": "required name=search_term_string"}}]}</script>
 </head>
@@ -67,7 +67,7 @@
   <aside class="drawer drawer-left" id="menu" aria-label="Menü" data-menu>
     <div class="drawer-head"><img src="/img/brand/wordmark.webp" alt="NS Card" width="101" height="36"><button class="icon-btn" type="button" data-close aria-label="Menü bezárása"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
     <div class="drawer-body">
-      <nav class="menu-links" aria-label="Mobil menü"><a href="/" aria-current="page" data-t="nav.home">Kezdőlap</a><a href="/products" data-mega-trigger aria-haspopup="true" aria-controls="mega" data-t="nav.products">Termékek</a><a href="/#rendeles" data-t="nav.ship">Szállítás és fizetés</a><a href="/#kapcsolat" data-contact-nav data-t="nav.contact">Kapcsolat</a></nav>
+      <nav class="menu-links" aria-label="Mobil menü"><a href="/" aria-current="page" data-t="nav.home">Kezdőlap</a><a href="/products" data-mega-trigger aria-haspopup="true" aria-controls="mega" data-t="nav.products">Termékek</a><a href="/#rendeles" data-t="nav.ship">Szállítás és fizetés</a><a href="/#kapcsolat" data-contact-nav data-t="nav.contact">Kapcsolat</a><span data-menu-extra></span></nav>
       <div class="menu-cats" data-menu-cats></div>
     </div>
   </aside>
@@ -168,6 +168,20 @@
         </div>
       </section>
 
+      <section class="section" id="megjelenesek" data-section="releases" aria-labelledby="rel-title" hidden>
+        <div class="wrap">
+          <div class="sec-head"><div><h2 class="display" id="rel-title" data-t="releases.title">Megjelenési naptár</h2><p data-t="releases.text">A következő Pokémon TCG megjelenések. Az előrendelhető termékeket már most lefoglalhatod.</p></div><a class="link-more" href="/products?pre=1"><span>Előrendelések</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
+          <div class="releases" data-releases></div>
+        </div>
+      </section>
+
+      <section class="section" id="velemenyek" data-section="reviews" aria-labelledby="hrev-title" hidden>
+        <div class="wrap">
+          <div class="sec-head"><div><h2 class="display" id="hrev-title" data-t="reviews.title">Ezt mondják a vásárlóink</h2><p data-reviews-sub></p></div></div>
+          <div class="hrev-grid" data-home-reviews></div>
+        </div>
+      </section>
+
       <section class="section" id="rendeles" data-section="steps" aria-labelledby="steps-title">
         <div class="wrap">
           <div class="sec-head"><div><h2 class="display" id="steps-title" data-t="steps.title">Így rendelhetsz</h2><p data-t="steps.text">Regisztráció nélkül, pár perc alatt.</p></div></div>
@@ -179,10 +193,26 @@
         </div>
       </section>
 
+      <section class="section" id="cikkek" data-section="blog" aria-labelledby="blog-title" hidden>
+        <div class="wrap">
+          <div class="sec-head"><div><h2 class="display" id="blog-title" data-t="blog.title">Útmutatók és hírek</h2><p data-t="blog.text">Gyűjtési tippek, megjelenések és bontási tanácsok.</p></div><a class="link-more" href="/blog"><span>Összes cikk</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a></div>
+          <div class="post-grid" data-home-blog></div>
+        </div>
+      </section>
+
       <section class="section" id="gyik" data-section="faq" aria-labelledby="faq-title" hidden>
         <div class="wrap faq-wrap">
           <div class="sec-head"><div><h2 class="display" id="faq-title" data-t="faq.title">Gyakori kérdések</h2><p data-t="faq.text">Ha nem találod a választ, írj nekünk bátran.</p></div></div>
           <div class="faq" data-faq></div>
+        </div>
+      </section>
+
+      <section class="section" id="hirlevel" data-section="newsletter" aria-labelledby="news-title" hidden>
+        <div class="wrap">
+          <div class="news-band">
+            <div><h2 class="display" id="news-title" data-t="news.title">Ne maradj le a következő megjelenésről</h2><p data-t="news.text">Elsőként szólunk az előrendelésekről, újratöltésekről és akciókról. Havonta legfeljebb néhány levél.</p></div>
+            <div data-news-home></div>
+          </div>
         </div>
       </section>
 
@@ -214,6 +244,7 @@
           <img src="/img/brand/logo.webp" alt="NS Card webshop logó" width="150" height="158" loading="lazy">
           <p data-t="footer.text">Pokémon TCG termékek gyűjtőknek és bontásra: boosterek, tin dobozok, Elite Trainer Boxok és kollekciók.</p>
           <div class="social" data-social hidden></div>
+          <div class="foot-news" data-foot-news hidden></div>
         </div>
         <div>
           <h2 data-t="footer.shop">Vásárlás</h2>
@@ -235,8 +266,8 @@
       <div class="foot-bottom"><span>© <span data-year>2026</span> NS Card</span><nav class="foot-legal" data-foot-legal aria-label="Jogi információk"></nav><span data-t="footer.note">Az árak forintban értendők.</span></div>
     </div>
   </footer>
-  <script src="/assets/js/texts.js?v=4.4.0" defer></script>
-  <script src="/assets/js/store.js?v=4.4.0" defer></script>
-  <script src="/assets/js/shop.js?v=4.4.0" defer></script>
+  <script src="/assets/js/texts.js?v=5.0.0" defer></script>
+  <script src="/assets/js/store.js?v=5.0.0" defer></script>
+  <script src="/assets/js/shop.js?v=5.0.0" defer></script>
 </body>
 </html>

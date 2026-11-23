@@ -47,3 +47,24 @@ A szövegek listája a `public/assets/js/texts.js` fájlban van (a forrás a fej
 - **Mobil**: rács / lista nézet váltó a terméklistán, „vissza a tetejére” gomb.
 - **Alkalmazásként telepíthető** (service worker, `public/sw.js`), gyorsabb ismételt betöltés.
 - **Admin**: kategóriák szerinti készlet-összesítő az Áttekintésben.
+
+### 5.0 újdonságok
+- **Rendeléskezelés** (admin → Rendelések): állapotok (új, fizetésre vár, fizetve, csomagolva, feladva, teljesítve, lemondva), csomagszám futárral, szállítólevél nyomtatás, CSV export, belső megjegyzés, történet.
+- **Automatikus készlet**: minden rendelés lefoglalja a darabot (kártyás fizetésnél 45 percig, ha nem fizetnek, felszabadul); az admin és a bolt mindig az aktuális elérhető darabszámot mutatja.
+- **E-mailek** (Resend): visszaigazolás utalási adatokkal, új rendelés értesítő a boltnak, feladási értesítő csomagkövetéssel, állapot e-mailek, hírlevél, „újra kapható” levelek.
+- **Billingo számlázás**: egy kattintással vagy automatikusan fizetéskor (27% ÁFA vagy AAM, e-számla, kiküldés a vásárlónak).
+- **Csomagautomata térkép** (Foxpost és Packeta Z-BOX), **irányítószám → település** kitöltés, számlázási adatok (cégnév, adószám).
+- **Előrendelés** megjelenési dátummal, **single kártyák** (állapot NM–DMG, nyelv, kártyaszám, ritkaság, grading) szűrőkkel.
+- **Vásárlói vélemények** moderálással és „ellenőrzött vásárlás” jelöléssel, csillagok a Google találatokban.
+- **Megjelenési naptár**, **cikkek** (/blog), **hírlevél** feliratkozás dupla megerősítéssel.
+- **Termék feedek**: `/feeds/google.xml`, `/feeds/arukereso.xml`, `/feeds/argep.xml`.
+
+#### Bekötés (Cloudflare → nscard-webshop → Settings)
+| Mi | Hol | Név |
+|---|---|---|
+| Adatbázis (kötelező a rendelésekhez) | Bindings → D1 database | `DB` |
+| E-mail | Variables and Secrets (Secret) | `RESEND_API_KEY`, opcionális `MAIL_FROM`, `ADMIN_EMAIL` |
+| Kártyás fizetés | Variables and Secrets (Secret) | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` |
+| Számlázás | Variables and Secrets (Secret) | `BILLINGO_API_KEY` |
+
+Minden módosítás után: Deployments → Retry deployment. Adatbázis nélkül a bolt a korábbi, levelezős rendelésre vált. A szerver kód a `functions/` és `lib/` mappában van; a szerver tesztek Node alatt futnak (node:sqlite a D1 helyett).
