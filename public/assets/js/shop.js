@@ -515,7 +515,7 @@
     scrim()?.addEventListener("click", () => { closeDrawer(); closeFilters(); });
     document.addEventListener("keydown", e => {
       if (e.key !== "Escape") return;
-      if (searchOpen) closeSearch(); else { closeDrawer(); closeFilters(); hideAdded(); }
+      if (searchOpen) closeSearch(); else { closeDrawer(); closeFilters(); hideAdded(); if ($(".pull.focus")) setFocus(null); }
     });
     const added = $("[data-added]");
     added?.addEventListener("mouseenter", () => clearTimeout(addedTimer));
@@ -642,31 +642,48 @@
   }
 
   /* --- csomagbontó --- */
-  const pack = { picks: [], timers: [], sig: "" };
+  const pack = { picks: [], timers: [], sig: "", busy: false };
   const packPool = () => N.products().filter(p => N.isBuyable(p) && p.images[0]);
+  const TINTS = ["var(--ember)", "var(--spark)", "#3ccb76", "#b56aff", "#ffb02e", "#ff5d8f", "#2fd3ff", "#e7b743"];
+  const tintFor = cat => TINTS[Math.max(0, N.CATEGORIES.findIndex(c => c.value === cat)) % TINTS.length];
   function drawPack() {
     const pool = packPool();
     if (pool.length < 3) return [];
-    return pool.map(p => ({ p, w: Math.random() * (p.flags.includes("rare") ? 1.7 : p.flags.includes("new") ? 1.3 : 1) }))
+    const three = pool.map(p => ({ p, w: Math.random() * (p.flags.includes("rare") ? 1.7 : p.flags.includes("new") ? 1.3 : 1) }))
       .sort((a, b) => b.w - a.w).slice(0, 3).map(x => x.p);
+    const best = three.reduce((m, p) => (p.price > m.price ? p : m), three[0]);
+    const rest = three.filter(p => p !== best);
+    return [rest[0], best, rest[1]]; // a legjobb lap középre kerül, és utoljára fordul meg
+  }
+  function pullHTML(p, i, best) {
+    const rare = p.flags.includes("rare");
+    const cls = best || rare ? "r-gold" : p.flags.includes("new") ? "r-new" : "";
+    const stars = best ? 3 : rare ? 2 : 1;
+    return `
+      <div class="pull ${cls}${best ? " best holo" : rare ? " holo" : ""}" style="--i:${i}" data-pull="${i}" role="button" tabindex="-1" aria-label="${esc(p.name)}, ${fmtFt(p.price)}">
+        <div class="pull-inner">
+          <div class="pull-face pull-front" style="--tint:${tintFor(p.category)}">
+            <div class="pc-card">
+              <div class="pc-head"><span class="pc-name">${esc(p.name.replace(/^Pokémon TCG:?\s*/i, ""))}</span><span class="pc-rar" aria-hidden="true">${"<i></i>".repeat(stars)}</span></div>
+              <div class="pc-art">${best ? `<span class="pc-badge">${esc(t("pack.best"))}</span>` : ""}<img src="${esc(imageUrl(p.images[0]))}" alt="" loading="lazy"></div>
+              <span class="pc-type">${esc(N.categoryLabel(p.category))}</span>
+              <div class="pc-stats"><div><small>Ár</small><b>${fmtFt(p.price)}</b></div><div><small>Készlet</small><b>${p.stock} db</b></div></div>
+              <div class="pc-foot"><span>NSC ${String(p.id).padStart(3, "0")}</span><span>NS Card</span></div>
+            </div>
+            <a class="pc-view" href="${productUrl(p)}" tabindex="-1">${esc(t("pack.view"))}</a>
+          </div>
+          <div class="pull-face pull-back" aria-hidden="true"><img src="/img/brand/mark.webp" alt=""><span>NS CARD</span></div>
+        </div>
+      </div>`;
   }
   function renderPulls() {
     const box = $("[data-pulls]");
     if (!box) return;
     pack.picks = drawPack();
-    const best = pack.picks.reduce((m, p) => (!m || p.price > m.price ? p : m), null);
-    box.innerHTML = pack.picks.map((p, i) => `
-      <div class="pull${p === best ? " best" : ""}" style="--i:${i}">
-        <div class="pull-inner">
-          <a class="pull-face pull-front" href="${productUrl(p)}" tabindex="-1" aria-label="${esc(p.name)}, ${fmtFt(p.price)}">
-            <span class="pf-top"><span>${esc(p === best ? t("pack.best") : N.categoryLabel(p.category))}</span><span class="gem" aria-hidden="true"></span></span>
-            <span class="pf-art"><img src="${esc(imageUrl(p.images[0]))}" alt="" loading="lazy"></span>
-            <strong>${esc(p.name)}</strong>
-            <span class="pf-price">${fmtFt(p.price)}</span>
-          </a>
-          <div class="pull-face pull-back" aria-hidden="true"><img src="/img/brand/mark.webp" alt=""></div>
-        </div>
-      </div>`).join("");
+    box.classList.remove("has-focus");
+    box.innerHTML = pack.picks.map((p, i) => pullHTML(p, i, i === 1)).join("");
+    const total = $("[data-pack-total]");
+    if (total) total.textContent = fmtFt(pack.picks.reduce((s, p) => s + p.price, 0));
     layoutPulls();
   }
   function layoutPulls() {
@@ -674,39 +691,68 @@
     if (!stage) return;
     const cards = $$(".pull", stage);
     if (!cards.length) return;
-    const w = stage.clientWidth, cw = cards[0].offsetWidth || 160;
-    const off = Math.max(cw * .62, Math.min(cw + 26, (w - cw) / 2 - 14));
-    const pos = [[-off, 18, -9], [0, -12, 0], [off, 18, 9]];
-    cards.forEach((c, i) => { c.style.setProperty("--x", pos[i][0].toFixed(0)); c.style.setProperty("--y", pos[i][1]); c.style.setProperty("--rot", pos[i][2]); });
+    const w = stage.clientWidth, cw = cards[0].offsetWidth || 180;
+    const off = Math.max(cw * .7, Math.min(cw + 30, (w - cw) / 2 - 12));
+    const pos = [[-off, 22, -10], [0, -14, 0], [off, 22, 10]];
+    cards.forEach((c, i) => {
+      c.style.setProperty("--x", pos[i][0].toFixed(0));
+      c.style.setProperty("--y", pos[i][1]);
+      c.style.setProperty("--rot", pos[i][2]);
+      c.style.zIndex = i === 1 ? 3 : 2;
+    });
   }
   function burst() {
     const box = $("[data-burst]");
     if (!box) return;
+    box.classList.remove("go");
     if (!fx("sparkles")) { box.innerHTML = ""; return; }
-    const colors = ["var(--gold)", "var(--ember)", "var(--spark)", "var(--paper)"];
-    box.innerHTML = Array.from({ length: 26 }, (_, i) => {
-      const a = Math.random() * Math.PI * 2, d = 110 + Math.random() * 150;
-      return `<i style="--tx:${(Math.cos(a) * d).toFixed(0)}px;--ty:${(Math.sin(a) * d - 40).toFixed(0)}px;--tr:${(Math.random() * 540 - 270).toFixed(0)}deg;--c:${colors[i % 4]};${i % 3 ? "" : "border-radius:50%;"}"></i>`;
+    const colors = ["var(--gold)", "var(--ember)", "var(--spark)", "#ffffff", "#ff6ad5"];
+    box.innerHTML = Array.from({ length: 34 }, (_, i) => {
+      const a = Math.random() * Math.PI * 2, d = 120 + Math.random() * 190;
+      return `<i style="--tx:${(Math.cos(a) * d).toFixed(0)}px;--ty:${(Math.sin(a) * d - 50).toFixed(0)}px;--tr:${(Math.random() * 720 - 360).toFixed(0)}deg;--c:${colors[i % colors.length]};--dl:${(Math.random() * .12).toFixed(2)}s;${i % 3 ? "" : "border-radius:50%;"}${i % 4 ? "" : "width:5px;height:12px;"}"></i>`;
     }).join("");
+    void box.offsetWidth;
+    box.classList.add("go");
+  }
+  function flipPull(card) {
+    if (!card || card.classList.contains("flip")) return;
+    card.classList.add("flip");
+    card.tabIndex = 0;
+    if (card.classList.contains("best")) setTimeout(burst, fx("pack") ? 350 : 0);
+  }
+  function setFocus(card) {
+    const box = $("[data-pulls]");
+    $$(".pull.focus", box).forEach(c => { if (c !== card) { c.classList.remove("focus"); const a = $(".pc-view", c); if (a) a.tabIndex = -1; } });
+    const on = !!card && !card.classList.contains("focus");
+    if (card) card.classList.toggle("focus", on);
+    box?.classList.toggle("has-focus", on);
+    const a = card && $(".pc-view", card);
+    if (a) a.tabIndex = on ? 0 : -1;
   }
   function openPack() {
     const stage = $("[data-pack-stage]");
-    if (!stage || stage.classList.contains("open")) return;
+    if (!stage || pack.busy || stage.classList.contains("open")) return;
     if (!pack.picks.length) renderPulls();
     if (!pack.picks.length) return;
-    burst();
-    stage.classList.add("open");
+    pack.busy = true;
     const anim = fx("pack");
-    const base = anim ? 1150 : 60, step = anim ? 380 : 0;
-    $$(".pull", stage).forEach((c, i) => pack.timers.push(setTimeout(() => { c.classList.add("flip"); const a = $("a", c); if (a) a.tabIndex = 0; }, base + i * step)));
-    pack.timers.push(setTimeout(() => { stage.classList.add("is-done"); $("[data-pack-again]", stage)?.focus({ preventScroll: true }); }, base + 3 * step + 250));
+    const at = (ms, fn) => pack.timers.push(setTimeout(fn, anim ? ms : 0));
+    layoutPulls();
+    if (anim) stage.classList.add("shake");
+    at(420, () => { stage.classList.remove("shake"); stage.classList.add("open"); });
+    at(1250, () => stage.classList.add("spread"));
+    const cards = $$(".pull", stage);
+    [0, 2, 1].forEach((idx, k) => at(2000 + k * 560, () => flipPull(cards[idx])));
+    at(2000 + 3 * 560 + 450, () => { stage.classList.add("is-done"); pack.busy = false; });
   }
   function resetPack(silent) {
     const stage = $("[data-pack-stage]");
     if (!stage) return;
     pack.timers.forEach(clearTimeout);
     pack.timers = [];
-    stage.classList.remove("open", "is-done");
+    pack.busy = false;
+    stage.classList.remove("open", "spread", "shake", "is-done");
+    $("[data-burst]")?.classList.remove("go");
     renderPulls();
     if (!silent) $(".booster", stage)?.focus({ preventScroll: true });
   }
@@ -724,12 +770,25 @@
       mat.addEventListener("pointerleave", () => { mat.classList.remove("pointer"); mat.style.setProperty("--mx", "50%"); mat.style.setProperty("--my", "50%"); });
     }
     document.addEventListener("click", e => {
-      const b = e.target.closest("[data-pack-open], [data-pack-again]");
-      if (!b) return;
-      if (b.matches("[data-pack-again]")) { resetPack(); return; }
       const stage = $("[data-pack-stage]");
-      if (!b.closest("[data-pack-stage]") && stage && mobileMQ.matches) stage.scrollIntoView({ behavior: motionOK() ? "smooth" : "auto", block: "center" });
-      if (stage?.classList.contains("is-done")) { resetPack(true); setTimeout(openPack, 380); } else openPack();
+      if (!stage) return;
+      if (e.target.closest(".pc-view")) return;
+      const card = e.target.closest(".pull");
+      if (card && stage.classList.contains("spread")) {
+        if (!card.classList.contains("flip")) flipPull(card); else setFocus(card);
+        return;
+      }
+      const b = e.target.closest("[data-pack-open], [data-pack-again]");
+      if (!b) { if (e.target.closest("[data-pack-stage]")) setFocus(null); return; }
+      if (b.matches("[data-pack-again]")) { resetPack(); setTimeout(openPack, 420); return; }
+      if (!b.closest("[data-pack-stage]") && mobileMQ.matches) stage.scrollIntoView({ behavior: motionOK() ? "smooth" : "auto", block: "center" });
+      if (stage.classList.contains("open")) { resetPack(true); setTimeout(openPack, 420); } else openPack();
+    });
+    document.addEventListener("keydown", e => {
+      const card = e.target.closest?.(".pull");
+      if (!card || (e.key !== "Enter" && e.key !== " ")) return;
+      e.preventDefault();
+      if (!card.classList.contains("flip")) flipPull(card); else setFocus(card);
     });
     let rz = 0;
     window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(layoutPulls, 120); });

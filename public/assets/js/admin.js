@@ -23,6 +23,25 @@
     publikalas: "Publikálás"
   };
 
+  const VIEW_SUB = {
+    attekintes: "A bolt állapota, teendők és alacsony készlet egy helyen.",
+    termekek: "Termékek hozzáadása, árak, készlet és képek.",
+    kategoriak: "A webshop menüjének és szűrőinek kategóriái.",
+    megjelenes: "Színek, betűk, animációk és szövegek élő előnézettel.",
+    beallitasok: "Elérhetőség, szállítás, fizetés és szerkesztő mód.",
+    publikalas: "Élesítés, GitHub kapcsolat és biztonsági mentés."
+  };
+
+  function toggleMore(force) {
+    const m = $("[data-more-menu]"), sc = $("[data-more-scrim]"), b = $("[data-mobile-more]");
+    if (!m) return;
+    const open = typeof force === "boolean" ? force : m.hidden;
+    m.hidden = !open;
+    if (sc) sc.hidden = !open;
+    b?.setAttribute("aria-expanded", String(open));
+    document.body.classList.toggle("lock", open || !!state?.edit);
+  }
+
   const state = {
     live: null,
     draft: null,
@@ -338,12 +357,14 @@
     if (!VIEWS[view]) view = "attekintes";
     if (view === "megjelenes" && state.mode !== "pro") setMode("pro", { quiet: true });
     $("[data-app]").classList.toggle("studio-mode", view === "megjelenes");
-    const mm = $("[data-more-menu]"); if (mm) mm.hidden = true;
+    toggleMore(false);
     if (location.hash.slice(1) !== view) history.replaceState(null, "", `#${view}`);
     state.view = view;
     $$("[data-view]").forEach(s => { s.hidden = s.dataset.view !== view; });
     $$("[data-view-link]").forEach(a => { if (a.dataset.viewLink === view) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
     $("[data-view-title]").textContent = VIEWS[view];
+    const sub = $("[data-view-sub]");
+    if (sub) sub.textContent = VIEW_SUB[view] || "";
     document.title = `${VIEWS[view]} – NS Card admin`;
     renderView();
     window.scrollTo(0, 0);
@@ -361,10 +382,19 @@
     pill.className = `status-pill ${cls}`;
     pill.textContent = text;
     btn.disabled = state.publishing || (!dirty && state.live?.source === "remote");
-    btn.textContent = state.publishing ? "Publikálás…" : "Publikálás";
+    const bl = $("[data-publish-label]", btn);
+    if (bl) bl.textContent = state.publishing ? "Publikálás…" : "Publikálás"; else btn.textContent = state.publishing ? "Publikálás…" : "Publikálás";
     $$("[data-nav-dirty]").forEach(d => { d.hidden = !dirty; });
     const nc = $("[data-nav-count]");
     if (nc) nc.textContent = products().length;
+    const cc = $("[data-nav-cat-count]");
+    if (cc) cc.textContent = state.draft?.settings?.categories?.length || "";
+    const ss = $("[data-side-status]");
+    if (ss) {
+      const live = state.live?.source === "remote";
+      ss.textContent = state.publishing ? "Publikálás folyamatban" : dirty ? "Nem publikált módosítás" : live ? "Élő webshop" : "Webshop admin";
+      ss.classList.toggle("warn", dirty || state.publishing);
+    }
   }
 
   function renderView() {
@@ -1303,12 +1333,8 @@
       if (t.matches("[data-mode]")) return setMode(t.dataset.mode);
       if (t.matches("[data-mode-toggle]")) { $("[data-more-menu]").hidden = true; return setMode(state.mode === "pro" ? "basic" : "pro"); }
       if (t.matches("[data-publish]")) return publish();
-      if (t.matches("[data-mobile-more]")) {
-        const m = $("[data-more-menu]");
-        m.hidden = !m.hidden;
-        t.setAttribute("aria-expanded", String(!m.hidden));
-        return;
-      }
+      if (t.matches("[data-mobile-more]")) return toggleMore();
+      if (t.closest("[data-more-menu]") && t.matches("a")) toggleMore(false);
       if (t.matches("[data-new-product]")) return openEditor();
       if (t.matches("[data-edit]")) return openEditor(Number(t.dataset.edit));
       if (t.matches("[data-dup]")) return duplicateProduct(Number(t.dataset.dup));
@@ -1377,7 +1403,7 @@
       }
     });
     document.addEventListener("click", e => {
-      if (!e.target.closest("[data-mobile-more], [data-more-menu]")) $("[data-more-menu]").hidden = true;
+      if (e.target.matches("[data-more-scrim]")) toggleMore(false);
     });
 
     window.addEventListener("hashchange", () => go(location.hash.slice(1)));
@@ -1419,7 +1445,11 @@
     ["dragleave", "drop"].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove("over"); }));
     dz.addEventListener("drop", e => { if (e.dataTransfer?.files?.length) addFiles(e.dataTransfer.files); });
     $("[data-scrim]").addEventListener("click", () => closeEditor());
-    document.addEventListener("keydown", e => { if (e.key === "Escape" && state.edit && $("[data-confirm]").hidden) closeEditor(); });
+    document.addEventListener("keydown", e => {
+      if (e.key !== "Escape") return;
+      if (!$("[data-more-menu]").hidden) { toggleMore(false); return; }
+      if (state.edit && $("[data-confirm]").hidden) closeEditor();
+    });
   }
 
   /* ---------------- indulás ---------------- */

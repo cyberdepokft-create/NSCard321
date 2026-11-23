@@ -118,14 +118,15 @@
             <div class="hero-actions"><button class="btn btn-primary" type="button" data-pack-open><span data-t="pack.button">Csomag kinyitása</span></button></div>
           </div>
           <div class="pack-stage" data-pack-stage>
+            <div class="pack-light" aria-hidden="true"></div>
             <div class="burst" data-burst aria-hidden="true"></div>
-            <div class="pulls" data-pulls></div>
+            <div class="pulls" data-pulls aria-live="polite"></div>
             <button class="booster" type="button" data-pack-open aria-label="Csomag kinyitása">
               <span class="booster-top"></span>
-              <span class="booster-body"><img src="/img/brand/mark.webp" alt="" width="122" height="122"><b>NS Card</b><small>3 lap</small></span>
+              <span class="booster-body"><span class="bb-logo"><img src="/img/brand/mark.webp" alt="" width="122" height="122"></span><b>NS Card</b><small>Booster · 3 lap</small></span>
             </button>
             <span class="booster-hint" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V11m0-1.5a1.5 1.5 0 0 1 3 0V12m0-1a1.5 1.5 0 0 1 3 0v3.5a6 6 0 0 1-6 6h-.5a6 6 0 0 1-4.6-2.2L4.6 15.5a1.5 1.5 0 0 1 2.3-1.9L9 15.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span data-t="pack.hint">Koppints a csomagra</span></span>
-            <button class="btn btn-quiet btn-sm pack-again" type="button" data-pack-again data-t="pack.again">Új csomag</button>
+            <div class="pack-result" data-pack-result><span><span data-t="pack.total">A húzás összértéke</span>: <b data-pack-total></b></span><button class="btn btn-primary btn-sm" type="button" data-pack-again data-t="pack.again">Új csomag</button></div>
           </div>
         </div>
       </section>
