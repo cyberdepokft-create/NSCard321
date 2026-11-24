@@ -30,7 +30,8 @@ export async function onRequestPost({ request, env }) {
   try { await sendOrderMails(DB, env, s, originOf(request), full); } catch {}
   return json({
     ok: true, id: o.id, total: priced.total, pay: priced.pay, method: priced.method, preorder: priced.preorder,
-    emailed: !!full.data.emailed?.customer, mail: mailReady(env), bankDetails: priced.pay === "transfer" ? String(s.bankDetails || "") : ""
+    emailed: !!full.data.emailed?.customer, mail: mailReady(env), bankDetails: priced.pay === "transfer" ? String(s.bankDetails || "") : "",
+    token: o.data.token, gift: priced.gift
   });
 }
 

@@ -68,3 +68,15 @@ A szövegek listája a `public/assets/js/texts.js` fájlban van (a forrás a fej
 | Számlázás | Variables and Secrets (Secret) | `BILLINGO_API_KEY` |
 
 Minden módosítás után: Deployments → Retry deployment. Adatbázis nélkül a bolt a korábbi, levelezős rendelésre vált. A szerver kód a `functions/` és `lib/` mappában van; a szerver tesztek Node alatt futnak (node:sqlite a D1 helyett).
+
+### 5.1 újdonságok
+- **Mobil admin**: kompakt publikálás gomb, felül megjelenő értesítések, ugrómenü a Beállításokban, a mentés sáv csak módosításkor jelenik meg, mobilon a cikk szerkesztő a kiválasztott cikkhez görget.
+- **Rendelés követése** (`/rendeles`): a vásárló a rendelésszámmal és e-mail címmel (vagy a levélben kapott linkkel) látja az állapotot és a csomagkövetést.
+- **Ajándékcsomagolás** üzenettel (Beállítások → Ajándék): az adminban külön jelölve, a nyomtatott lapon ilyenkor nincs ár és vásárlói e-mail.
+- **Vásárlási limit** termékenként (`maxPerOrder`), a kosár és a szerver is betartja.
+- **Kapcsolat űrlap** a szerveren át: az üzenetek az admin Közösség → Üzenetek fülön, automatikus válaszlevéllel.
+- **Eladási grafikon** (30 nap) és toplista az Áttekintésben, **admin jelszó csere** (PBKDF2, a Publikálás oldalon).
+- **Kereső szinonimák** (pl. „etb” ↔ „elite trainer box”, „tin” ↔ „fémdoboz”).
+- **Cikkek**: 13 részletes útmutató, táblázatok (mobilon kártyákká rendeződnek), „> **Tipp:**” és „> **Fontos:**” kiemelő dobozok, lenyitható „Gyakori kérdések”, tartalomjegyzék, kapcsolódó termékek, olvasási csík. A termékoldalon az állapot, nyelv, ritkaság és grading mellett „Mit jelent?” link vezet a megfelelő cikkhez.
+
+A cikkek a katalógus `settings.posts` listájában vannak, és az adminban (Cikkek és naptár) szerkeszthetők; a mintacikkek a `public/assets/data/starter-posts.json` fájlban is megvannak.

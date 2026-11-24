@@ -72,7 +72,9 @@
     invoiceElectronic: true,
     invoiceSend: true,
     billingoBlockId: 0,
-    analyticsToken: ""
+    analyticsToken: "",
+    giftWrap: false,
+    giftWrapPrice: 0
   });
 
   /* Single kártyák állapota és nyelve */
@@ -186,7 +188,8 @@
       cardNo: String(r.cardNo || "").trim().slice(0, 20),
       rarity: String(r.rarity || "").trim().slice(0, 40),
       grade: String(r.grade || "").trim().slice(0, 24),
-      ean: /^\d{8,14}$/.test(String(r.ean || "").trim()) ? String(r.ean).trim() : ""
+      ean: /^\d{8,14}$/.test(String(r.ean || "").trim()) ? String(r.ean).trim() : "",
+      maxPerOrder: Math.min(99, int(r.maxPerOrder))
     };
   }
 
@@ -269,6 +272,7 @@
         cover: String(p?.cover || "").trim().slice(0, 600),
         body: String(p?.body || "").replace(/\r\n/g, "\n").trim().slice(0, 40000),
         tag: String(p?.tag || "").trim().slice(0, 30),
+        products: [...new Set((Array.isArray(p?.products) ? p.products : []).map(Number).filter(n => n > 0))].slice(0, 8),
         published: p?.published !== false
       });
     }
@@ -307,14 +311,20 @@
       .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
       .replace(/\[([^\]]+)\]\(((?:https?:\/\/|mailto:|tel:|\/)[^)\s]+)\)/g, (m, a, href) => `<a href="${href}"${/^https?:/.test(href) ? ' target="_blank" rel="noopener"' : ""}>${a}</a>`);
     const out = [];
-    let para = [], list = null, ltype = "";
+    let para = [], list = null, ltype = "", quote = [], table = [];
     const flushP = () => { if (para.length) { out.push(`<p>${para.map(inline).join("<br>")}</p>`); para = []; } };
     const flushL = () => { if (list) { out.push(`<${ltype}>${list.join("")}</${ltype}>`); list = null; } };
+    const flushQ = () => { if (quote.length) { out.push(`<blockquote${calloutClass(quote[0])}>${quote.map(inline).join("<br>")}</blockquote>`); quote = []; } };
+    const flushT = () => { if (table.length) { out.push(tableHTML(table, inline)); table = []; } };
     for (const raw of String(md || "").replace(/\r\n/g, "\n").split("\n")) {
       const l = raw.trim();
       let m;
-      if (!l) { flushP(); flushL(); continue; }
-      if ((m = l.match(/^(#{1,3})\s+(.*)$/))) { flushP(); flushL(); out.push(m[1].length === 3 ? `<h3>${inline(m[2])}</h3>` : `<h2>${inline(m[2])}</h2>`); continue; }
+      if (!l) { flushP(); flushL(); flushQ(); flushT(); continue; }
+      if (/^\|.*\|$/.test(l)) { flushP(); flushL(); flushQ(); table.push(l); continue; }
+      flushT();
+      if (/^>\s?/.test(l)) { flushP(); flushL(); quote.push(l.replace(/^>\s?/, "")); continue; }
+      flushQ();
+      if ((m = l.match(/^(#{1,3})\s+(.*)$/))) { flushP(); flushL(); out.push(m[1].length === 3 ? `<h3 id="${slugify(m[2])}">${inline(m[2])}</h3>` : `<h2 id="${slugify(m[2])}">${inline(m[2])}</h2>`); continue; }
       if ((m = l.match(/^[-*•]\s+(.*)$/)) || (m = l.match(/^\d+[.)]\s+(.*)$/))) {
         const type = /^\d/.test(l) ? "ol" : "ul";
         flushP();
@@ -326,8 +336,25 @@
       flushL();
       para.push(l);
     }
-    flushP(); flushL();
+    flushP(); flushL(); flushQ(); flushT();
     return out.join("\n");
+  }
+  /* „> **Tipp:** …” zöld, „> **Fontos:** …” sárga kiemelő doboz */
+  function calloutClass(first) {
+    const k = String(first || "").toLowerCase();
+    if (/^\*\*(tipp|jó tudni|érdekesség)/.test(k)) return ' class="callout tip"';
+    if (/^\*\*(fontos|figyelem|vigyázat)/.test(k)) return ' class="callout warn"';
+    return "";
+  }
+  /* | fejléc | fejléc | sorok → görgethető táblázat; a |---| elválasztó sor kimarad */
+  function tableHTML(rows, inline) {
+    const cells = r => r.replace(/^\||\|$/g, "").split("|").map(c => c.trim());
+    const body = rows.filter(r => !/^\|[\s:|-]+\|$/.test(r)).map(cells);
+    if (!body.length) return "";
+    const head = rows.length > 1 && /^\|[\s:|-]+\|$/.test(rows[1]) ? body.shift() : null;
+    /* a fejléc szövege data-label-ként minden cellán: mobilon a sorok kártyákká rendeződnek */
+    const label = i => head && head[i] ? ` data-label="${esc(head[i].replace(/\*\*/g, ""))}"` : "";
+    return `<div class="table-wrap${head ? " stack" : ""}"><table>${head ? `<thead><tr>${head.map(c => `<th scope="col">${inline(c)}</th>`).join("")}</tr></thead>` : ""}<tbody>${body.map(r => `<tr>${r.map((c, i) => i === 0 && head ? `<th scope="row">${inline(c)}</th>` : `<td${label(i)}>${inline(c)}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
   }
 
   /* ---------- kedvencek és nemrég megnézett ---------- */
@@ -714,6 +741,7 @@
   const isSoon = p => p?.availability === "coming_soon";
   const isPreorder = p => p?.availability === "preorder";
   const isBuyable = p => !!p && !isSoon(p) && p.stock > 0;
+  const maxQty = p => p ? (p.maxPerOrder > 0 ? Math.min(p.stock, p.maxPerOrder) : p.stock) : 0;
   const rating = id => { const r = live.ratings?.[id]; return Array.isArray(r) && r[1] > 0 ? { avg: Number(r[0]) || 0, count: Number(r[1]) || 0 } : null; };
   const fmtDate = (iso, opts = { year: "numeric", month: "long", day: "numeric" }) => {
     const m = String(iso || "").match(/^(\d{4})-(\d{2})(?:-(\d{2}))?$/);
@@ -747,7 +775,7 @@
       return Object.entries(raw).map(([id, qty]) => {
         const product = byId(id);
         if (!product || !isBuyable(product)) return null;
-        return { product, qty: Math.min(int(qty, 0), product.stock) };
+        return { product, qty: Math.min(int(qty, 0), maxQty(product)) };
       }).filter(line => line && line.qty > 0);
     },
     count() { return cart.lines().reduce((s, l) => s + l.qty, 0); },
@@ -757,7 +785,7 @@
       const p = byId(id);
       if (!isBuyable(p)) return { ok: false, reason: isSoon(p) ? "soon" : "out" };
       const raw = cart.read();
-      const next = Math.min(int(raw[id], 0) + int(qty, 1), p.stock);
+      const next = Math.min(int(raw[id], 0) + int(qty, 1), maxQty(p));
       const capped = next === int(raw[id], 0);
       raw[id] = next;
       cart.write(raw);
@@ -766,7 +794,7 @@
     set(id, qty) {
       const p = byId(id);
       const raw = cart.read();
-      const n = p ? Math.min(int(qty, 0), p.stock) : 0;
+      const n = p ? Math.min(int(qty, 0), maxQty(p)) : 0;
       if (n <= 0) delete raw[id]; else raw[id] = n;
       cart.write(raw);
     },
@@ -779,7 +807,7 @@
       for (const id of Object.keys(raw)) {
         const p = byId(id);
         if (!p || !isBuyable(p)) { delete raw[id]; changed = true; }
-        else if (raw[id] > p.stock) { raw[id] = p.stock; changed = true; }
+        else if (raw[id] > maxQty(p)) { raw[id] = maxQty(p); changed = true; }
       }
       if (changed) cart.write(raw);
     }
@@ -816,7 +844,7 @@
     ready, load,
     get data() { return current; },
     get previewMode() { return previewMode; },
-    products, settings, byId, isSoon, isBuyable, stockInfo, discount,
+    products, settings, byId, isSoon, isBuyable, stockInfo, discount, maxQty,
     cart, shippingFor, shippingMethods
   };
 })();

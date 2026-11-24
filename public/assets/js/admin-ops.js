@@ -10,7 +10,7 @@
     summary: null, summaryErr: null,
     filter: "open", q: "", orders: [], ordersAt: 0, ordersErr: null, loading: false,
     statuses: {}, carriers: {}, current: null, busy: false,
-    community: null, communityAt: 0, communityErr: null, commTab: "reviews",
+    community: null, communityAt: 0, communityErr: null, commTab: "messages",
     contentTab: "posts", postIdx: -1,
     integrations: null, intErr: null
   };
@@ -60,7 +60,7 @@
     const open = s?.open || 0;
     $$("[data-nav-orders]").forEach(b => { b.textContent = open || ""; b.hidden = !open; });
     $$("[data-nav-orders-dot]").forEach(b => { b.hidden = !(s?.counts?.new); });
-    const c = s?.pendingReviews || 0;
+    const c = (s?.pendingReviews || 0) + (s?.newMessages || 0);
     $$("[data-nav-community]").forEach(b => { b.textContent = c || ""; b.hidden = !c; });
   }
 
@@ -82,7 +82,24 @@
         <div><span>Utolsó 30 nap</span><strong>${fmtFt(s.last30.revenue)}</strong><small>${s.last30.orders} rendelés · átlag ${fmtFt(s.last30.orders ? s.last30.revenue / s.last30.orders : 0)}</small></div>
         <a href="#kozosseg"><span>Közösség</span><strong>${s.subscribers}</strong><small>feliratkozó · ${s.pendingReviews} vélemény vár · ${s.alerts} értesítő</small></a>
       </div>
+      ${salesChart(s)}
       ${s.recent.length ? `<div class="olist compact">${s.recent.map(orderRow).join("")}</div>` : '<p class="muted">Még nincs rendelés. Amint valaki vásárol, itt jelenik meg.</p>'}`;
+  }
+
+  function salesChart(s) {
+    const days = [];
+    for (let i = 29; i >= 0; i--) { const d = new Date(Date.now() - i * 864e5); days.push(d.toISOString().slice(0, 10)); }
+    const map = new Map((s.daily || []).map(r => [r.d, r]));
+    const vals = days.map(d => map.get(d)?.sum || 0);
+    const max = Math.max(1, ...vals);
+    if (!vals.some(Boolean) && !(s.top || []).length) return "";
+    const top = (s.top || []).map(t => ({ ...t, p: A.byId(t.id) })).filter(t => t.p);
+    return `<div class="dash-sales">
+      <div class="chart-card"><div class="chart-head"><b>Bevétel – utolsó 30 nap</b><small>${fmtFt(vals.reduce((a, b) => a + b, 0))}</small></div>
+        <div class="bars" role="img" aria-label="Napi bevétel az utolsó 30 napban">${days.map((d, i) => `<span style="--v:${(vals[i] / max * 100).toFixed(1)}%" title="${esc(d.slice(5).replace("-", ". "))}.: ${fmtFt(vals[i])} · ${map.get(d)?.n || 0} rendelés"${vals[i] ? "" : ' class="z"'}></span>`).join("")}</div>
+        <div class="chart-axis"><small>${esc(days[0].slice(5).replace("-", ". "))}.</small><small>ma</small></div></div>
+      ${top.length ? `<div class="chart-card"><div class="chart-head"><b>Legkelendőbb termékek</b><small>30 nap</small></div><ol class="top-list">${top.map(t => `<li><button class="p-name" type="button" data-edit="${t.p.id}">${esc(t.p.name)}</button><span>${t.qty} db</span></li>`).join("")}</ol></div>` : ""}
+    </div>`;
   }
 
   /* ---------- rendelések ---------- */
@@ -103,7 +120,7 @@
       <span class="o-id"><b>${esc(o.id)}</b><small>${esc(dt(o.createdAt))}</small></span>
       <span class="o-who"><b>${esc(o.name)}</b><small>${esc(o.preview)}</small></span>
       <span class="o-ship"><small>${esc(o.method)}${o.city ? ` · ${esc(o.city)}` : ""}</small><small>${esc(PAY[o.pay] || o.pay)}${o.paid ? " · <em class='ok'>fizetve</em>" : ""}</small></span>
-      <span class="o-total"><b>${fmtFt(o.total)}</b><small>${o.items} db${o.preorder ? " · előrendelés" : ""}</small></span>
+      <span class="o-total"><b>${fmtFt(o.total)}</b><small>${o.items} db${o.preorder ? " · előrendelés" : ""}${o.gift ? " · ajándék" : ""}</small></span>
       <span class="o-st">${exp ? '<span class="pill st-out">Lejárt fizetés</span>' : pill(o.status)}${o.invoice ? `<small>${ico.doc}${esc(o.invoice)}</small>` : ""}</span>
     </button>`;
   }
@@ -198,7 +215,8 @@
         <div class="op-head-act"><button class="icon-btn" type="button" data-op-print aria-label="Szállítólevél nyomtatása" title="Szállítólevél nyomtatása">${ico.print}</button><button class="icon-btn" type="button" data-op-close aria-label="Bezárás">${ico.close}</button></div>
       </div>
       <div class="op-body">
-        <div class="op-status">${exp ? '<span class="pill st-out">Lejárt fizetés – a készletet felszabadítottuk</span>' : pill(o.status)}${o.paid ? '<span class="pill in">Fizetve</span>' : `<span class="pill hidden">Nincs fizetve</span>`}${d.preorder ? '<span class="pill soon">Előrendelés</span>' : ""}</div>
+        <div class="op-status">${exp ? '<span class="pill st-out">Lejárt fizetés – a készletet felszabadítottuk</span>' : pill(o.status)}${o.paid ? '<span class="pill in">Fizetve</span>' : `<span class="pill hidden">Nincs fizetve</span>`}${d.preorder ? '<span class="pill soon">Előrendelés</span>' : ""}${d.gift ? '<span class="pill gift">Ajándékcsomagolás</span>' : ""}</div>
+        ${d.gift ? `<div class="op-gift"><b>Ajándékcsomagolás kérve</b>${d.giftMessage ? `<p>„${esc(d.giftMessage)}”</p>` : "<p class=\"muted\">Üzenet nélkül.</p>"}<small>A nyomtatott lapon ilyenkor nincs ár, csak az üzenet.</small></div>` : ""}
         ${o.status !== "cancelled" ? `<div class="op-flow">
           ${next.filter(([k]) => k !== "shipped").map(([k, l]) => `<button class="btn ${k === "paid" || k === "packed" ? "btn-primary" : "btn-ghost"} btn-sm" type="button" data-op-status="${k}">${l}</button>`).join("")}
         </div>` : `<div class="op-flow"><button class="btn btn-ghost btn-sm" type="button" data-op-status="new">Visszaállítás</button></div>`}
@@ -222,6 +240,7 @@
             ${d.discount ? `<div><span>Kupon (${esc(d.coupon)})</span><span>−${fmtFt(d.discount)}</span></div>` : d.coupon ? `<div><span>Kupon (${esc(d.coupon)})</span><span>ingyenes szállítás</span></div>` : ""}
             <div><span>${esc(d.methodLabel || "Szállítás")}</span><span>${d.shipping ? fmtFt(d.shipping) : "ingyenes"}</span></div>
             ${d.cod ? `<div><span>Utánvételi díj</span><span>${fmtFt(d.cod)}</span></div>` : ""}
+            ${d.gift ? `<div><span>Ajándékcsomagolás</span><span>${d.giftFee ? fmtFt(d.giftFee) : "ingyenes"}</span></div>` : ""}
             <div class="tot"><span>Összesen · ${esc(PAY[o.pay] || o.pay)}</span><span>${fmtFt(d.total)}</span></div>
           </div>
         </section>
@@ -267,14 +286,17 @@
     const w = window.open("", "_blank", "width=820,height=900");
     if (!w) { toast("A böngésző letiltotta az új ablakot.", true); return; }
     const addr = d.method === "locker" ? c.locker : d.method === "pickup" ? "Személyes átvétel" : `${c.zip} ${c.city}, ${c.address}`;
+    /* ajándéknál a csomagba tett lapon nincs ár, helyette az üzenet szerepel */
+    const gift = !!d.gift;
     w.document.write(`<!doctype html><html lang="hu"><head><meta charset="utf-8"><title>${esc(o.id)}</title><style>
-      body{font:14px/1.5 Arial,sans-serif;color:#111;margin:32px}h1{font-size:22px;margin:0}table{width:100%;border-collapse:collapse;margin:18px 0}td,th{border-bottom:1px solid #ddd;padding:8px 4px;text-align:left}th:last-child,td:last-child{text-align:right}.box{display:flex;gap:40px;margin-top:18px}.box div{flex:1}.muted{color:#666}.big{font-size:18px;font-weight:bold}@media print{button{display:none}}
+      body{font:14px/1.5 Arial,sans-serif;color:#111;margin:32px}h1{font-size:22px;margin:0}table{width:100%;border-collapse:collapse;margin:18px 0}td,th{border-bottom:1px solid #ddd;padding:8px 4px;text-align:left}th:last-child,td:last-child{text-align:right}.box{display:flex;gap:40px;margin-top:18px}.box div{flex:1}.muted{color:#666}.big{font-size:18px;font-weight:bold}.gift{border:2px dashed #999;border-radius:12px;padding:18px 20px;margin:22px 0;font-size:16px}.gift b{display:block;font-size:12px;color:#666;margin-bottom:6px;font-weight:normal}@media print{button{display:none}}
     </style></head><body>
-      <h1>${esc(s.shopName || "NS Card")} – szállítólevél</h1><p class="muted">${esc(o.id)} · ${esc(dtLong(o.createdAt))}</p>
-      <div class="box"><div><b>Címzett</b><br>${esc(c.name)}<br>${esc(addr)}<br>${esc(c.phone)}<br>${esc(c.email)}</div><div><b>Feladó</b><br>${esc(s.companyName || s.shopName || "")}<br>${esc(s.companyAddress || s.address || "")}<br>${esc(s.phone || "")}<br>${esc(s.email || "")}</div></div>
-      <table><thead><tr><th>Termék</th><th>Db</th><th>Összeg</th></tr></thead><tbody>${(d.lines || []).map(l => `<tr><td>${esc(l.name)}${l.preorder ? " (előrendelés)" : ""}</td><td>${l.qty}</td><td>${fmtFt(l.qty * l.price)}</td></tr>`).join("")}</tbody></table>
-      <p class="big">Fizetendő: ${fmtFt(d.total)} – ${esc(d.payLabel || "")}${d.pay === "cod" && !o.paid ? " (UTÁNVÉT)" : o.paid ? " (fizetve)" : ""}</p>
-      ${c.note ? `<p><b>Megjegyzés:</b> ${esc(c.note)}</p>` : ""}</body></html>`);
+      <h1>${esc(s.shopName || "NS Card")} – ${gift ? "ajándékcsomag" : "szállítólevél"}</h1><p class="muted">${esc(o.id)} · ${esc(dtLong(o.createdAt))}</p>
+      <div class="box"><div><b>Címzett</b><br>${esc(c.name)}<br>${esc(addr)}<br>${esc(c.phone)}${gift ? "" : `<br>${esc(c.email)}`}</div><div><b>Feladó</b><br>${esc(s.companyName || s.shopName || "")}<br>${esc(s.companyAddress || s.address || "")}<br>${esc(s.phone || "")}<br>${esc(s.email || "")}</div></div>
+      ${gift && d.giftMessage ? `<div class="gift"><b>Üzenet</b>${esc(d.giftMessage).replace(/\n/g, "<br>")}</div>` : ""}
+      <table><thead><tr><th>Termék</th><th>Db</th>${gift ? "" : "<th>Összeg</th>"}</tr></thead><tbody>${(d.lines || []).map(l => `<tr><td>${esc(l.name)}${l.preorder ? " (előrendelés)" : ""}</td><td>${l.qty}</td>${gift ? "" : `<td>${fmtFt(l.qty * l.price)}</td>`}</tr>`).join("")}</tbody></table>
+      ${gift ? `<p class="muted">Jó bontást kívánunk!</p>` : `<p class="big">Fizetendő: ${fmtFt(d.total)} – ${esc(d.payLabel || "")}${d.pay === "cod" && !o.paid ? " (UTÁNVÉT)" : o.paid ? " (fizetve)" : ""}</p>`}
+      ${c.note && !gift ? `<p><b>Megjegyzés:</b> ${esc(c.note)}</p>` : ""}</body></html>`);
     w.document.close();
     setTimeout(() => { try { w.focus(); w.print(); } catch {} }, 250);
   }
@@ -298,9 +320,23 @@
     if (!ops.community) { box.innerHTML = `<div class="card">${setupBox(ops.communityErr, "A közösségi funkciók")}</div>`; return; }
     const c = ops.community;
     const pend = c.reviews.filter(r => r.status === "pending").length;
-    const tabs = [["reviews", `Vélemények${pend ? ` <b>${pend}</b>` : ""}`], ["news", `Hírlevél <b>${c.subStats.active}</b>`], ["alerts", `Értesítők${c.alerts.length ? ` <b>${c.alerts.reduce((a, x) => a + x.count, 0)}</b>` : ""}`]];
+    const newMsg = (c.messages || []).filter(m => m.status === "new").length;
+    const tabs = [["messages", `Üzenetek${newMsg ? ` <b>${newMsg}</b>` : ""}`], ["reviews", `Vélemények${pend ? ` <b>${pend}</b>` : ""}`], ["news", `Hírlevél <b>${c.subStats.active}</b>`], ["alerts", `Értesítők${c.alerts.length ? ` <b>${c.alerts.reduce((a, x) => a + x.count, 0)}</b>` : ""}`]];
     let body = "";
-    if (ops.commTab === "reviews") {
+    if (ops.commTab === "messages") {
+      const list = c.messages || [];
+      body = list.length ? `<div class="rv-list">${list.map(m => `
+        <article class="rv msg ${m.status}">
+          <header><b>${esc(m.name || m.email)}</b><span class="pill ${m.status === "new" ? "low" : m.status === "done" ? "in" : "hidden"}">${m.status === "new" ? "Új" : m.status === "done" ? "Megválaszolva" : "Olvasott"}</span><small>${esc(dt(m.createdAt))}</small></header>
+          ${m.subject ? `<h3>${esc(m.subject)}</h3>` : ""}${m.productId ? `<p class="rv-prod">${esc(prodName(m.productId))}</p>` : ""}
+          <p class="msg-body">${esc(m.body)}</p>
+          <div class="row-actions">
+            <a class="btn btn-primary btn-sm" href="mailto:${esc(m.email)}?subject=${encodeURIComponent(`Re: ${m.subject || "Kérdésed az NS Card webshopban"}`)}&body=${encodeURIComponent(`\n\n---\n${m.name || ""} írta:\n${m.body}`)}" data-msg-reply="${m.id}">${ico.mail}Válasz e-mailben</a>
+            ${m.status !== "done" ? `<button class="btn btn-ghost btn-sm" type="button" data-msg="${m.id}" data-to="done">Kész</button>` : `<button class="btn btn-ghost btn-sm" type="button" data-msg="${m.id}" data-to="new">Újra nyitás</button>`}
+            <button class="btn btn-danger-ghost btn-sm" type="button" data-msg-del="${m.id}">Törlés</button>
+          </div>
+        </article>`).join("")}</div>` : '<div class="empty-state"><strong>Nincs üzenet</strong><span class="muted">A kezdőlap „Kérdésed van?” űrlapjáról érkező üzenetek itt jelennek meg, és e-mailben is szólunk róluk.</span></div>';
+    } else if (ops.commTab === "reviews") {
       body = c.reviews.length ? `<div class="rv-list">${c.reviews.map(r => `
         <article class="rv ${r.status}">
           <header><span class="stars-a" aria-label="${r.rating} csillag">${"★".repeat(r.rating)}<i>${"★".repeat(5 - r.rating)}</i></span><b>${esc(r.name)}</b>${r.verified ? '<span class="pill in">Ellenőrzött vásárlás</span>' : ""}<span class="pill ${r.status === "approved" ? "in" : r.status === "rejected" ? "out" : "low"}">${r.status === "approved" ? "Megjelenik" : r.status === "rejected" ? "Elutasítva" : "Jóváhagyásra vár"}</span><small>${esc(dt(r.createdAt))}</small></header>
@@ -347,75 +383,8 @@
   }
 
   /* ---------- cikkek és megjelenési naptár ---------- */
-  const STARTER_POSTS = [
-    { slug: "booster-etb-display-tin-melyiket-valaszd", title: "Booster, ETB, display vagy tin – melyiket válaszd?", tag: "Vásárlási útmutató", excerpt: "Rövid áttekintés a Pokémon TCG termékfajtákról: mit kapsz a pénzedért, és melyik kinek ideális.", body: `Ha most kezdesz Pokémon kártyákat gyűjteni, elsőre sok a különböző doboz. Íme, miben különböznek, és melyik mire jó.
-
-## Booster csomag
-A legkisebb egység: egy lezárt csomag véletlenszerű lapokkal egy adott szettből. A jelenlegi angol nyelvű szetteknél egy csomagban jellemzően 10 lap van, köztük legalább egy ritkább lap.
-- Ideális kipróbálásra, ajándéknak, vagy ha egy-egy bontás izgalmára vágysz.
-- A legolcsóbb belépő, de laponként nem mindig a legjobb ár.
-
-## Elite Trainer Box (ETB)
-Gyűjtőknek és játékosoknak egyaránt népszerű doboz. A legtöbb ETB-ben 9 booster csomag van, mellette kártyavédők (sleeve), energia lapok, dobókockák, jelölők és egy tárolódoboz, amiben később a paklidat is tarthatod.
-- Ideális ajándéknak, és ha egy szettből több csomagot bontanál.
-- A tárolódoboz és a kiegészítők miatt hosszú távon is hasznos.
-
-## Booster display
-Egy teljes, gyárilag lezárt doboz – az angol szetteknél általában 36 booster csomaggal. Csomagonként ez a legkedvezőbb ár, és a legnagyobb esély a ritka lapokra.
-- Ideális komolyabb gyűjtőknek, közös bontáshoz, vagy ha bontatlanul tennéd félre.
-
-## Tin és kollekciók
-Fémdobozok és kollekciós dobozok, amelyekben néhány booster mellett gyakran fix promó lap is van. A pontos tartalom termékenként eltér, ezért mindig nézd meg a termékleírást.
-- Ideálisak ajándéknak: látványosak, és biztosan kapsz egy különleges lapot.
-
-## Röviden
-- **Kipróbálnád?** Booster vagy mini tin.
-- **Ajándékba?** ETB vagy kollekció.
-- **Komolyan gyűjtenél?** Display.
-
-Kérdésed van egy termékről? Írj nekünk, szívesen segítünk választani.` },
-    { slug: "kartyaallapotok-nm-lp-mp-hp-dmg", title: "Kártyaállapotok: mit jelent az NM, LP, MP, HP és DMG?", tag: "Single kártyák", excerpt: "A single kártyák árát az állapot erősen befolyásolja. Így értelmezd a rövidítéseket.", body: `Single (egyenként árult) kártyáknál az állapot legalább annyira fontos, mint maga a lap. A nemzetközi gyakorlatban elterjedt skálát használjuk.
-
-## Near Mint (NM)
-Szinte hibátlan lap. Legfeljebb apró, alig látható nyomok a széleken vagy a sarkokon, közvetlenül csomagból vagy védőben tartott lapoknál jellemző.
-
-## Lightly Played (LP)
-Enyhén használt: kisebb kopás a széleken, egy-két apró karc vagy fehéredés a sarkokon. Pakliban játszva vagy albumban tartva gyakori állapot.
-
-## Moderately Played (MP)
-Közepesen használt: jól látható kopás, karcok, esetleg enyhe hajlás nélküli felületi nyomok. Játékra tökéletes, gyűjteménybe kedvező áron.
-
-## Heavily Played (HP)
-Erősen használt: jelentős kopás, felületi sérülések, kisebb hajlás. Főleg játékra ajánljuk.
-
-## Damaged (DMG)
-Sérült: szakadás, erős hajlás, vízfolt vagy más komoly hiba. Ritka lapoknál így is értékes lehet.
-
-## Grading (PSA, CGC, BGS)
-A független cégek által értékelt és lezárt tokba helyezett lapoknál a szám (pl. PSA 10) a hivatalos minősítést jelzi. Ezeknél a termékleírásban a minősítő cég és az érték is szerepel.
-
-Ha bizonytalan vagy egy lap állapotában, kérj tőlünk további fotót – szívesen küldünk.` },
-    { slug: "igy-tarold-a-kartyaidat", title: "Így tárold a Pokémon kártyáidat: sleeve, toploader, mappa", tag: "Gyűjtési tippek", excerpt: "Néhány egyszerű szokással a lapjaid évekig megőrzik az állapotukat és az értéküket.", body: `A kártyák értéke nagyban függ az állapotuktól. Néhány egyszerű eszközzel a gyűjteményed hosszú távon is szép marad.
-
-## 1. Sleeve – az első védelem
-A vékony műanyag védő megóvja a lapot a karcoktól és az ujjlenyomatoktól. Ritka lapnál érdemes két réteget használni: egy szoros belső (perfect fit) és egy normál külső sleeve-et.
-
-## 2. Toploader – a ritka lapoknak
-Merev műanyag tok, amely a hajlástól is véd. Az értékes lapokat sleeve-ben tedd bele, így nem csúsznak és nem karcolódnak.
-
-## 3. Mappa (binder)
-Gyűjtéshez és bemutatáshoz a legjobb. Válassz oldalra töltős, savmentes zsebes mappát, és kerüld a gyűrűs mappákat, mert a gyűrű közelében a lapok meggyűrődhetnek.
-
-## 4. Tárolás
-- Tartsd száraz, hűvös helyen, közvetlen napfénytől távol.
-- A bontatlan dobozokat fektetve és por ellen védve tárold.
-- Kerüld a gumigyűrűt és a túltömött dobozokat.
-
-## 5. Kezelés
-Tiszta, száraz kézzel nyúlj a lapokhoz, bontásnál sima, tiszta felületen dolgozz.
-
-Ha kérdésed van a tárolásról vagy kiegészítőkről, írj nekünk!` }
-  ];
+  let STARTER_POSTS = [];
+  const loadStarter = () => fetch("/assets/data/starter-posts.json?v=5.1.0").then(r => r.ok ? r.json() : []).then(d => { STARTER_POSTS = Array.isArray(d) ? d : []; if (state.view === "tartalom") renderContent(); }).catch(() => {});
   const posts = () => (state.draft.settings.posts = state.draft.settings.posts || []);
   const releases = () => (state.draft.settings.releases = state.draft.settings.releases || []);
   function savePosts(msg) {
@@ -449,7 +418,18 @@ Ha kérdésed van a tárolásról vagy kiegészítőkről, írj nekünk!` }
           </div>
           <div class="field"><label for="po-excerpt">Rövid összefoglaló</label><textarea class="textarea" id="po-excerpt" name="excerpt" rows="2" maxlength="280">${esc(ed.excerpt)}</textarea><span class="hint">A listában és a Google találatban jelenik meg.</span></div>
           <div class="field"><span class="label">Borítókép</span><div class="cover-row">${ed.cover ? `<img src="${esc(A.imageUrl(ed.cover))}" alt="">` : ""}<button class="btn btn-ghost btn-sm" type="button" data-post-cover>${ed.cover ? "Csere" : "Kép feltöltése"}</button>${ed.cover ? '<button class="btn btn-ghost btn-sm" type="button" data-post-cover-del>Eltávolítás</button>' : ""}<input type="file" accept="image/*" hidden data-post-cover-file></div></div>
-          <div class="field"><label for="po-body">Szöveg</label><textarea class="textarea code-area page-body" id="po-body" name="body" rows="16">${esc(ed.body)}</textarea><span class="hint">Formázás: <code>## Cím</code>, <code>### Alcím</code>, <code>- lista</code>, <code>**félkövér**</code>, <code>[link](https://…)</code>, <code>![kép](https://…)</code></span></div>
+          <div class="field">
+            <div class="post-body-head"><label for="po-body">Szöveg</label><span class="muted small" data-po-stats>${wordStats(ed.body)}</span>
+              <div class="segmented seg-sm" role="radiogroup" aria-label="Nézet"><label><input type="radio" name="po-view" value="edit" ${ops.postView !== "preview" ? "checked" : ""}><span>Szerkesztés</span></label><label><input type="radio" name="po-view" value="preview" ${ops.postView === "preview" ? "checked" : ""}><span>Előnézet</span></label></div></div>
+            <textarea class="textarea code-area page-body" id="po-body" name="body" rows="18" ${ops.postView === "preview" ? "hidden" : ""}>${esc(ed.body)}</textarea>
+            <article class="prose-preview post-preview" data-po-preview ${ops.postView === "preview" ? "" : "hidden"}>${ops.postView === "preview" ? previewHTML(ed.body) : ""}</article>
+            <div class="post-insert"><label class="sr-only" for="po-ins">Termék beszúrása</label><select class="select" id="po-ins" data-po-ins><option value="">Termék beszúrása a szövegbe…</option>${state.draft.products.filter(p => !p.hidden).map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join("")}</select><button class="btn btn-ghost btn-sm" type="button" data-po-insert>Beszúrás</button><button class="btn btn-ghost btn-sm" type="button" data-po-tip>Tipp doboz</button><button class="btn btn-ghost btn-sm" type="button" data-po-snip="table">Táblázat</button><button class="btn btn-ghost btn-sm" type="button" data-po-snip="faq">GYIK</button></div>
+            <span class="hint">Formázás: <code>## Cím</code>, <code>### Alcím</code>, <code>- lista</code>, <code>&gt; **Tipp:** …</code> (zöld doboz), <code>&gt; **Fontos:** …</code> (sárga doboz), <code>| táblázat | sor |</code>, <code>**félkövér**</code>, <code>[link](https://…)</code>, <code>![kép](https://…)</code>. Termékkártya: <code>[[termek:12]]</code> külön sorban. A <code>## Gyakori kérdések</code> fejezet <code>### kérdései</code> lenyitható sorok lesznek.</span>
+          </div>
+          <div class="field"><span class="label">Kapcsolódó termékek a cikk mellett</span>
+            <div class="po-prods">${state.draft.products.filter(p => !p.hidden).map(p => `<label class="po-prod"><input type="checkbox" name="po-prod" value="${p.id}" ${(ed.products || []).includes(p.id) ? "checked" : ""}>${p.images[0] ? `<img class="po-thumb" src="${esc(A.imageUrl(p.images[0]))}" alt="">` : '<span class="po-thumb"></span>'}<span class="po-name">${esc(p.name)}</span></label>`).join("")}</div>
+            <span class="hint">Ha egyet sem jelölsz, a cikk címe alapján automatikusan ajánlunk termékeket.</span>
+          </div>
           <label class="toggle"><input type="checkbox" name="published" ${ed.published ? "checked" : ""}><span class="switch"></span><span><strong>Megjelenik a boltban</strong><small>Kikapcsolva vázlat marad.</small></span></label>
           <div class="row-actions end"><button class="btn btn-primary" type="submit">Cikk mentése</button></div>
         </form>` : `<div class="card"><p class="muted">Válassz egy cikket a szerkesztéshez, vagy írj újat.</p></div>`}
@@ -482,6 +462,11 @@ Ha kérdésed van a tárolásról vagy kiegészítőkről, írj nekünk!` }
     x.excerpt = f.excerpt.value.trim();
     x.body = f.body.value;
     x.published = f.published.checked;
+    x.products = $$('input[name="po-prod"]:checked', f).map(c => Number(c.value)).slice(0, 8);
+  }
+  const wordStats = body => { const w = String(body || "").replace(/\[\[[^\]]+\]\]/g, "").split(/\s+/).filter(Boolean).length; return `${w} szó · ${Math.max(1, Math.round(w / 200))} perc olvasás`; };
+  function previewHTML(body) {
+    return N.mdToHtml(String(body || "").replace(/^\s*\[\[termek(?:ek)?:([\d,\s]+)\]\]\s*$/gm, (m, ids) => ids.split(",").map(Number).map(id => A.byId(id)).filter(Boolean).map(p => `> 🛒 Termékkártya: ${p.name}`).join("\n")));
   }
 
   /* ---------- szolgáltatások ---------- */
@@ -569,6 +554,23 @@ Ha kérdésed van a tárolásról vagy kiegészítőkről, írj nekünk!` }
     }
     if (el.matches("[data-op-print]")) return printSlip();
     if (el.matches("[data-comm-tab]")) { ops.commTab = el.dataset.commTab; return paintCommunity(); }
+    if (el.matches("[data-msg]")) {
+      try { await api(`messages/${el.dataset.msg}`, { method: "PATCH", body: JSON.stringify({ status: el.dataset.to }) }); loadCommunity(); loadSummary(); } catch (err) { toast(err.message, true); }
+      return;
+    }
+    if (el.matches("[data-msg-reply]")) { api(`messages/${el.dataset.msgReply}`, { method: "PATCH", body: JSON.stringify({ status: "done" }) }).then(() => { loadCommunity(); loadSummary(); }).catch(() => {}); return; }
+    if (el.matches("[data-msg-del]")) {
+      if (!(await confirmDialog({ title: "Törlöd az üzenetet?", text: "Véglegesen törlődik." }))) return;
+      try { await api(`messages/${el.dataset.msgDel}`, { method: "DELETE" }); toast("Törölve."); loadCommunity(); loadSummary(); } catch (err) { toast(err.message, true); }
+      return;
+    }
+    if (el.closest("[data-jump]") && el.matches("a")) {
+      e.preventDefault();
+      document.querySelector(el.getAttribute("href"))?.scrollIntoView({ behavior: "smooth", block: "start" });
+      $$("[data-jump] a").forEach(a => a.removeAttribute("aria-current"));
+      el.setAttribute("aria-current", "true");
+      return;
+    }
     if (el.matches("[data-rv]")) {
       try { await api(`reviews/${el.dataset.rv}`, { method: "PATCH", body: JSON.stringify({ status: el.dataset.to }) }); toast(el.dataset.to === "approved" ? "Jóváhagyva – megjelenik a boltban." : "Elutasítva."); loadCommunity(); loadSummary(); } catch (err) { toast(err.message, true); }
       return;
@@ -604,10 +606,15 @@ Ha kérdésed van a tárolásról vagy kiegészítőkről, írj nekünk!` }
       posts().unshift({ slug: `uj-cikk-${Date.now().toString(36)}`, title: "Új cikk", date: new Date().toISOString().slice(0, 10), excerpt: "", cover: "", body: "## Alcím\n\nIde jön a szöveg.", tag: "", published: false });
       ops.postIdx = 0; savePosts(); renderContent(); setTimeout(() => $("#po-title")?.select(), 30); return;
     }
-    if (el.matches("[data-post-edit]")) { ops.postIdx = Number(el.dataset.postEdit); return renderContent(); }
+    if (el.matches("[data-post-edit]")) {
+      ops.postIdx = Number(el.dataset.postEdit); renderContent();
+      /* mobilon a szerkesztő a lista alatt van: odagörgetünk, hogy látszódjon, mit nyitottál meg */
+      if (matchMedia("(max-width: 1100px)").matches) requestAnimationFrame(() => $("[data-post-form]")?.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }));
+      return;
+    }
     if (el.matches("[data-post-starter]")) {
       const today = new Date();
-      STARTER_POSTS.filter(sp => !posts().some(x => x.slug === sp.slug)).forEach((sp, k) => posts().push({ ...sp, cover: "", published: true, date: new Date(today - k * 864e5 * 3).toISOString().slice(0, 10) }));
+      STARTER_POSTS.filter(sp => !posts().some(x => x.slug === sp.slug)).forEach((sp, k) => posts().push({ ...sp, cover: sp.cover || "", published: true, date: sp.date || new Date(today - k * 864e5 * 3).toISOString().slice(0, 10) }));
       savePosts("Mintacikkek hozzáadva. Nézd át és szabd testre őket."); renderContent(); return;
     }
     if (el.matches("[data-post-del]")) {
@@ -615,6 +622,24 @@ Ha kérdésed van a tárolásról vagy kiegészítőkről, írj nekünk!` }
       posts().splice(ops.postIdx, 1); ops.postIdx = -1; savePosts("Cikk törölve."); renderContent(); return;
     }
     if (el.matches("[data-post-cover]")) return $("[data-post-cover-file]")?.click();
+    if (el.matches("[data-po-insert]") || el.matches("[data-po-tip]") || el.matches("[data-po-snip]")) {
+      const ta = $("#po-body");
+      if (!ta) return;
+      let snippet = "";
+      if (el.matches("[data-po-tip]")) snippet = "> **Tipp:** ";
+      else if (el.dataset.poSnip === "table") snippet = "| Termék | Mi van benne | Kinek |\n|---|---|---|\n| Booster | 10 lap | Kipróbálás |\n| ETB | 9 booster + kiegészítők | Ajándék |";
+      else if (el.dataset.poSnip === "faq") snippet = "## Gyakori kérdések\n### Első kérdés?\nA válasz egy-két mondatban.\n\n### Második kérdés?\nA válasz.";
+      else { const id = $("[data-po-ins]")?.value; if (!id) { toast("Válassz terméket a listából."); return; } snippet = `[[termek:${id}]]`; }
+      const at = ta.selectionStart ?? ta.value.length;
+      const before = ta.value.slice(0, at), after = ta.value.slice(at);
+      const ins = `${before && !before.endsWith("\n\n") ? (before.endsWith("\n") ? "\n" : "\n\n") : ""}${snippet}${el.matches("[data-po-tip]") ? "" : "\n\n"}`;
+      ta.value = before + ins + after;
+      ta.focus();
+      const pos = (before + ins).length;
+      ta.setSelectionRange(pos, pos);
+      $("[data-po-stats]").textContent = wordStats(ta.value);
+      return;
+    }
     if (el.matches("[data-post-cover-del]")) { readPostForm($("[data-post-form]")); posts()[ops.postIdx].cover = ""; savePosts(); renderContent(); return; }
     if (el.matches("[data-rel-del]")) { releases().splice(Number(el.dataset.relDel), 1); state.draft.settings.releases = N.sanitizeReleases(releases()); A.saveDraft(); renderContent(); return; }
     if (el.matches("[data-int-refresh]")) return renderIntegrations(true);
@@ -670,8 +695,18 @@ Ha kérdésed van a tárolásról vagy kiegészítőkről, írj nekünk!` }
       } catch { toast("A kép nem olvasható be.", true); }
     }
   });
+  document.addEventListener("change", e => {
+    if (e.target.name !== "po-view") return;
+    ops.postView = e.target.value;
+    const ta = $("#po-body"), pv = $("[data-po-preview]");
+    if (!ta || !pv) return;
+    ta.hidden = ops.postView === "preview";
+    pv.hidden = !ta.hidden;
+    if (!pv.hidden) pv.innerHTML = previewHTML(ta.value);
+  });
   let qTimer = 0;
   document.addEventListener("input", e => {
+    if (e.target.id === "po-body") { const st = $("[data-po-stats]"); if (st) st.textContent = wordStats(e.target.value); }
     if (e.target.matches("[data-o-q]")) { clearTimeout(qTimer); qTimer = setTimeout(() => { ops.q = e.target.value.trim(); loadOrders(true); }, 350); }
   });
   $("[data-order-scrim]")?.addEventListener("click", () => panel(false));
@@ -679,6 +714,7 @@ Ha kérdésed van a tárolásról vagy kiegészítőkről, írj nekünk!` }
 
   function start() {
     loadSummary();
+    loadStarter();
     setInterval(() => {
       if (document.visibilityState !== "visible") return;
       loadSummary();

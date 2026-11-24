@@ -164,7 +164,7 @@ assert.equal(r.status, 400);
 r = await call("functions/api/admin/[[path]].js", "onRequest", req("/api/admin/newsletter", { method: "POST", body: { subject: "Decemberi megjelenések", body: "## Hamarosan\nÚj ETB érkezik." }, headers: ADMIN }), { path: ["newsletter"] });
 assert.equal(r.data.sent, 1);
 const nl = JSON.parse(calls.filter(c => c.url === "https://api.resend.com/emails/batch").at(-1).init.body)[0];
-assert.match(nl.html, /unsubscribe=/); assert.match(nl.html, /<h2>Hamarosan<\/h2>/);
+assert.match(nl.html, /unsubscribe=/); assert.match(nl.html, /<h2[^>]*>Hamarosan<\/h2>/);
 
 // 9. újra kapható értesítő
 r = await call("functions/api/notify.js", "onRequestPost", req("/api/notify", { method: "POST", body: { email: "varo@example.com", productId: 2 } }));
@@ -202,5 +202,43 @@ const env2 = { ...env, DB: undefined };
 const m = await imp("functions/api/orders.js");
 const res2 = await m.onRequestPost({ request: req("/api/orders", { method: "POST", body: { items: [{ id: 1, qty: 1 }], customer, pay: "cod" } }), env: env2 });
 assert.equal(res2.status, 503); assert.equal((await res2.json()).fallback, true);
+
+
+// 13. ajándékcsomagolás, vásárlási limit, rendelés követés
+catalog.settings.giftWrap = true; catalog.settings.giftWrapPrice = 990;
+catalog.products[2].maxPerOrder = 1;
+r = await call("functions/api/orders.js", "onRequestPost", req("/api/orders", { method: "POST", body: { items: [{ id: 3, qty: 2 }], customer, shipping: "home", pay: "cod" } }));
+assert.equal(r.status, 409); assert.match(r.data.error, /legfeljebb 1 db/); assert.equal(r.data.left, 1);
+r = await call("functions/api/orders.js", "onRequestPost", req("/api/orders", { method: "POST", body: { items: [{ id: 3, qty: 1 }], customer, shipping: "home", pay: "cod", gift: true, giftMessage: "Boldog karácsonyt!" } }));
+assert.equal(r.status, 200, JSON.stringify(r.data)); assert.equal(r.data.total, 29990 + 2500 + 500 + 990); assert.ok(r.data.token.length >= 16);
+const gid = r.data.id, gtok = r.data.token;
+let rm = JSON.parse(calls.filter(c => c.url === "https://api.resend.com/emails").at(-2).init.body);
+assert.match(rm.html, /Ajándékcsomagolás/); assert.match(rm.html, /rendeles\?id=/);
+r = await call("functions/api/order-status.js", "onRequestGet", req(`/api/order-status?id=${gid}&t=${gtok}`));
+assert.equal(r.status, 200); assert.equal(r.data.order.status, "new"); assert.equal(r.data.order.gift, true); assert.equal(r.data.order.lines.length, 1); assert.equal(r.data.order.email, undefined);
+r = await call("functions/api/order-status.js", "onRequestGet", req(`/api/order-status?id=${gid}&t=rossztokenrossztoken`));
+assert.equal(r.status, 404);
+r = await call("functions/api/order-status.js", "onRequestPost", req("/api/order-status", { method: "POST", body: { id: gid.toLowerCase(), email: "ELEK@example.com" } }));
+assert.equal(r.status, 200);
+r = await call("functions/api/order-status.js", "onRequestPost", req("/api/order-status", { method: "POST", body: { id: gid, email: "mas@example.com" } }));
+assert.equal(r.status, 404);
+
+// 14. kapcsolat űrlap → admin üzenetek
+r = await call("functions/api/contact.js", "onRequestPost", req("/api/contact", { method: "POST", body: { name: "Kata", email: "kata@example.com", subject: "Előrendelés", message: "Mikor érkezik a következő ETB?" } }));
+assert.equal(r.data.ok, true); assert.equal(r.data.mailed, true);
+r = await call("functions/api/admin/[[path]].js", "onRequest", req("/api/admin/community", { headers: ADMIN }), { path: ["community"] });
+assert.equal(r.data.messages.length, 1); assert.equal(r.data.messages[0].status, "new");
+await call("functions/api/admin/[[path]].js", "onRequest", req(`/api/admin/messages/${r.data.messages[0].id}`, { method: "PATCH", body: { status: "done" }, headers: ADMIN }), { path: ["messages", String(r.data.messages[0].id)] });
+r = await call("functions/api/admin/[[path]].js", "onRequest", req("/api/admin/summary", { headers: ADMIN }), { path: ["summary"] });
+assert.equal(r.data.newMessages, 0); assert.ok(r.data.daily.length >= 1); assert.ok(r.data.top.length >= 1);
+
+// markdown: táblázat és GYIK a szerveroldali cikkben is
+{
+  const { mdToHtml } = await imp("lib/core.js");
+  const h = mdToHtml("## Gyakori kérdések\n### Mi az ETB?\nEgy doboz.\n\n| Termék | Ár |\n|---|---|\n| Booster | **1990 Ft** |\n\n> **Tipp:** sleeve");
+  assert.match(h, /<h2 id="gyakori-kerdesek">/); assert.match(h, /<table><thead><tr><th>Termék<\/th><th>Ár<\/th><\/tr><\/thead><tbody><tr><td>Booster<\/td><td><strong>1990 Ft<\/strong><\/td><\/tr><\/tbody><\/table>/);
+  assert.doesNotMatch(h, /\|---/); assert.match(h, /<blockquote><strong>Tipp:<\/strong> sleeve<\/blockquote>/);
+  assert.doesNotMatch(mdToHtml("| <script>x</script> |"), /<script>/);
+}
 
 console.log("OK – szerver függvények:", calls.length, "külső hívás álcázva");

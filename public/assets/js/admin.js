@@ -130,18 +130,46 @@
   };
 
   /* ---------------- belépés ---------------- */
+  /* Ha az adminban új jelszót állítottál be, az admin-auth.json (PBKDF2 lenyomat) érvényes, a beépített jelszó pedig már nem. */
+  let authCfg = null;
+  const authFile = () => { const pth = (state?.gh?.path || N.DEFAULT_REMOTE.path); return `${pth.includes("/") ? pth.slice(0, pth.lastIndexOf("/") + 1) : ""}admin-auth.json`; };
+  async function loadAuth() {
+    const remote = await N.resolveRemote().catch(() => null);
+    const urls = [];
+    if (remote) urls.push(`${N.rawUrl({ ...remote, path: authFile() })}?v=${Date.now()}`);
+    urls.push(`/store/admin-auth.json?v=${Date.now()}`);
+    for (const u of urls) {
+      try {
+        const r = await N.fetchWithTimeout(u, 5000, { cache: "no-store" });
+        if (r.ok) { const j = await r.json(); if (j && j.hash && j.salt && j.user) { authCfg = j; return j; } }
+      } catch {}
+    }
+    authCfg = null;
+    return null;
+  }
+  async function pbkdf2(text, salt, iterations) {
+    const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(text), "PBKDF2", false, ["deriveBits"]);
+    const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: new TextEncoder().encode(salt), iterations, hash: "SHA-256" }, key, 256);
+    return [...new Uint8Array(bits)].map(b => b.toString(16).padStart(2, "0")).join("");
+  }
+  async function checkPassword(user, pass) {
+    if (authCfg) return user === authCfg.user && (await pbkdf2(`${user}|${pass}`, authCfg.salt, Number(authCfg.iter) || 210000)) === authCfg.hash;
+    return user === AUTH.user && (await sha256(`${AUTH.salt}|${user}|${pass}`)) === AUTH.hash;
+  }
+  const sessionTag = () => (authCfg?.hash || AUTH.hash).slice(0, 12);
+  const adminUser = () => authCfg?.user || AUTH.user;
   function session() {
     for (const st of [sessionStorage, localStorage]) {
       try {
         const s = JSON.parse(st.getItem(SESSION_KEY) || "null");
-        if (s && s.exp > Date.now() && s.v === AUTH.hash.slice(0, 12)) return true;
+        if (s && s.exp > Date.now() && s.v === sessionTag()) return true;
       } catch {}
     }
     return false;
   }
   function setSession(remember) {
     const days = remember ? 30 : 0.5;
-    const data = JSON.stringify({ exp: Date.now() + days * 864e5, v: AUTH.hash.slice(0, 12) });
+    const data = JSON.stringify({ exp: Date.now() + days * 864e5, v: sessionTag() });
     try { (remember ? localStorage : sessionStorage).setItem(SESSION_KEY, data); } catch {}
   }
   function clearSession() {
@@ -159,8 +187,11 @@
       return;
     }
     const user = f.user.value.trim();
-    const hash = await sha256(`${AUTH.salt}|${user}|${f.pass.value}`);
-    if (user === AUTH.user && hash === AUTH.hash) {
+    const btn = $('button[type="submit"]', f);
+    btn.disabled = true;
+    const ok = await checkPassword(user, f.pass.value).catch(() => false);
+    btn.disabled = false;
+    if (ok) {
       setSession(f.remember.checked);
       f.reset();
       startApp();
@@ -795,6 +826,7 @@
     renderStatus();
     const auto = state.gh.autoPublish && state.gh.token;
     $("[data-settings-note]").textContent = isDirty() ? (auto ? "Mentve, publikálás folyamatban…" : "Mentve. Publikáld, hogy élesedjen.") : "Nincs változás.";
+    f.classList.remove("changed");
     toast(isDirty() ? "Beállítások mentve." : "Nincs változás.");
   }
 
@@ -834,6 +866,7 @@
 
   function renderPublish() {
     renderPublishCard();
+    renderPass();
     const f = $("[data-gh-form]");
     const g = state.gh;
     ["owner", "repo", "branch", "path"].forEach(k => { if (document.activeElement !== f.elements[k]) f.elements[k].value = g[k]; });
@@ -946,6 +979,7 @@
     f.elements.rarity.value = d.rarity || "";
     f.elements.grade.value = d.grade || "";
     f.elements.ean.value = d.ean || "";
+    f.elements.maxPerOrder.value = d.maxPerOrder || "";
     $("[data-e-single]").open = d.category === "single" || !!(d.condition || d.lang || d.cardNo || d.grade);
     updateAvHint();
     $$("[data-e-err]").forEach(el => { el.hidden = true; });
@@ -996,6 +1030,7 @@
       rarity: f.elements.rarity.value.trim(),
       grade: f.elements.grade.value.trim(),
       ean: f.elements.ean.value.replace(/\D/g, ""),
+      maxPerOrder: f.elements.maxPerOrder.value,
       images: [...(state.edit?.images || [])]
     };
   }
@@ -1828,6 +1863,8 @@ A termék átvételétől számított 14 napon belül indoklás nélkül elállh
     });
 
     $("[data-settings-form]").addEventListener("submit", onSettingsSubmit);
+    $("[data-settings-form]").addEventListener("input", e => e.currentTarget.classList.add("changed"));
+    $("[data-settings-form]").addEventListener("change", e => e.currentTarget.classList.add("changed"));
     $("[data-cat-add]").addEventListener("submit", e => { e.preventDefault(); if (addCategory(e.currentTarget.label.value)) e.currentTarget.reset(); });
     document.addEventListener("change", e => {
       const el = e.target;
@@ -1872,6 +1909,7 @@ A termék átvételétől számított 14 napon belül indoklás nélkül elállh
   /* ---------------- indulás ---------------- */
   async function startApp() {
     applyMode();
+    $$(".side-user .who b, .more-head b").forEach(b => { b.textContent = adminUser(); });
     $("[data-login]").hidden = true;
     $("[data-app]").hidden = false;
     $("[data-view-title]").textContent = "Betöltés…";
@@ -1928,12 +1966,67 @@ A termék átvételétől számított 14 napon belül indoklás nélkül elállh
   }
   window.NSCAdmin = { state, N, $, $$, esc, fmtFt, fmtDate, imageUrl, ICON, go, toast, confirmDialog, saveDraft, renderStatus, renderAll, api, publish, isDirty, byId, catLabel, compressImage, syncStock };
 
+  /* --- jelszó csere --- */
+  function passStrength(p) {
+    let n = 0;
+    if (p.length >= 10) n++; if (p.length >= 14) n++;
+    if (/[a-z]/.test(p) && /[A-Z]/.test(p)) n++;
+    if (/\d/.test(p)) n++; if (/[^A-Za-z0-9]/.test(p)) n++;
+    return Math.min(4, n);
+  }
+  function renderPass() {
+    const f = $("[data-pass-form]");
+    if (!f) return;
+    if (document.activeElement !== f.user) f.user.value = adminUser();
+    const pill = $("[data-pass-pill]");
+    if (pill) { pill.className = `status-pill ${authCfg ? "ok" : "warn"}`; pill.textContent = authCfg ? "Saját jelszó" : "Alap jelszó – cseréld le"; }
+  }
+  async function onPassSubmit(e) {
+    e.preventDefault();
+    const f = e.currentTarget;
+    const msg = $("[data-pass-msg]");
+    msg.className = "form-msg";
+    const user = f.user.value.trim(), next = f.pass.value;
+    if (!state.gh.token) { msg.className = "form-msg bad"; msg.textContent = "Előbb kösd össze a GitHubot (fent), mert a jelszó ott tárolódik."; return; }
+    if (!(await checkPassword(adminUser(), f.old.value))) { msg.className = "form-msg bad"; msg.textContent = "A jelenlegi jelszó nem stimmel."; f.old.focus(); return; }
+    if (!/^[A-Za-z0-9._@-]{3,40}$/.test(user)) { msg.className = "form-msg bad"; msg.textContent = "A felhasználónév 3–40 karakter (betű, szám, pont, kötőjel)."; return; }
+    if (passStrength(next) < 3 || next.length < 10) { msg.className = "form-msg bad"; msg.textContent = "Túl gyenge jelszó: legalább 10 karakter, kis- és nagybetű és szám."; f.pass.focus(); return; }
+    if (next !== f.pass2.value) { msg.className = "form-msg bad"; msg.textContent = "A két új jelszó nem egyezik."; f.pass2.focus(); return; }
+    const saltBytes = new Uint8Array(16); crypto.getRandomValues(saltBytes);
+    const salt = [...saltBytes].map(b => b.toString(16).padStart(2, "0")).join("");
+    const iter = 210000;
+    msg.textContent = "Mentés…";
+    try {
+      const cfg = { v: 1, user, salt, iter, hash: await pbkdf2(`${user}|${next}`, salt, iter), updatedAt: new Date().toISOString() };
+      await putFile(authFile(), b64FromString(JSON.stringify(cfg, null, 2)), "Admin jelszó módosítása");
+      const remember = (() => { try { return !!localStorage.getItem(SESSION_KEY); } catch { return false; } })();
+      authCfg = cfg;
+      setSession(remember);
+      f.old.value = f.pass.value = f.pass2.value = "";
+      msg.className = "form-msg ok";
+      msg.textContent = "Kész. Mostantól az új jelszóval lehet belépni (a többi eszközön újra be kell lépni).";
+      renderPass();
+      toast("Admin jelszó lecserélve.");
+    } catch (err) { msg.className = "form-msg bad"; msg.textContent = err.message || "A mentés nem sikerült."; }
+  }
+
   bind();
   bindStudio();
   bindPagesAndCoupons();
-  if (session()) startApp();
-  else {
-    $("[data-login]").hidden = false;
-    setTimeout(() => $("#lg-user")?.focus(), 50);
-  }
+  $("[data-pass-form]")?.addEventListener("submit", onPassSubmit);
+  $("[data-pass-form]")?.addEventListener("input", e => {
+    if (e.target.name !== "pass") return;
+    const n = passStrength(e.target.value);
+    const m = $("[data-pw-meter]");
+    if (m) { m.dataset.level = String(n); }
+    const h = $("[data-pw-hint]");
+    if (h) h.textContent = ["Legalább 10 karakter, kis- és nagybetű, szám.", "Gyenge", "Közepes", "Erős", "Nagyon erős"][n];
+  });
+  loadAuth().finally(() => {
+    if (session()) startApp();
+    else {
+      $("[data-login]").hidden = false;
+      setTimeout(() => $("#lg-user")?.focus(), 50);
+    }
+  });
 })();

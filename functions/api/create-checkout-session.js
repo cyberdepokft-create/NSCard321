@@ -40,6 +40,13 @@ export async function onRequestPost({ request, env }) {
     params.append(`line_items[${n}][quantity]`, "1");
     n++;
   }
+  if (priced.giftFee > 0) {
+    params.append(`line_items[${n}][price_data][currency]`, "huf");
+    params.append(`line_items[${n}][price_data][unit_amount]`, String(priced.giftFee * 100));
+    params.append(`line_items[${n}][price_data][product_data][name]`, "Ajándékcsomagolás");
+    params.append(`line_items[${n}][quantity]`, "1");
+    n++;
+  }
   if (priced.discount > 0) {
     const cp = new URLSearchParams({ amount_off: String(priced.discount * 100), currency: "huf", duration: "once", max_redemptions: "1", name: `Kupon ${priced.coupon}`.slice(0, 40) });
     const cr = await stripe(env, "/coupons", { method: "POST", params: cp });

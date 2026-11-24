@@ -40,7 +40,7 @@ function summaryOf(o) {
     id: o.id, createdAt: o.createdAt, status: o.status, statusLabel: o.statusLabel, paid: o.paid, pay: o.pay, ship: o.ship,
     name: o.name, email: o.email, phone: o.phone, total: o.total, invoice: o.invoice, tracking: o.tracking, carrier: o.carrier,
     items: (d.lines || []).reduce((a, l) => a + l.qty, 0), preview: (d.lines || []).map(l => `${l.qty}× ${l.name}`).join(", ").slice(0, 160),
-    preorder: !!d.preorder, method: d.methodLabel || "", locker: d.customer?.locker || "", city: d.customer?.city || ""
+    preorder: !!d.preorder, gift: !!d.gift, method: d.methodLabel || "", locker: d.customer?.locker || "", city: d.customer?.city || ""
   };
 }
 
@@ -94,10 +94,14 @@ export async function onRequest({ request, env, params }) {
     const subs = await DB.prepare("SELECT COUNT(*) AS n FROM subscribers WHERE confirmed = 1 AND unsubscribed = 0").first();
     const alerts = await DB.prepare("SELECT COUNT(*) AS n FROM stock_alerts WHERE notified_at IS NULL").first();
     const { results: recent } = await DB.prepare("SELECT * FROM orders ORDER BY created_at DESC LIMIT 6").all();
+    const { results: daily } = await DB.prepare("SELECT substr(created_at, 1, 10) AS d, COUNT(*) AS n, COALESCE(SUM(total), 0) AS sum FROM orders WHERE created_at > ? AND status NOT IN ('cancelled','pending_payment') GROUP BY d ORDER BY d").bind(since).all();
+    const { results: top } = await DB.prepare("SELECT oi.product_id AS id, SUM(oi.qty) AS qty FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE oi.created_at > ? AND oi.active = 1 AND o.status NOT IN ('cancelled','pending_payment') GROUP BY oi.product_id ORDER BY qty DESC LIMIT 5").bind(since).all();
+    const msgs = await DB.prepare("SELECT COUNT(*) AS n FROM messages WHERE status = 'new'").first();
     return json({
       counts, open: (counts.new || 0) + (counts.paid || 0) + (counts.packed || 0),
       last30: { orders: Number(rev?.n) || 0, revenue: Number(rev?.sum) || 0 }, last24: { orders: Number(day?.n) || 0, revenue: Number(day?.sum) || 0 },
-      pendingReviews: Number(pending?.n) || 0, subscribers: Number(subs?.n) || 0, alerts: Number(alerts?.n) || 0,
+      pendingReviews: Number(pending?.n) || 0, subscribers: Number(subs?.n) || 0, alerts: Number(alerts?.n) || 0, newMessages: Number(msgs?.n) || 0,
+      daily: (daily || []).map(r => ({ d: r.d, n: Number(r.n), sum: Number(r.sum) })), top: (top || []).map(r => ({ id: r.id, qty: Number(r.qty) })),
       recent: (recent || []).map(rowToOrder).map(summaryOf)
     });
   }
@@ -191,10 +195,12 @@ export async function onRequest({ request, env, params }) {
     const stats = await DB.prepare("SELECT SUM(CASE WHEN confirmed = 1 AND unsubscribed = 0 THEN 1 ELSE 0 END) AS active, SUM(CASE WHEN confirmed = 0 THEN 1 ELSE 0 END) AS waiting, SUM(unsubscribed) AS gone FROM subscribers").first();
     const { results: alerts } = await DB.prepare("SELECT product_id AS id, COUNT(*) AS n, MAX(created_at) AS last FROM stock_alerts WHERE notified_at IS NULL GROUP BY product_id ORDER BY n DESC").all();
     const { results: reviews } = await DB.prepare("SELECT * FROM reviews ORDER BY CASE status WHEN 'pending' THEN 0 ELSE 1 END, created_at DESC LIMIT 200").all();
+    const { results: messages } = await DB.prepare("SELECT * FROM messages ORDER BY CASE status WHEN 'new' THEN 0 ELSE 1 END, created_at DESC LIMIT 200").all();
     return json({
       subscribers: (subs || []).map(r => ({ email: r.email, createdAt: r.created_at, confirmed: !!r.confirmed, unsubscribed: !!r.unsubscribed, source: r.source || "" })),
       subStats: { active: Number(stats?.active) || 0, waiting: Number(stats?.waiting) || 0, gone: Number(stats?.gone) || 0 },
       alerts: (alerts || []).map(a => ({ id: a.id, count: a.n, last: a.last })),
+      messages: (messages || []).map(m => ({ id: m.id, createdAt: m.created_at, name: m.name || "", email: m.email, subject: m.subject || "", body: m.body, productId: m.product_id || 0, status: m.status })),
       reviews: (reviews || []).map(r => ({ id: r.id, productId: r.product_id, name: r.name, rating: r.rating, title: r.title || "", body: r.body || "", email: r.email || "", orderId: r.order_id || "", verified: !!r.verified, status: r.status, createdAt: r.created_at, reply: r.reply || "" })),
       mail: mailReady(env)
     });
@@ -217,6 +223,16 @@ export async function onRequest({ request, env, params }) {
       const b = await readJson(request) || {};
       if (["approved", "rejected", "pending"].includes(b.status)) await DB.prepare("UPDATE reviews SET status = ? WHERE id = ?").bind(b.status, rid).run();
       if (typeof b.reply === "string") await DB.prepare("UPDATE reviews SET reply = ? WHERE id = ?").bind(cleanText(b.reply, 1000) || null, rid).run();
+      return json({ ok: true });
+    }
+  }
+
+  if (head === "messages" && id) {
+    const mid = Number(id);
+    if (method === "DELETE") { await DB.prepare("DELETE FROM messages WHERE id = ?").bind(mid).run(); return json({ ok: true }); }
+    if (method === "PATCH") {
+      const b = await readJson(request) || {};
+      if (["new", "read", "done"].includes(b.status)) await DB.prepare("UPDATE messages SET status = ? WHERE id = ?").bind(b.status, mid).run();
       return json({ ok: true });
     }
   }

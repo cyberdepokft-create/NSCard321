@@ -12,12 +12,14 @@ export async function onRequestGet({ request, env }) {
   const s = res.data;
   if (!res.ok) return json({ error: s?.error?.message || "Nem sikerült lekérdezni a fizetést." }, 502);
   const orderId = s.metadata?.order_id || s.client_reference_id || "";
+  let token = "";
   if (s.payment_status === "paid" && orderId) {
     try {
       const DB = await getDb(env);
       if (DB) {
         const catalog = await loadCatalog(request, env);
-        await markPaid(DB, env, catalog.settings || {}, originOf(request), orderId, { stripeSession: s.id, amount: Math.round((s.amount_total || 0) / 100), via: "visszatérés" });
+        const o = await markPaid(DB, env, catalog.settings || {}, originOf(request), orderId, { stripeSession: s.id, amount: Math.round((s.amount_total || 0) / 100), via: "visszatérés" });
+        token = o?.data?.token || "";
       }
     } catch {}
   }
@@ -31,6 +33,7 @@ export async function onRequestGet({ request, env }) {
     coupon: s.metadata?.coupon || "",
     discount: Math.round((s.total_details?.amount_discount || 0) / 100),
     items: (s.line_items?.data || []).map(li => ({ name: li.description, qty: li.quantity, total: Math.round((li.amount_total || 0) / 100) })),
-    order: orderId || String(s.id || "").slice(-8).toUpperCase()
+    order: orderId || String(s.id || "").slice(-8).toUpperCase(),
+    token
   });
 }

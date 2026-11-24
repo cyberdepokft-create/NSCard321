@@ -10,7 +10,7 @@
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="preload" href="/assets/fonts/dm-sans.woff" as="font" type="font/woff" crossorigin>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=5.0.0">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=5.1.0">
 </head>
 <body>
   <!-- Belépés -->
@@ -180,8 +180,11 @@
               <button type="button" class="mode-card" data-mode="pro" aria-pressed="false"><strong>Haladó</strong><span>Plusz a Megjelenés szerkesztő: színek, betűk, animációk, szekciók, minden szöveg és saját CSS, élő előnézettel.</span></button>
             </div>
           </div>
+          <nav class="jump" aria-label="Ugrás a beállításokhoz" data-jump>
+            <a href="#s-bolt">Bolt</a><a href="#s-ceg">Cég</a><a href="#s-szallitas">Szállítás</a><a href="#s-fizetes">Fizetés</a><a href="#s-szamla">Számlázás</a><a href="#s-ajandek">Ajándék</a><a href="#kuponok">Kuponok</a><a href="#integraciok">Bekötés</a>
+          </nav>
           <form class="settings" data-settings-form novalidate>
-            <div class="card">
+            <div class="card" id="s-bolt">
               <div class="card-head"><h2>Bolt adatai</h2></div>
               <div class="form-grid">
                 <div class="field"><label for="s-shopName">Bolt neve</label><input class="input" id="s-shopName" name="shopName"></div>
@@ -190,7 +193,7 @@
                 <div class="field"><label for="s-address">Cím vagy átvételi pont (nem kötelező)</label><input class="input" id="s-address" name="address" placeholder="pl. Budapest"></div>
               </div>
             </div>
-            <div class="card">
+            <div class="card" id="s-ceg">
               <div class="card-head"><h2>Cég adatai</h2><a class="link" href="#oldalak">Impresszum</a></div>
               <p class="muted">Ezekből készül automatikusan az Impresszum oldal. Webshopnál kötelező feltüntetni az üzemeltető adatait.</p>
               <div class="form-grid">
@@ -213,7 +216,7 @@
               <div class="card-head"><h2>Értesítő sáv</h2></div>
               <div class="field"><label for="s-announcement">Szöveg az oldal tetején (nem kötelező)</label><input class="input" id="s-announcement" name="announcement" maxlength="140" placeholder="pl. Ingyenes szállítás 30 000 Ft felett"><span class="hint">Üresen hagyva nem jelenik meg. A főcímet, a többi szöveget és a kinézetet a Haladó mód Megjelenés menüjében szerkesztheted.</span></div>
             </div>
-            <div class="card">
+            <div class="card" id="s-szallitas">
               <div class="card-head"><h2>Szállítás</h2></div>
               <div class="ship-rows">
                 <div class="ship-row">
@@ -237,7 +240,7 @@
                 <div class="field"><label for="s-deliveryText">Várható kézbesítés</label><input class="input" id="s-deliveryText" name="deliveryText" maxlength="40" placeholder="pl. 1–3 munkanap"><span class="hint">A termékoldalon és a gyakori kérdéseknél jelenik meg.</span></div>
               </div>
             </div>
-            <div class="card">
+            <div class="card" id="s-fizetes">
               <div class="card-head"><h2>Fizetési módok</h2></div>
               <div class="toggles">
                 <label class="toggle"><input type="checkbox" name="payTransfer"><span class="switch"></span><span><strong>Banki átutalás</strong><small>A vásárló a visszaigazoló e-mailben és a köszönő oldalon kapja meg az utalási adatokat.</small></span></label>
@@ -248,7 +251,7 @@
                 <div class="stripe-box" data-stripe-box><p class="muted">Stripe állapot ellenőrzése…</p></div>
               </div>
             </div>
-            <div class="card">
+            <div class="card" id="s-szamla">
               <div class="card-head"><h2>Számlázás – Billingo</h2><span data-billingo-pill></span></div>
               <p class="muted">A számlát a rendelés adatlapján egy kattintással állítod ki, vagy automatikusan, amikor a rendelés „Fizetve” állapotba kerül.</p>
               <div class="form-grid">
@@ -260,6 +263,11 @@
                 <label class="toggle"><input type="checkbox" name="invoiceElectronic"><span class="switch"></span><span><strong>E-számla</strong><small>Elektronikus számla (PDF), nem papír alapú.</small></span></label>
                 <label class="toggle"><input type="checkbox" name="invoiceSend"><span class="switch"></span><span><strong>Számla küldése a vásárlónak</strong><small>A Billingo e-mailben elküldi a számlát.</small></span></label>
               </div>
+            </div>
+            <div class="card" id="s-ajandek">
+              <div class="card-head"><h2>Ajándékcsomagolás</h2></div>
+              <label class="toggle"><input type="checkbox" name="giftWrap"><span class="switch"></span><span><strong>Ajándékcsomagolás a pénztárban</strong><small>A vásárló bejelölheti, és üzenetet írhat az ajándékkártyára. Árcédula nélkül csomagolod.</small></span></label>
+              <div class="form-grid three"><div class="field"><label for="s-giftWrapPrice">Díja</label><div class="unit-input"><input class="input" id="s-giftWrapPrice" name="giftWrapPrice" type="number" min="0" step="10" inputmode="numeric"><span>Ft</span></div><span class="hint">0 = ingyenes.</span></div></div>
             </div>
             <div class="card">
               <div class="card-head"><h2>Látogatottság</h2></div>
@@ -403,6 +411,18 @@
               </div>
               <p class="form-msg" data-gh-msg role="status"></p>
             </form>
+            <form class="card" data-pass-form novalidate>
+              <div class="card-head"><h2>Admin belépés</h2><span class="status-pill" data-pass-pill></span></div>
+              <p class="muted">Itt cserélheted le a belépési jelszót. Az új jelszó erős titkosítással (PBKDF2) kerül a GitHubra, a régi jelszó ezután nem működik.</p>
+              <div class="form-grid">
+                <div class="field"><label for="pw-user">Felhasználónév</label><input class="input" id="pw-user" name="user" autocomplete="username" autocapitalize="off" spellcheck="false"></div>
+                <div class="field"><label for="pw-old">Jelenlegi jelszó</label><input class="input" id="pw-old" name="old" type="password" autocomplete="current-password"></div>
+                <div class="field"><label for="pw-new">Új jelszó</label><input class="input" id="pw-new" name="pass" type="password" autocomplete="new-password" minlength="10"><div class="pw-meter" data-pw-meter><i></i></div><span class="hint" data-pw-hint>Legalább 10 karakter, kis- és nagybetű, szám.</span></div>
+                <div class="field"><label for="pw-new2">Új jelszó még egyszer</label><input class="input" id="pw-new2" name="pass2" type="password" autocomplete="new-password"></div>
+              </div>
+              <div class="row-actions"><button class="btn btn-primary" type="submit">Jelszó cseréje</button></div>
+              <p class="form-msg" data-pass-msg role="status"></p>
+            </form>
             <div class="card">
               <div class="card-head"><h2>Token készítése</h2></div>
               <ol class="howto">
@@ -486,6 +506,7 @@
             <div class="field"><label for="e-price">Ár</label><div class="unit-input"><input class="input" id="e-price" name="price" type="number" min="0" step="10" inputmode="numeric" required><span>Ft</span></div><span class="field-error" data-e-err="price" hidden></span></div>
             <div class="field"><label for="e-oldPrice">Eredeti ár (akcióhoz)</label><div class="unit-input"><input class="input" id="e-oldPrice" name="oldPrice" type="number" min="0" step="10" inputmode="numeric"><span>Ft</span></div><span class="hint" data-e-discount></span></div>
             <div class="field"><label for="e-stock">Készlet</label><div class="unit-input"><input class="input" id="e-stock" name="stock" type="number" min="0" step="1" inputmode="numeric"><span>db</span></div></div>
+            <div class="field"><label for="e-maxPerOrder">Max. db / rendelés</label><div class="unit-input"><input class="input" id="e-maxPerOrder" name="maxPerOrder" type="number" min="0" max="99" step="1" inputmode="numeric" placeholder="0"><span>db</span></div><span class="hint">0 = nincs korlát. Keresett termékeknél a felvásárlás ellen.</span></div>
           </div>
           <div class="field">
             <span class="label" id="e-av-label">Elérhetőség</span>
@@ -560,9 +581,9 @@
 
   <div class="toast" role="status" aria-live="polite" data-toast></div>
 
-  <script src="/assets/js/texts.js?v=5.0.0" defer></script>
-  <script src="/assets/js/store.js?v=5.0.0" defer></script>
-  <script src="/assets/js/admin.js?v=5.0.0" defer></script>
-  <script src="/assets/js/admin-ops.js?v=5.0.0" defer></script>
+  <script src="/assets/js/texts.js?v=5.1.0" defer></script>
+  <script src="/assets/js/store.js?v=5.1.0" defer></script>
+  <script src="/assets/js/admin.js?v=5.1.0" defer></script>
+  <script src="/assets/js/admin-ops.js?v=5.1.0" defer></script>
 </body>
 </html>
