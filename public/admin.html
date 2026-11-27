@@ -10,7 +10,7 @@
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="preload" href="/assets/fonts/dm-sans.woff" as="font" type="font/woff" crossorigin>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=5.1.0">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=5.1.1">
 </head>
 <body>
   <!-- Belépés -->
@@ -411,6 +411,26 @@
               </div>
               <p class="form-msg" data-gh-msg role="status"></p>
             </form>
+            <div class="card">
+              <div class="card-head"><h2>Token készítése (2 perc)</h2></div>
+              <a class="btn btn-primary token-link" data-gh-tokenlink href="https://github.com/settings/personal-access-tokens/new?name=NS%20Card%20admin&contents=write&expires_in=366" target="_blank" rel="noopener">Token létrehozása a GitHubon</a>
+              <ol class="howto">
+                <li>Kattints a fenti gombra, és lépj be a GitHubra. A név, az 1 éves lejárat és az írási jog (<em>Contents: Read and write</em>) már ki van töltve.</li>
+                <li><em>Repository access</em> résznél válaszd: <strong>Only select repositories</strong> → <code data-gh-repo-name>NSCard321</code>.</li>
+                <li>Lent kattints a <strong>Generate token</strong> gombra, és másold ki a <code>github_pat_…</code> kezdetű tokent.</li>
+                <li>Illeszd be ide a <strong>GitHub token</strong> mezőbe, és mentsd el. A függőben lévő módosításaid ezután automatikusan felkerülnek a boltba.</li>
+              </ol>
+              <p class="hint">A token csak ebben a böngészőben tárolódik. Ha telefonról és gépről is szerkesztesz, mindkettőn egyszer be kell illeszteni – ugyanaz a token jó mindkettőre.</p>
+              <div class="card-head" style="margin-top:20px"><h2>Biztonsági mentés</h2></div>
+              <div class="row-actions">
+                <button class="btn btn-ghost" type="button" data-export>Katalógus letöltése (JSON)</button>
+                <button class="btn btn-ghost" type="button" data-import>JSON betöltése</button>
+                <input type="file" accept="application/json,.json" data-import-file hidden>
+              </div>
+              <div class="row-actions">
+                <button class="btn btn-danger-ghost" type="button" data-discard>Nem publikált módosítások elvetése</button>
+              </div>
+            </div>
             <form class="card" data-pass-form novalidate>
               <div class="card-head"><h2>Admin belépés</h2><span class="status-pill" data-pass-pill></span></div>
               <p class="muted">Itt cserélheted le a belépési jelszót. Az új jelszó erős titkosítással (PBKDF2) kerül a GitHubra, a régi jelszó ezután nem működik.</p>
@@ -423,25 +443,6 @@
               <div class="row-actions"><button class="btn btn-primary" type="submit">Jelszó cseréje</button></div>
               <p class="form-msg" data-pass-msg role="status"></p>
             </form>
-            <div class="card">
-              <div class="card-head"><h2>Token készítése</h2></div>
-              <ol class="howto">
-                <li>GitHubon: <a class="link" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Settings → Developer settings → Fine-grained tokens → Generate new token</a>.</li>
-                <li>Név: <code>NS Card admin</code>, lejárat: amennyi kényelmes (pl. 1 év).</li>
-                <li><em>Repository access</em>: <strong>Only select repositories</strong> → <code data-gh-repo-name>nscardshoop</code>.</li>
-                <li><em>Permissions → Repository permissions → Contents</em>: <strong>Read and write</strong>.</li>
-                <li>A kapott tokent másold be balra, és mentsd el.</li>
-              </ol>
-              <div class="card-head" style="margin-top:20px"><h2>Biztonsági mentés</h2></div>
-              <div class="row-actions">
-                <button class="btn btn-ghost" type="button" data-export>Katalógus letöltése (JSON)</button>
-                <button class="btn btn-ghost" type="button" data-import>JSON betöltése</button>
-                <input type="file" accept="application/json,.json" data-import-file hidden>
-              </div>
-              <div class="row-actions">
-                <button class="btn btn-danger-ghost" type="button" data-discard>Nem publikált módosítások elvetése</button>
-              </div>
-            </div>
           </div>
         </section>
       </div>
@@ -581,9 +582,9 @@
 
   <div class="toast" role="status" aria-live="polite" data-toast></div>
 
-  <script src="/assets/js/texts.js?v=5.1.0" defer></script>
-  <script src="/assets/js/store.js?v=5.1.0" defer></script>
-  <script src="/assets/js/admin.js?v=5.1.0" defer></script>
-  <script src="/assets/js/admin-ops.js?v=5.1.0" defer></script>
+  <script src="/assets/js/texts.js?v=5.1.1" defer></script>
+  <script src="/assets/js/store.js?v=5.1.1" defer></script>
+  <script src="/assets/js/admin.js?v=5.1.1" defer></script>
+  <script src="/assets/js/admin-ops.js?v=5.1.1" defer></script>
 </body>
 </html>

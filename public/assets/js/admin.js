@@ -342,7 +342,7 @@
   async function publish({ auto = false } = {}) {
     if (state.publishing) { state.publishQueued = true; return false; }
     if (!state.gh.token) {
-      if (!auto) { toast("A publikáláshoz előbb kösd össze a GitHubot.", true); go("publikalas"); setTimeout(() => $("#gh-token")?.focus(), 100); }
+      if (!auto) { toast("A publikáláshoz egyszer be kell illesztened a GitHub tokent – a Publikálás oldalon segítünk.", true); go("publikalas"); setTimeout(() => $("#gh-token")?.focus(), 100); }
       return false;
     }
     clearTimeout(publishTimer);
@@ -873,6 +873,9 @@
     if (document.activeElement !== f.elements.token) f.elements.token.value = g.token;
     f.elements.autoPublish.checked = !!g.autoPublish;
     $("[data-gh-repo-name]").textContent = g.repo;
+    /* előre kitöltött GitHub tokenoldal: név, tulajdonos, 1 év, Contents írás */
+    const tl = $("[data-gh-tokenlink]");
+    if (tl) tl.href = `https://github.com/settings/personal-access-tokens/new?${new URLSearchParams({ name: "NS Card admin", description: `NS Card webshop admin – publikálás a ${g.owner}/${g.repo} repóba`, target_name: g.owner, expires_in: "366", contents: "write" })}`;
     renderGhPill();
   }
 

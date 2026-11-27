@@ -957,3 +957,4 @@ em.ok { font-style: normal; color: var(--clover); }
 .prose-preview blockquote { margin: 0; padding: 10px 14px; border-left: 4px solid var(--gold, #ffd23f); border-radius: 0 10px 10px 0; background: rgba(255, 210, 63, .07); }
 .prose-preview blockquote.callout.tip { border-left-color: var(--clover, #3ccb76); background: rgba(60, 203, 118, .08); }
 .post-editor { scroll-margin-top: 80px; }
+.token-link { margin: 4px 0 14px; width: 100%; justify-content: center; }
