@@ -80,3 +80,20 @@ Minden módosítás után: Deployments → Retry deployment. Adatbázis nélkül
 - **Cikkek**: 13 részletes útmutató, táblázatok (mobilon kártyákká rendeződnek), „> **Tipp:**” és „> **Fontos:**” kiemelő dobozok, lenyitható „Gyakori kérdések”, tartalomjegyzék, kapcsolódó termékek, olvasási csík. A termékoldalon az állapot, nyelv, ritkaság és grading mellett „Mit jelent?” link vezet a megfelelő cikkhez.
 
 A cikkek a katalógus `settings.posts` listájában vannak, és az adminban (Cikkek és naptár) szerkeszthetők; a mintacikkek a `public/assets/data/starter-posts.json` fájlban is megvannak.
+
+### 5.2: belépés és publikálás a szerveren (ajánlott)
+Ha a Cloudflare-ben (nscard-webshop → Settings → Variables and Secrets, Production) beállítod:
+
+| Név | Típus | Mi ez |
+|---|---|---|
+| `ADMIN_PASSWORD` | Secret | az admin jelszó (legalább 12 karakter) |
+| `ADMIN_USER` | Text | felhasználónév (alapból `NSadmin`) |
+| `GITHUB_TOKEN` | Secret | fine-grained token a repóhoz, *Contents: Read and write* (az admin Publikálás oldalán előre kitöltött gombbal készíthető) |
+
+…majd Deployments → Retry deployment, akkor:
+- a belépést a szerver ellenőrzi (IP-nként 10 hibás próbálkozás / 15 perc), a régi, kódba épített jelszó nem enged be;
+- a publikálás a szerveren át megy (`/api/admin/github`), a token a böngészőbe nem kerül le, és csak a katalógus mappája (`public/store/`) írható;
+- bármelyik eszközről belépve lehet publikálni, tokent sehol nem kell beírni;
+- jelszócsere: az `ADMIN_PASSWORD` értékének cseréje + Retry deployment; ekkor minden munkamenet lejár.
+
+Beállítás nélkül minden a régi módon működik (böngészőnként beillesztett GitHub token).

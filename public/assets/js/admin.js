@@ -174,6 +174,42 @@
   }
   function clearSession() {
     try { sessionStorage.removeItem(SESSION_KEY); localStorage.removeItem(SESSION_KEY); } catch {}
+    clearServer();
+  }
+
+  /* Szerveres belépés: ha a Cloudflare-ben be van állítva az ADMIN_PASSWORD, a szerver ad munkamenetet,
+   * és a publikálás is a szerveren át megy (GITHUB_TOKEN a Cloudflare titkai között) – a böngészőben nincs token. */
+  const SERVER_KEY = "nsc.admin.server.v1";
+  const serverAuth = { configured: false, github: false, checked: false };
+  function loadServer() {
+    for (const st of [sessionStorage, localStorage]) {
+      try { const s = JSON.parse(st.getItem(SERVER_KEY) || "null"); if (s?.token && s.exp > Date.now()) return s; } catch {}
+    }
+    return null;
+  }
+  function saveServer(s, remember) {
+    try { sessionStorage.removeItem(SERVER_KEY); localStorage.removeItem(SERVER_KEY); (remember ? localStorage : sessionStorage).setItem(SERVER_KEY, JSON.stringify(s)); } catch {}
+  }
+  function clearServer() {
+    try { sessionStorage.removeItem(SERVER_KEY); localStorage.removeItem(SERVER_KEY); } catch {}
+    if (typeof state !== "undefined") state.server = null;
+  }
+  async function probeServer() {
+    try {
+      const r = await N.fetchWithTimeout("/api/admin-login", 5000, { cache: "no-store" });
+      const j = r.ok && /json/.test(r.headers.get("content-type") || "") ? await r.json() : null;
+      serverAuth.configured = !!j?.configured; serverAuth.github = !!j?.github;
+    } catch { serverAuth.configured = false; }
+    serverAuth.checked = true;
+    return serverAuth;
+  }
+  const hasAuth = () => !!(state.server || state.gh.token);
+  const authToken = () => state.server?.token || state.gh.token;
+  /* lejárt szerveres munkamenet: vissza a belépéshez (a piszkozat a böngészőben marad) */
+  function sessionExpired() {
+    clearServer();
+    toast("Lejárt a belépés. Lépj be újra – a mentett módosításaid megmaradtak.", true);
+    setTimeout(() => location.reload(), 1600);
   }
 
   async function onLogin(e) {
@@ -181,7 +217,7 @@
     const f = e.currentTarget;
     const err = $("[data-login-error]");
     err.hidden = true;
-    if (!window.crypto?.subtle) {
+    if (!window.crypto?.subtle && !serverAuth.configured) {
       err.textContent = "Az admin felület csak biztonságos (https) kapcsolaton érhető el.";
       err.hidden = false;
       return;
@@ -189,6 +225,27 @@
     const user = f.user.value.trim();
     const btn = $('button[type="submit"]', f);
     btn.disabled = true;
+    if (serverAuth.configured) {
+      let res = null, data = {};
+      try {
+        res = await fetch("/api/admin-login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ user, pass: f.pass.value, remember: f.remember.checked }) });
+        data = await res.json().catch(() => ({}));
+      } catch {}
+      btn.disabled = false;
+      if (res?.ok && data.token) {
+        state.server = { token: data.token, exp: data.exp, user: data.user };
+        serverAuth.github = !!data.github;
+        saveServer(state.server, f.remember.checked);
+        f.reset();
+        startApp();
+      } else {
+        err.textContent = data.error || "A belépés most nem sikerült. Ellenőrizd az internetkapcsolatot.";
+        err.hidden = false;
+        f.pass.value = "";
+        f.pass.focus();
+      }
+      return;
+    }
     const ok = await checkPassword(user, f.pass.value).catch(() => false);
     btn.disabled = false;
     if (ok) {
@@ -227,12 +284,15 @@
   const encPath = p => p.split("/").filter(Boolean).map(encodeURIComponent).join("/");
 
   async function gh(path, init = {}) {
-    const res = await fetch(`${ghBase(state.gh)}${path}`, {
+    const viaServer = !!state.server;
+    const res = await fetch(viaServer ? `/api/admin/github${path}` : `${ghBase(state.gh)}${path}`, {
       ...init,
-      headers: { Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", Authorization: `Bearer ${state.gh.token}`, ...(init.body ? { "Content-Type": "application/json" } : {}) }
+      headers: { Accept: "application/vnd.github+json", ...(viaServer ? {} : { "X-GitHub-Api-Version": "2022-11-28" }), Authorization: `Bearer ${viaServer ? state.server.token : state.gh.token}`, ...(init.body ? { "Content-Type": "application/json" } : {}) }
     });
     if (res.status === 404 && init.allow404) return null;
     const data = await res.json().catch(() => ({}));
+    if (viaServer && res.status === 401) { sessionExpired(); const e = new Error("Lejárt a belépés."); e.status = 401; throw e; }
+    if (viaServer && !res.ok && data.error) { const e = new Error(data.error); e.status = res.status; e.notoken = !!data.notoken; throw e; }
     if (!res.ok) {
       const msg = res.status === 401 ? "A GitHub token érvénytelen vagy lejárt."
         : res.status === 403 ? "A tokennek nincs írási joga ehhez a repóhoz (Contents: Read and write)."
@@ -247,7 +307,7 @@
   }
 
   async function verifyGh() {
-    if (!state.gh.token) { state.ghState = "none"; return false; }
+    if (!hasAuth()) { state.ghState = "none"; return false; }
     try {
       const repo = await gh("");
       state.ghState = repo?.permissions?.push ? "ok" : "readonly";
@@ -304,7 +364,7 @@
       if (!ok) toast("A böngésző tárhelye megtelt (sok új kép). Publikálj most, hogy a képek feltöltődjenek.", true);
     }
     renderStatus();
-    if (!quiet && isDirty() && state.gh.autoPublish && state.gh.token) {
+    if (!quiet && isDirty() && state.gh.autoPublish && hasAuth()) {
       clearTimeout(publishTimer);
       publishTimer = setTimeout(() => publish({ auto: true }), 1200);
     }
@@ -341,7 +401,7 @@
 
   async function publish({ auto = false } = {}) {
     if (state.publishing) { state.publishQueued = true; return false; }
-    if (!state.gh.token) {
+    if (!hasAuth()) {
       if (!auto) { toast("A publikáláshoz egyszer be kell illesztened a GitHub tokent – a Publikálás oldalon segítünk.", true); go("publikalas"); setTimeout(() => $("#gh-token")?.focus(), 100); }
       return false;
     }
@@ -488,8 +548,9 @@
 
     const todo = [];
     if (!s.email && !s.payCard) todo.push({ cls: "bad", text: "Add meg a rendelési e-mail címet. Enélkül a vásárlók nem tudnak rendelést leadni.", btn: "Beállítás", act: "go:beallitasok" });
-    if (!state.gh.token) todo.push({ cls: "bad", text: "Kösd össze a GitHubot, hogy a módosítások megjelenjenek a boltban.", btn: "Összekötés", act: "go:publikalas" });
+    if (!hasAuth()) todo.push({ cls: "bad", text: "Kösd össze a GitHubot, hogy a módosítások megjelenjenek a boltban.", btn: "Összekötés", act: "go:publikalas" });
     else if (state.ghState === "badtoken") todo.push({ cls: "bad", text: "A GitHub token lejárt vagy érvénytelen.", btn: "Javítás", act: "go:publikalas" });
+    else if (state.server && state.ghState === "error") todo.push({ cls: "bad", text: state.ghError || "A publikálás a szerveren nincs beállítva.", btn: "Részletek", act: "go:publikalas" });
     if (isDirty()) todo.push({ cls: "", text: `${changeCount()} módosítás még nincs élesítve a boltban.`, btn: "Publikálás", act: "publish" });
     const noImg = visible.filter(p => !p.images.length);
     if (noImg.length) todo.push({ cls: "bad", text: `${noImg.length} terméknek nincs képe.`, btn: "Szerkesztés", act: `edit:${noImg[0].id}` });
@@ -824,7 +885,7 @@
     state.draft.settings = N.sanitizeSettings(raw);
     saveDraft();
     renderStatus();
-    const auto = state.gh.autoPublish && state.gh.token;
+    const auto = state.gh.autoPublish && hasAuth();
     $("[data-settings-note]").textContent = isDirty() ? (auto ? "Mentve, publikálás folyamatban…" : "Mentve. Publikáld, hogy élesedjen.") : "Nincs változás.";
     f.classList.remove("changed");
     toast(isDirty() ? "Beállítások mentve." : "Nincs változás.");
@@ -857,7 +918,7 @@
     const pill = $("[data-gh-pill]");
     const map = {
       ok: ["ok", "Összekötve"], none: ["warn", "Nincs összekötve"], badtoken: ["bad", "Érvénytelen token"],
-      readonly: ["bad", "Nincs írási jog"], error: ["bad", "Hiba"], unknown: [state.gh.token ? "busy" : "warn", state.gh.token ? "Ellenőrzés…" : "Nincs összekötve"]
+      readonly: ["bad", "Nincs írási jog"], error: ["bad", "Hiba"], unknown: [hasAuth() ? "busy" : "warn", hasAuth() ? "Ellenőrzés…" : "Nincs összekötve"]
     };
     const [cls, text] = map[state.ghState] || map.unknown;
     pill.className = `status-pill ${cls}`;
@@ -873,6 +934,25 @@
     if (document.activeElement !== f.elements.token) f.elements.token.value = g.token;
     f.elements.autoPublish.checked = !!g.autoPublish;
     $("[data-gh-repo-name]").textContent = g.repo;
+    /* szerveres mód: nincs token mező, a Cloudflare beállítás állapota látszik */
+    const srv = !!state.server;
+    f.classList.toggle("server-mode", srv);
+    $$(".gh-local", f).forEach(el => { el.hidden = srv; });
+    const note = $("[data-gh-server-note]");
+    note.hidden = !srv;
+    if (srv) {
+      note.className = `notice gh-server-note ${serverAuth.github ? "ok" : "warn"}`;
+      note.textContent = serverAuth.github ? "A GitHub token a Cloudflare-ben van (GITHUB_TOKEN). Ezen az eszközön nincs teendőd – bármelyik eszközről belépve publikálhatsz." : "Szerveres belépéssel vagy bent, de a GITHUB_TOKEN még nincs beállítva a Cloudflare-ben. Készítsd el lent a tokent, és add hozzá a Cloudflare-ben (fent a lépések).";
+    }
+    const setup = $("[data-server-setup]");
+    if (setup) {
+      setup.hidden = serverAuth.configured && serverAuth.github;
+      const pills = { adminAuth: serverAuth.configured, github: serverAuth.github };
+      $$("[data-env-pill]", setup).forEach(el => { const ok = pills[el.dataset.envPill]; el.className = `status-pill ${ok ? "ok" : "warn"}`; el.textContent = ok ? "Beállítva" : "Még nincs"; });
+    }
+    $("[data-token-step-local]").hidden = srv;
+    $("[data-token-step-server]").hidden = !srv;
+    $("[data-token-hint]").hidden = srv;
     /* előre kitöltött GitHub tokenoldal: név, tulajdonos, 1 év, Contents írás */
     const tl = $("[data-gh-tokenlink]");
     if (tl) tl.href = `https://github.com/settings/personal-access-tokens/new?${new URLSearchParams({ name: "NS Card admin", description: `NS Card webshop admin – publikálás a ${g.owner}/${g.repo} repóba`, target_name: g.owner, expires_in: "366", contents: "write" })}`;
@@ -1912,7 +1992,7 @@ A termék átvételétől számított 14 napon belül indoklás nélkül elállh
   /* ---------------- indulás ---------------- */
   async function startApp() {
     applyMode();
-    $$(".side-user .who b, .more-head b").forEach(b => { b.textContent = adminUser(); });
+    $$(".side-user .who b, .more-head b").forEach(b => { b.textContent = state.server?.user || adminUser(); });
     $("[data-login]").hidden = true;
     $("[data-app]").hidden = false;
     $("[data-view-title]").textContent = "Betöltés…";
@@ -1925,22 +2005,23 @@ A termék átvételétől számított 14 napon belül indoklás nélkül elállh
     }
     go(location.hash.slice(1) || "attekintes");
     renderStatus();
-    if (state.gh.token) syncStock();
+    if (hasAuth()) syncStock();
     window.NSCAdminOps?.start();
-    if (state.gh.token) verifyGh().then(() => { renderGhPill(); if (state.view === "attekintes") renderDashboard(); });
+    if (hasAuth()) verifyGh().then(() => { renderGhPill(); if (state.view === "attekintes") renderDashboard(); });
     else state.ghState = "none";
   }
 
   /* a rendelés- és tartalomkezelő modul (admin-ops.js) ezen keresztül éri el az admin állapotát */
   async function api(path, init = {}) {
-    if (!state.gh.token) { const e = new Error("A szerver funkciókhoz kösd össze a GitHubot (Publikálás menü)."); e.status = 401; e.notoken = true; throw e; }
+    if (!hasAuth()) { const e = new Error("A szerver funkciókhoz kösd össze a GitHubot (Publikálás menü)."); e.status = 401; e.notoken = true; throw e; }
     const res = await fetch(`/api/admin/${path}`, {
       ...init,
-      headers: { Accept: "application/json", Authorization: `Bearer ${state.gh.token}`, ...(init.body ? { "Content-Type": "application/json" } : {}), ...(init.headers || {}) }
+      headers: { Accept: "application/json", Authorization: `Bearer ${authToken()}`, ...(init.body ? { "Content-Type": "application/json" } : {}), ...(init.headers || {}) }
     });
     const type = res.headers.get("content-type") || "";
     if (init.raw) { if (!res.ok) throw new Error(`Hiba (${res.status})`); return res; }
     const data = /json/.test(type) ? await res.json().catch(() => ({})) : {};
+    if (res.status === 401 && state.server) { sessionExpired(); const e = new Error("Lejárt a belépés."); e.status = 401; throw e; }
     if (!res.ok) {
       const e = new Error(data.error || (res.status === 404 && !/json/.test(type) ? "A szerver funkciók csak a Cloudflare-en futó boltban érhetők el." : `Hiba (${res.status})`));
       e.status = res.status; e.nodb = !!data.nodb; e.local = res.status === 404 && !/json/.test(type);
@@ -1950,7 +2031,7 @@ A termék átvételétől számított 14 napon belül indoklás nélkül elállh
   }
   /* készlet: a legutóbbi szinkron óta leadott rendelések levonása (élő és piszkozat adat is) */
   async function syncStock() {
-    if (!state.gh.token || !state.live || !state.draft) return;
+    if (!hasAuth() || !state.live || !state.draft) return;
     const targets = [state.live, state.draft];
     const sinceSet = [...new Set(targets.map(x => x.settings.stockSyncedAt || ""))];
     try {
@@ -1967,7 +2048,7 @@ A termék átvételétől számított 14 napon belül indoklás nélkül elállh
       state.stockSynced = true;
     } catch {}
   }
-  window.NSCAdmin = { state, N, $, $$, esc, fmtFt, fmtDate, imageUrl, ICON, go, toast, confirmDialog, saveDraft, renderStatus, renderAll, api, publish, isDirty, byId, catLabel, compressImage, syncStock };
+  window.NSCAdmin = { state, N, $, $$, esc, fmtFt, fmtDate, imageUrl, ICON, go, toast, confirmDialog, saveDraft, renderStatus, renderAll, api, publish, isDirty, byId, catLabel, compressImage, syncStock, hasAuth, serverAuth };
 
   /* --- jelszó csere --- */
   function passStrength(p) {
@@ -1980,6 +2061,10 @@ A termék átvételétől számított 14 napon belül indoklás nélkül elállh
   function renderPass() {
     const f = $("[data-pass-form]");
     if (!f) return;
+    const srv = !!state.server;
+    $$(".pass-local", f).forEach(el => { el.hidden = srv; });
+    $("[data-pass-server]").hidden = !srv;
+    if (srv) { const pill = $("[data-pass-pill]"); if (pill) { pill.className = "status-pill ok"; pill.textContent = "Cloudflare-ben"; } return; }
     if (document.activeElement !== f.user) f.user.value = adminUser();
     const pill = $("[data-pass-pill]");
     if (pill) { pill.className = `status-pill ${authCfg ? "ok" : "warn"}`; pill.textContent = authCfg ? "Saját jelszó" : "Alap jelszó – cseréld le"; }
@@ -2025,8 +2110,10 @@ A termék átvételétől számított 14 napon belül indoklás nélkül elállh
     const h = $("[data-pw-hint]");
     if (h) h.textContent = ["Legalább 10 karakter, kis- és nagybetű, szám.", "Gyenge", "Közepes", "Erős", "Nagyon erős"][n];
   });
-  loadAuth().finally(() => {
-    if (session()) startApp();
+  state.server = loadServer();
+  Promise.all([loadAuth(), probeServer()]).finally(() => {
+    /* ha a szerveres belépés be van állítva, a régi (böngészős) belépés már nem enged be */
+    if (state.server || (!serverAuth.configured && session())) startApp();
     else {
       $("[data-login]").hidden = false;
       setTimeout(() => $("#lg-user")?.focus(), 50);

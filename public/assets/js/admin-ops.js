@@ -34,7 +34,7 @@
 
   /* ---------- beállítási útmutatók (ha még nincs adatbázis / token) ---------- */
   function setupBox(err, what = "A rendeléskezelés") {
-    if (err?.notoken) return `<div class="setup"><h2>${what} a GitHub kapcsolattal működik</h2><p class="muted">A szerver az admin GitHub tokenjével azonosít. Kösd össze a GitHubot, és utána itt látod a rendeléseket.</p><a class="btn btn-primary" href="#publikalas">GitHub összekötése</a></div>`;
+    if (err?.notoken) return `<div class="setup"><h2>${what} belépett adminnal működik</h2><p class="muted">Ehhez kösd össze a GitHubot ezen az eszközön, vagy állítsd be a szerveres belépést a Cloudflare-ben (Publikálás oldal) – utána itt látod a rendeléseket.</p><a class="btn btn-primary" href="#publikalas">GitHub összekötése</a></div>`;
     if (err?.local) return `<div class="setup"><h2>Csak az élő boltban érhető el</h2><p class="muted">A rendelések, vélemények és hírlevél a Cloudflare-en futó webshopban működnek (nscard.hu), a helyi előnézetben nem.</p></div>`;
     if (err?.nodb) return `<div class="setup"><h2>Kapcsold be a rendeléskezelést</h2><p class="muted">Egyszeri, ingyenes beállítás a Cloudflare-en (kb. 2 perc). Utána a rendelések ide érkeznek, a készlet automatikusan csökken, és működnek a vélemények, a hírlevél és az „újra kapható” értesítők.</p>
       <ol class="howto">
@@ -48,7 +48,7 @@
 
   /* ---------- összesítő, menü jelzések ---------- */
   async function loadSummary() {
-    if (!state.gh.token) { ops.summary = null; ops.summaryErr = { notoken: true }; paintBadges(); return; }
+    if (!A.hasAuth()) { ops.summary = null; ops.summaryErr = { notoken: true }; paintBadges(); return; }
     try { ops.summary = await api("summary"); ops.summaryErr = null; }
     catch (e) { ops.summary = null; ops.summaryErr = e; }
     paintBadges();
@@ -496,6 +496,7 @@
     const bp = $("[data-billingo-pill]");
     if (bp) bp.innerHTML = i.billingo?.ok ? '<span class="pill in">Bekötve</span>' : i.billingo?.configured ? '<span class="pill out">Hibás kulcs</span>' : '<span class="pill hidden">Nincs bekötve</span>';
     box.innerHTML = `<div class="int-list">
+      ${row(i.adminAuth && i.github ? true : i.adminAuth || i.github ? "warn" : false, "Belépés és publikálás a szerveren", i.adminAuth && i.github ? "A jelszó és a GitHub token a Cloudflare-ben van – bármelyik eszközről belépve publikálhatsz." : "A jelszó és a GitHub token a Cloudflare-ben, a kódból nem kiolvasható helyen.", i.adminAuth && i.github ? "" : `<ol class="howto">${i.adminAuth ? "" : `<li>${cfSecret("ADMIN_PASSWORD")} – az új admin jelszó. Felhasználónév: <code>ADMIN_USER</code> (Text, alapból NSadmin).</li>`}${i.github ? "" : `<li>${cfSecret("GITHUB_TOKEN")} – a Publikálás oldalon lévő „Token létrehozása” gombbal készítsd el.</li>`}<li>${retry}</li></ol>`)}
       ${row(i.db, "Rendelések adatbázisa (D1)", "Rendelések, készletfoglalás, vélemények, hírlevél, értesítők.", i.db ? "" : `<ol class="howto"><li>Cloudflare → <strong>Storage &amp; Databases → D1 SQL Database → Create</strong>, név: <code>nscard</code>.</li><li>nscard-webshop → <strong>Settings → Bindings → Add → D1 database</strong>, Variable name: <code>DB</code>.</li><li>${retry}</li></ol>`)}
       ${row(i.mail, "E-mail küldés (Resend)", i.mail ? `Feladó: ${esc(i.mailFrom || "NS Card <rendeles@nscard.hu>")}` : "Visszaigazolások, feladási értesítő, hírlevél, „újra kapható” levelek.", i.mail ? "" : `<ol class="howto"><li>Regisztrálj a <a class="link" href="https://resend.com/signup" target="_blank" rel="noopener">resend.com</a> oldalon (havi 3000 levél ingyenes).</li><li>Resend → <strong>Domains → Add domain</strong>: <code>nscard.hu</code>. A megadott DNS rekordokat vedd fel a Cloudflare DNS-ben (a domain aktiválása után).</li><li>Resend → <strong>API Keys → Create</strong>, majd ${cfSecret("RESEND_API_KEY")}.</li><li>Nem kötelező: <code>MAIL_FROM</code> (pl. <code>NS Card &lt;rendeles@nscard.hu&gt;</code>) és <code>ADMIN_EMAIL</code> (ide jön az új rendelés értesítő; alapból a bolt e-mail címe).</li><li>${retry}</li></ol>`)}
       ${row(i.stripe ? (i.webhook ? true : "warn") : false, "Kártyás fizetés (Stripe)", i.stripe ? (i.webhook ? "Kulcs és webhook rendben." : "A kulcs megvan. A webhook ajánlott, hogy a fizetés akkor is rögzüljön, ha a vásárló bezárja az ablakot.") : "A kulcs beállítását a Fizetési módoknál találod.", i.webhook ? "" : `<ol class="howto"><li>Stripe → <strong>Developers → Webhooks → Add endpoint</strong>: <code>${esc(origin)}/api/stripe-webhook</code></li><li>Események: <code>checkout.session.completed</code>, <code>checkout.session.async_payment_succeeded</code>, <code>checkout.session.expired</code>.</li><li>A „Signing secret” (<code>whsec_…</code>): ${cfSecret("STRIPE_WEBHOOK_SECRET")}. ${retry}</li></ol>`)}
@@ -510,7 +511,7 @@
 
   /* ---------- újra kapható értesítő publikálás után ---------- */
   async function notifyBack(ids) {
-    if (!ids?.length || !state.gh.token) return;
+    if (!ids?.length || !A.hasAuth()) return;
     try {
       const r = await api("notify", { method: "POST", body: JSON.stringify({ ids }) });
       if (r.sent) toast(`${r.sent} vásárló kapott „újra kapható” értesítést.`);

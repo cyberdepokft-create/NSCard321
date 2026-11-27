@@ -15,10 +15,12 @@
  * POST   newsletter {subject, body, test}
  * POST   notify {ids:[…]}                  „újra kapható” levelek
  * GET    integrations                      beállított szolgáltatások állapota
+ * GET    github                            a bolt repója (a szerver GITHUB_TOKEN-jével)
+ * GET|PUT github/contents/PATH             katalógus és képek olvasása/írása – csak a katalógus mappájában
  */
-import { json, readJson, loadCatalog, originOf, nowIso, clean, cleanText, validEmail, absUrl } from "../../../lib/core.js";
+import { json, readJson, loadCatalog, originOf, nowIso, clean, cleanText, validEmail, absUrl, remoteConfig } from "../../../lib/core.js";
 import { getDb, soldSince } from "../../../lib/db.js";
-import { isAdmin } from "../../../lib/auth.js";
+import { isAdmin, serverAuthReady } from "../../../lib/auth.js";
 import { STATUS, CARRIERS, getOrder, rowToOrder, saveOrder, setStatus } from "../../../lib/orders.js";
 import { sendMail, sendBatch, mailReady, shippedEmail, statusEmail, orderConfirmation, backInStockEmail, newsletterEmail } from "../../../lib/mail.js";
 import { maybeInvoice } from "../../../lib/flow.js";
@@ -57,13 +59,46 @@ async function listOrders(DB, u) {
   return (results || []).map(rowToOrder);
 }
 
+/* Publikálás a szerveren keresztül: a GitHub token a Cloudflare titkai között van (GITHUB_TOKEN), a böngésző nem látja.
+ * Csak a bolt repója, csak a beállított ág, és csak a katalógus mappája (pl. public/store/) írható – a szerver kódja nem. */
+async function githubProxy(request, env, rest) {
+  if (!env.GITHUB_TOKEN) return json({ error: "A GITHUB_TOKEN nincs beállítva a Cloudflare-ben (Settings → Variables and Secrets).", notoken: true }, 503);
+  const cfg = await remoteConfig(request, env);
+  const method = request.method;
+  const base = `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}`;
+  let target = "", body;
+  if (!rest.length && method === "GET") target = base;
+  else if (rest[0] === "contents" && rest.length > 1 && (method === "GET" || method === "PUT")) {
+    const path = rest.slice(1).join("/");
+    const dir = cfg.path.includes("/") ? cfg.path.slice(0, cfg.path.lastIndexOf("/") + 1) : "";
+    if (!dir || !path.startsWith(dir) || path.split("/").some(s => !s || s === "." || s === "..") || !/^[\w./-]+$/.test(path)) return json({ error: "Ide az admin nem írhat." }, 403);
+    target = `${base}/contents/${path.split("/").map(encodeURIComponent).join("/")}`;
+    if (method === "GET") target += `?ref=${encodeURIComponent(cfg.branch)}`;
+    else {
+      const b = await readJson(request, 60 * 1024 * 1024);
+      if (!b || typeof b.content !== "string" || !b.content) return json({ error: "Hiányzó tartalom." }, 400);
+      body = JSON.stringify({ message: clean(b.message, 200) || "Admin módosítás", content: b.content, branch: cfg.branch, ...(b.sha ? { sha: clean(b.sha, 64) } : {}) });
+    }
+  } else return json({ error: "Nem támogatott művelet." }, 400);
+  const res = await fetch(target, {
+    method, body,
+    headers: { Authorization: `Bearer ${env.GITHUB_TOKEN}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28", "User-Agent": "nscard-webshop", ...(body ? { "Content-Type": "application/json" } : {}) }
+  });
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401) return json({ error: "A Cloudflare-ben beállított GitHub token érvénytelen vagy lejárt. Készíts újat, és cseréld le a GITHUB_TOKEN értékét.", gh: 401 }, 502);
+  if (res.status === 403) return json({ error: "A Cloudflare-ben beállított GitHub tokennek nincs írási joga (Contents: Read and write) ehhez a repóhoz.", gh: 403 }, 403);
+  if (res.status === 404 && !rest.length) return json({ error: "A repó nem található, vagy a GitHub token nem fér hozzá (Repository access).", gh: 404 }, 404);
+  return json(data, res.status);
+}
+
 export async function onRequest({ request, env, params }) {
-  if (!(await isAdmin(request, env))) return json({ error: "Nincs jogosultság. Kösd össze a GitHubot az adminban (Publikálás menü)." }, 401);
+  if (!(await isAdmin(request, env))) return json({ error: serverAuthReady(env) ? "Lejárt a belépés. Lépj be újra." : "Nincs jogosultság. Kösd össze a GitHubot az adminban (Publikálás menü).", relogin: serverAuthReady(env) }, 401);
   const method = request.method;
   const parts = [].concat(params.path || []).map(p => decodeURIComponent(p));
   const [head, id, action] = parts;
   const u = new URL(request.url);
   const base = originOf(request);
+  if (head === "github") return githubProxy(request, env, parts.slice(1));
 
   if (head === "integrations" && method === "GET") {
     let billingo = { configured: billingoReady(env) };
@@ -73,6 +108,7 @@ export async function onRequest({ request, env, params }) {
     }
     return json({
       db: !!env.DB, mail: mailReady(env), mailFrom: env.MAIL_FROM || "", adminEmail: env.ADMIN_EMAIL || "",
+      adminAuth: serverAuthReady(env), github: !!env.GITHUB_TOKEN,
       stripe: !!env.STRIPE_SECRET_KEY, webhook: !!env.STRIPE_WEBHOOK_SECRET, billingo
     });
   }

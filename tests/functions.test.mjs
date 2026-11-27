@@ -232,6 +232,65 @@ await call("functions/api/admin/[[path]].js", "onRequest", req(`/api/admin/messa
 r = await call("functions/api/admin/[[path]].js", "onRequest", req("/api/admin/summary", { headers: ADMIN }), { path: ["summary"] });
 assert.equal(r.data.newMessages, 0); assert.ok(r.data.daily.length >= 1); assert.ok(r.data.top.length >= 1);
 
+// szerveres belépés és publikálás (ADMIN_PASSWORD + GITHUB_TOKEN a Cloudflare-ben)
+{
+  const L = "functions/api/admin-login.js", AD = "functions/api/admin/[[path]].js";
+  r = await call(L, "onRequestGet", req("/api/admin-login"));
+  assert.equal(r.data.configured, false);
+  r = await call(L, "onRequestPost", req("/api/admin-login", { method: "POST", body: { user: "NSadmin", pass: "x" } }));
+  assert.equal(r.status, 501); assert.equal(r.data.configured, false);
+  Object.assign(env, { ADMIN_PASSWORD: "Nagyon-Eros-Jelszo-2026", ADMIN_USER: "NSadmin", GITHUB_TOKEN: "good-token-0123456789abcdef" });
+  r = await call(L, "onRequestGet", req("/api/admin-login"));
+  assert.deepEqual(r.data, { configured: true, github: true });
+  r = await call(L, "onRequestPost", req("/api/admin-login", { method: "POST", body: { user: "NSadmin", pass: "rossz" } }));
+  assert.equal(r.status, 401); assert.ok(!r.data.token);
+  r = await call(L, "onRequestPost", req("/api/admin-login", { method: "POST", body: { user: "nsadmin", pass: "Nagyon-Eros-Jelszo-2026", remember: true } }));
+  assert.equal(r.status, 200); assert.match(r.data.token, /^nsc1\./); assert.ok(r.data.exp > Date.now() + 29 * 864e5); assert.equal(r.data.github, true);
+  const S = { Authorization: `Bearer ${r.data.token}` };
+  r = await call(AD, "onRequest", req("/api/admin/summary", { headers: S }), { path: ["summary"] });
+  assert.equal(r.status, 200);
+  const forged = S.Authorization.slice(0, -3) + (S.Authorization.endsWith("AAA") ? "BBB" : "AAA");
+  r = await call(AD, "onRequest", req("/api/admin/summary", { headers: { Authorization: forged } }), { path: ["summary"] });
+  assert.equal(r.status, 401); assert.equal(r.data.relogin, true);
+  r = await call(AD, "onRequest", req("/api/admin/integrations", { headers: S }), { path: ["integrations"] });
+  assert.equal(r.data.adminAuth, true); assert.equal(r.data.github, true);
+  // GitHub proxy: a szerver tokenjével, csak a katalógus mappájába és a beállított ágra
+  r = await call(AD, "onRequest", req("/api/admin/github", { headers: S }), { path: ["github"] });
+  assert.equal(r.status, 200); assert.equal(r.data.permissions.push, true);
+  let last = calls.at(-1); assert.equal(last.url, "https://api.github.com/repos/o/r"); assert.equal(last.init.headers.Authorization, "Bearer good-token-0123456789abcdef");
+  r = await call(AD, "onRequest", req("/api/admin/github/contents/public/store/catalog.json?ref=evil", { headers: S }), { path: ["github", "contents", "public", "store", "catalog.json"] });
+  last = calls.at(-1); assert.equal(last.url, "https://api.github.com/repos/o/r/contents/public/store/catalog.json?ref=main");
+  r = await call(AD, "onRequest", req("/api/admin/github/contents/public/store/images/1-a.webp", { method: "PUT", headers: S, body: { message: "Kép", content: "AAAA", branch: "evil", sha: "abc123" } }), { path: ["github", "contents", "public", "store", "images", "1-a.webp"] });
+  assert.equal(r.status, 200); last = calls.at(-1);
+  assert.equal(last.init.method, "PUT"); assert.deepEqual(JSON.parse(last.init.body), { message: "Kép", content: "AAAA", branch: "main", sha: "abc123" });
+  const before = calls.length;
+  for (const path of [["github", "contents", "functions", "api", "x.js"], ["github", "contents", "public", "store", "..", "..", "functions", "x.js"], ["github", "contents", "public", "index.html"]]) {
+    r = await call(AD, "onRequest", req("/api/admin/" + path.join("/"), { method: "PUT", headers: S, body: { content: "AAAA" } }), { path });
+    assert.equal(r.status, 403, path.join("/"));
+  }
+  r = await call(AD, "onRequest", req("/api/admin/github/pulls", { headers: S }), { path: ["github", "pulls"] });
+  assert.equal(r.status, 400);
+  assert.equal(calls.length, before, "tiltott útvonalon nem mehet ki kérés");
+  // GitHub token nélkül érthető hiba
+  delete env.GITHUB_TOKEN;
+  r = await call(AD, "onRequest", req("/api/admin/github", { headers: S }), { path: ["github"] });
+  assert.equal(r.status, 503); assert.equal(r.data.notoken, true);
+  // próbálkozás-korlát IP-nként
+  const bad = () => call(L, "onRequestPost", req("/api/admin-login", { method: "POST", headers: { "CF-Connecting-IP": "9.9.9.9" }, body: { user: "NSadmin", pass: "nem" } }));
+  for (let i = 0; i < 10; i++) assert.equal((await bad()).status, 401);
+  assert.equal((await bad()).status, 429);
+  r = await call(L, "onRequestPost", req("/api/admin-login", { method: "POST", headers: { "CF-Connecting-IP": "9.9.9.9" }, body: { user: "NSadmin", pass: "Nagyon-Eros-Jelszo-2026" } }));
+  assert.equal(r.status, 429);
+  // jelszócsere után a régi munkamenet érvénytelen
+  env.ADMIN_PASSWORD = "Masik-Jelszo-2027";
+  r = await call(AD, "onRequest", req("/api/admin/summary", { headers: S }), { path: ["summary"] });
+  assert.equal(r.status, 401);
+  // a régi, GitHub tokenes admin is működik tovább
+  r = await call(AD, "onRequest", req("/api/admin/summary", { headers: ADMIN }), { path: ["summary"] });
+  assert.equal(r.status, 200);
+  delete env.ADMIN_PASSWORD; delete env.ADMIN_USER;
+}
+
 // markdown: táblázat és GYIK a szerveroldali cikkben is
 {
   const { mdToHtml } = await imp("lib/core.js");

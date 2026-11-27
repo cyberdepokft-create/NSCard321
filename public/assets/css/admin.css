@@ -958,3 +958,12 @@ em.ok { font-style: normal; color: var(--clover); }
 .prose-preview blockquote.callout.tip { border-left-color: var(--clover, #3ccb76); background: rgba(60, 203, 118, .08); }
 .post-editor { scroll-margin-top: 80px; }
 .token-link { margin: 4px 0 14px; width: 100%; justify-content: center; }
+
+/* 5.2: szerveres belépés és publikálás */
+.server-setup { margin-bottom: 18px; border-color: color-mix(in srgb, var(--accent, #ff7a1a) 45%, var(--line)); }
+.server-setup .howto li .status-pill { margin-left: 6px; vertical-align: middle; }
+.server-setup .howto code { word-break: break-all; }
+.gh-server-note.ok { border-color: color-mix(in srgb, #3ccb76 45%, transparent); }
+[hidden] { display: none !important; }
+.notice { padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255, 255, 255, .04); margin: 10px 0 14px; line-height: 1.5; }
+.notice.warn { border-color: color-mix(in srgb, #ffd23f 45%, transparent); background: rgba(255, 210, 63, .07); }

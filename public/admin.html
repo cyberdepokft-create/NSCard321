@@ -10,7 +10,7 @@
   <link rel="icon" type="image/png" href="/favicon.png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="preload" href="/assets/fonts/dm-sans.woff" as="font" type="font/woff" crossorigin>
-  <link rel="stylesheet" href="/assets/css/admin.css?v=5.1.1">
+  <link rel="stylesheet" href="/assets/css/admin.css?v=5.2.0">
 </head>
 <body>
   <!-- Belépés -->
@@ -386,11 +386,25 @@
         <!-- Publikálás -->
         <section data-view="publikalas" aria-label="Publikálás" hidden>
           <div class="card publish-card" data-publish-card></div>
+          <div class="card server-setup" data-server-setup hidden>
+            <div class="card-head"><h2>Belépés és publikálás bármelyik eszközről</h2></div>
+            <p class="muted">Ha a jelszót és a GitHub tokent a Cloudflare-ben tárolod, egyik sem látszik a kódban, és bármelyik eszközről belépve publikálhatsz – tokent sehol nem kell beírni. Egyszer kell beállítani:</p>
+            <ol class="howto">
+              <li>Cloudflare → <strong>Workers &amp; Pages → nscard-webshop → Settings → Variables and Secrets → Add</strong> (környezet: Production).</li>
+              <li><code>ADMIN_PASSWORD</code> – típus: <strong>Secret</strong> – az új admin jelszavad (legalább 12 karakter). <span class="status-pill" data-env-pill="adminAuth"></span></li>
+              <li><code>ADMIN_USER</code> – típus: <strong>Text</strong> – a felhasználónév (ha kihagyod: <code>NSadmin</code>).</li>
+              <li><code>GITHUB_TOKEN</code> – típus: <strong>Secret</strong> – a tokent a lenti <em>Token létrehozása</em> gombbal készítheted el. <span class="status-pill" data-env-pill="github"></span></li>
+              <li><strong>Deployments</strong> fül → a legutóbbi telepítésnél <strong>⋯ → Retry deployment</strong>, majd frissítsd ezt az oldalt és lépj be az új jelszóval.</li>
+            </ol>
+            <p class="hint">Ezután a régi, böngészőben tárolt jelszó és token már nem kell: a belépést és a publikálást a szerver végzi.</p>
+            <a class="btn btn-ghost" href="https://dash.cloudflare.com/?to=/:account/pages/view/nscard-webshop/settings" target="_blank" rel="noopener">Cloudflare beállítások megnyitása</a>
+          </div>
           <div class="two-col">
             <form class="card" data-gh-form novalidate>
               <div class="card-head"><h2>GitHub kapcsolat</h2><span class="status-pill" data-gh-pill></span></div>
-              <p class="muted">A termékek és a képek a GitHubon tárolódnak, a webshop onnan olvassa őket. A publikáláshoz egy hozzáférési token kell, amit csak ez a böngésző tárol.</p>
-              <div class="field">
+              <p class="muted gh-local">A termékek és a képek a GitHubon tárolódnak, a webshop onnan olvassa őket. A publikáláshoz egy hozzáférési token kell, amit csak ez a böngésző tárol.</p>
+              <p class="notice gh-server-note" data-gh-server-note hidden></p>
+              <div class="field gh-local">
                 <label for="gh-token">GitHub token</label>
                 <div class="pass-wrap"><input class="input" id="gh-token" name="token" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…"><button class="pass-toggle" type="button" data-toggle-pass aria-label="Token megjelenítése">Mutat</button></div>
               </div>
@@ -407,7 +421,7 @@
               </details>
               <div class="row-actions">
                 <button class="btn btn-primary" type="submit">Kapcsolat mentése és ellenőrzése</button>
-                <button class="btn btn-ghost" type="button" data-gh-forget>Token törlése</button>
+                <button class="btn btn-ghost gh-local" type="button" data-gh-forget>Token törlése</button>
               </div>
               <p class="form-msg" data-gh-msg role="status"></p>
             </form>
@@ -418,9 +432,10 @@
                 <li>Kattints a fenti gombra, és lépj be a GitHubra. A név, az 1 éves lejárat és az írási jog (<em>Contents: Read and write</em>) már ki van töltve.</li>
                 <li><em>Repository access</em> résznél válaszd: <strong>Only select repositories</strong> → <code data-gh-repo-name>NSCard321</code>.</li>
                 <li>Lent kattints a <strong>Generate token</strong> gombra, és másold ki a <code>github_pat_…</code> kezdetű tokent.</li>
-                <li>Illeszd be ide a <strong>GitHub token</strong> mezőbe, és mentsd el. A függőben lévő módosításaid ezután automatikusan felkerülnek a boltba.</li>
+                <li data-token-step-local>Illeszd be ide a <strong>GitHub token</strong> mezőbe, és mentsd el. A függőben lévő módosításaid ezután automatikusan felkerülnek a boltba.</li>
+                <li data-token-step-server hidden>A Cloudflare-ben add hozzá <code>GITHUB_TOKEN</code> néven, <strong>Secret</strong> típussal, majd <strong>Retry deployment</strong>.</li>
               </ol>
-              <p class="hint">A token csak ebben a böngészőben tárolódik. Ha telefonról és gépről is szerkesztesz, mindkettőn egyszer be kell illeszteni – ugyanaz a token jó mindkettőre.</p>
+              <p class="hint" data-token-hint>A token csak ebben a böngészőben tárolódik. Ha telefonról és gépről is szerkesztesz, mindkettőn egyszer be kell illeszteni – ugyanaz a token jó mindkettőre. Kényelmesebb, ha a Cloudflare-ben tárolod (lásd fent).</p>
               <div class="card-head" style="margin-top:20px"><h2>Biztonsági mentés</h2></div>
               <div class="row-actions">
                 <button class="btn btn-ghost" type="button" data-export>Katalógus letöltése (JSON)</button>
@@ -433,14 +448,15 @@
             </div>
             <form class="card" data-pass-form novalidate>
               <div class="card-head"><h2>Admin belépés</h2><span class="status-pill" data-pass-pill></span></div>
-              <p class="muted">Itt cserélheted le a belépési jelszót. Az új jelszó erős titkosítással (PBKDF2) kerül a GitHubra, a régi jelszó ezután nem működik.</p>
-              <div class="form-grid">
+              <p class="notice" data-pass-server hidden>A belépést a szerver végzi: a jelszót a Cloudflare-ben, az <code>ADMIN_PASSWORD</code> értékének cseréjével módosíthatod (utána Retry deployment). Csere után minden eszközön újra be kell lépni.</p>
+              <p class="muted pass-local">Itt cserélheted le a belépési jelszót. Az új jelszó erős titkosítással (PBKDF2) kerül a GitHubra, a régi jelszó ezután nem működik.</p>
+              <div class="form-grid pass-local">
                 <div class="field"><label for="pw-user">Felhasználónév</label><input class="input" id="pw-user" name="user" autocomplete="username" autocapitalize="off" spellcheck="false"></div>
                 <div class="field"><label for="pw-old">Jelenlegi jelszó</label><input class="input" id="pw-old" name="old" type="password" autocomplete="current-password"></div>
                 <div class="field"><label for="pw-new">Új jelszó</label><input class="input" id="pw-new" name="pass" type="password" autocomplete="new-password" minlength="10"><div class="pw-meter" data-pw-meter><i></i></div><span class="hint" data-pw-hint>Legalább 10 karakter, kis- és nagybetű, szám.</span></div>
                 <div class="field"><label for="pw-new2">Új jelszó még egyszer</label><input class="input" id="pw-new2" name="pass2" type="password" autocomplete="new-password"></div>
               </div>
-              <div class="row-actions"><button class="btn btn-primary" type="submit">Jelszó cseréje</button></div>
+              <div class="row-actions pass-local"><button class="btn btn-primary" type="submit">Jelszó cseréje</button></div>
               <p class="form-msg" data-pass-msg role="status"></p>
             </form>
           </div>
@@ -582,9 +598,9 @@
 
   <div class="toast" role="status" aria-live="polite" data-toast></div>
 
-  <script src="/assets/js/texts.js?v=5.1.1" defer></script>
-  <script src="/assets/js/store.js?v=5.1.1" defer></script>
-  <script src="/assets/js/admin.js?v=5.1.1" defer></script>
-  <script src="/assets/js/admin-ops.js?v=5.1.1" defer></script>
+  <script src="/assets/js/texts.js?v=5.2.0" defer></script>
+  <script src="/assets/js/store.js?v=5.2.0" defer></script>
+  <script src="/assets/js/admin.js?v=5.2.0" defer></script>
+  <script src="/assets/js/admin-ops.js?v=5.2.0" defer></script>
 </body>
 </html>
