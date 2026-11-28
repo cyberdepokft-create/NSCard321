@@ -47,8 +47,10 @@ export async function onRequestPost({ request, env }) {
     params.append(`line_items[${n}][quantity]`, "1");
     n++;
   }
-  if (priced.discount > 0) {
-    const cp = new URLSearchParams({ amount_off: String(priced.discount * 100), currency: "huf", duration: "once", max_redemptions: "1", name: `Kupon ${priced.coupon}`.slice(0, 40) });
+  const off = priced.discount + (priced.packDiscount || 0);
+  if (off > 0) {
+    const label = [priced.discount > 0 ? `Kupon ${priced.coupon}` : "", priced.packDiscount ? "Csomag -5%" : ""].filter(Boolean).join(" + ");
+    const cp = new URLSearchParams({ amount_off: String(off * 100), currency: "huf", duration: "once", max_redemptions: "1", name: label.slice(0, 40) });
     const cr = await stripe(env, "/coupons", { method: "POST", params: cp });
     if (!cr.ok || !cr.data.id) return json({ error: cr.data?.error?.message || "A kupon nem alkalmazható a kártyás fizetésnél." }, 502);
     params.append("discounts[0][coupon]", cr.data.id);
@@ -70,7 +72,7 @@ export async function onRequestPost({ request, env }) {
   const meta = {
     order_id: order?.id || "", name: customer.name, phone: customer.phone, shipping: priced.methodLabel,
     address: priced.method === "locker" ? customer.locker : priced.method === "pickup" ? "" : `${customer.zip} ${customer.city}, ${customer.address}`,
-    note: customer.note, coupon: priced.coupon
+    note: customer.note, coupon: priced.coupon, pack: priced.pack?.length ? `${priced.pack.join(",")} (-${priced.packDiscount} Ft)` : ""
   };
   for (const [k, v] of Object.entries(meta)) if (v) params.append(`metadata[${k}]`, String(v).slice(0, 480));
 
