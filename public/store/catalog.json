@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T18:37:03.641Z",
+  "updatedAt": "2026-11-28T18:39:36.320Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -31,7 +31,7 @@
     "dispatchCutoff": 14,
     "deliveryText": "1–3 munkanap",
     "bankDetails": "",
-    "stockSyncedAt": "2026-11-28T18:36:17.494Z",
+    "stockSyncedAt": "2026-11-28T18:39:17.432Z",
     "lockerMap": true,
     "vatRate": "27%",
     "invoiceAuto": false,
@@ -373,6 +373,32 @@
     }
   },
   "products": [
+    {
+      "id": 18,
+      "category": "single",
+      "name": "Mega Latias ex",
+      "set": "Mega Evolution",
+      "line": "",
+      "description": "1db gyűjthető kártya",
+      "price": 249,
+      "oldPrice": null,
+      "stock": 1,
+      "availability": "in_stock",
+      "badge": "",
+      "flags": [],
+      "images": [
+        "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@87fc09ac09556081020eef0475b9654d28530b8e/public/store/images/18-mx0r8h1o-1t5tfc.png"
+      ],
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "NM",
+      "lang": "EN",
+      "cardNo": "100/132",
+      "rarity": "Double Rare",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 0
+    },
     {
       "id": 17,
       "category": "single",
