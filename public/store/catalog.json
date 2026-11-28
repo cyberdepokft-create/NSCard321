@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T14:08:58.592Z",
+  "updatedAt": "2026-11-28T14:09:05.658Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -372,34 +372,5 @@
       ]
     }
   },
-  "products": [
-    {
-      "id": 14,
-      "category": "booster",
-      "name": "Pokémon TCG: Mega Latias ex Box",
-      "set": "",
-      "line": "",
-      "description": "",
-      "price": 14690,
-      "oldPrice": null,
-      "stock": 6,
-      "availability": "in_stock",
-      "badge": "",
-      "flags": [
-        "home"
-      ],
-      "images": [
-        "img/products/14-1.webp"
-      ],
-      "hidden": false,
-      "releaseDate": "",
-      "condition": "",
-      "lang": "",
-      "cardNo": "",
-      "rarity": "",
-      "grade": "",
-      "ean": "",
-      "maxPerOrder": 0
-    }
-  ]
+  "products": []
 }
