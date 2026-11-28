@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T14:08:23.365Z",
+  "updatedAt": "2026-11-28T14:08:27.369Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -470,32 +470,6 @@
       "flags": [],
       "images": [
         "img/products/16-1.webp"
-      ],
-      "hidden": false,
-      "releaseDate": "",
-      "condition": "",
-      "lang": "",
-      "cardNo": "",
-      "rarity": "",
-      "grade": "",
-      "ean": "",
-      "maxPerOrder": 0
-    },
-    {
-      "id": 17,
-      "category": "tinek",
-      "name": "Pokémon TCG: Team Rocket Tin Mewtwo Ex",
-      "set": "",
-      "line": "",
-      "description": "",
-      "price": 11990,
-      "oldPrice": null,
-      "stock": 2,
-      "availability": "in_stock",
-      "badge": "",
-      "flags": [],
-      "images": [
-        "img/products/17-1.webp"
       ],
       "hidden": false,
       "releaseDate": "",
