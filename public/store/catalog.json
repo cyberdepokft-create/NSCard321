@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T14:25:33.450Z",
+  "updatedAt": "2026-11-28T14:50:19.336Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -31,7 +31,7 @@
     "dispatchCutoff": 14,
     "deliveryText": "1–3 munkanap",
     "bankDetails": "",
-    "stockSyncedAt": "2026-11-28T14:24:43.495Z",
+    "stockSyncedAt": "2026-11-28T14:49:58.792Z",
     "lockerMap": true,
     "vatRate": "27%",
     "invoiceAuto": false,
@@ -374,6 +374,32 @@
   },
   "products": [
     {
+      "id": 2,
+      "category": "single",
+      "name": "Zapdos",
+      "set": "30th Celebration",
+      "line": "",
+      "description": "1db gyűjthető kártyalap",
+      "price": 749,
+      "oldPrice": null,
+      "stock": 1,
+      "availability": "in_stock",
+      "badge": "",
+      "flags": [],
+      "images": [
+        "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@2edd0816fcf2ba42ecfcfef5e8979c1d6aba511d/public/store/images/2-mx0j1n0g-gzwk1c.png"
+      ],
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "NM",
+      "lang": "EN",
+      "cardNo": "133/128",
+      "rarity": "Illustrator Rare",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 0
+    },
+    {
       "id": 1,
       "category": "booster",
       "name": "Próba 1",
@@ -382,7 +408,7 @@
       "description": "proba",
       "price": 500,
       "oldPrice": null,
-      "stock": 1,
+      "stock": 0,
       "availability": "in_stock",
       "badge": "",
       "flags": [],
