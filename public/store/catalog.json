@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T19:28:43.771Z",
+  "updatedAt": "2026-11-28T19:30:56.714Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -31,7 +31,7 @@
     "dispatchCutoff": 14,
     "deliveryText": "1–3 munkanap",
     "bankDetails": "",
-    "stockSyncedAt": "2026-11-28T19:28:42.837Z",
+    "stockSyncedAt": "2026-11-28T19:30:42.944Z",
     "lockerMap": true,
     "vatRate": "27%",
     "invoiceAuto": false,
@@ -374,6 +374,32 @@
   },
   "products": [
     {
+      "id": 23,
+      "category": "single",
+      "name": "Team Rocket's Moltres ex",
+      "set": "Destined Rivals",
+      "line": "",
+      "description": "1db gyűjthető kártya",
+      "price": 249,
+      "oldPrice": null,
+      "stock": 1,
+      "availability": "in_stock",
+      "badge": "",
+      "flags": [],
+      "images": [
+        "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@633d9368426b3715679d38a9c6aceccbfda20900/public/store/images/23-mx0t2iph-ea3gdl.png"
+      ],
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "NM",
+      "lang": "EN",
+      "cardNo": "031/182",
+      "rarity": "Double Rare",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 0
+    },
+    {
       "id": 22,
       "category": "single",
       "name": "Arboliva ex",
@@ -390,6 +416,32 @@
         "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@de232ae4fccac8befe5b1d0dbeb2f4e128b66423/public/store/images/22-mx0szod2-yfizbi.png"
       ],
       "hidden": false,
+      "releaseDate": "",
+      "condition": "",
+      "lang": "",
+      "cardNo": "",
+      "rarity": "",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 0
+    },
+    {
+      "id": 24,
+      "category": "single",
+      "name": "Arboliva ex (másolat)",
+      "set": "Destined Rivals",
+      "line": "",
+      "description": "1db gyűjthető kártya",
+      "price": 249,
+      "oldPrice": null,
+      "stock": 1,
+      "availability": "in_stock",
+      "badge": "",
+      "flags": [],
+      "images": [
+        "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@de232ae4fccac8befe5b1d0dbeb2f4e128b66423/public/store/images/22-mx0szod2-yfizbi.png"
+      ],
+      "hidden": true,
       "releaseDate": "",
       "condition": "",
       "lang": "",
