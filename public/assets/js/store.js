@@ -72,6 +72,8 @@
     invoiceElectronic: true,
     invoiceSend: true,
     billingoBlockId: 0,
+    invoiceProvider: "",
+    szamlazzPrefix: "",
     analyticsToken: "",
     giftWrap: false,
     giftWrapPrice: 0
@@ -221,6 +223,8 @@
     s.faq = sanitizeFaq(r.faq);
     s.dispatchCutoff = Math.min(23, Math.max(0, s.dispatchCutoff));
     s.vatRate = s.vatRate === "AAM" ? "AAM" : "27%";
+    s.invoiceProvider = ["szamlazz", "billingo"].includes(s.invoiceProvider) ? s.invoiceProvider : "";
+    s.szamlazzPrefix = /^[A-Za-z0-9]{1,10}$/.test(s.szamlazzPrefix) ? s.szamlazzPrefix : "";
     if (!/^\d{4}-\d{2}-\d{2}T/.test(s.stockSyncedAt)) s.stockSyncedAt = "";
     s.analyticsToken = /^[a-f0-9]{32}$/i.test(s.analyticsToken) ? s.analyticsToken : "";
     s.posts = sanitizePosts(r.posts);
