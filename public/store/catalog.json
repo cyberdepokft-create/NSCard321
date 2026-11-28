@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T18:03:52.972Z",
+  "updatedAt": "2026-11-28T18:03:58.620Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -405,7 +405,7 @@
       "name": "Serperior ex (másolat)",
       "set": "Black Bolt",
       "line": "",
-      "description": "",
+      "description": "1db gyűjthető kártyalap",
       "price": 249,
       "oldPrice": null,
       "stock": 1,
