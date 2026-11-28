@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T18:18:49.821Z",
+  "updatedAt": "2026-11-28T18:21:17.789Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -31,7 +31,7 @@
     "dispatchCutoff": 14,
     "deliveryText": "1–3 munkanap",
     "bankDetails": "",
-    "stockSyncedAt": "2026-11-28T18:18:17.167Z",
+    "stockSyncedAt": "2026-11-28T18:21:17.299Z",
     "lockerMap": true,
     "vatRate": "27%",
     "invoiceAuto": false,
@@ -373,6 +373,32 @@
     }
   },
   "products": [
+    {
+      "id": 11,
+      "category": "single",
+      "name": "Mega Venusaur ex",
+      "set": "Mega Evolution",
+      "line": "",
+      "description": "1db gyűjthető kártya",
+      "price": 349,
+      "oldPrice": null,
+      "stock": 1,
+      "availability": "in_stock",
+      "badge": "",
+      "flags": [],
+      "images": [
+        "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@976c6fd39cd78285e55bcec258c21d25a7dbf580/public/store/images/11-mx0qkypq-sf4sfj.png"
+      ],
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "NM",
+      "lang": "EN",
+      "cardNo": "003/132",
+      "rarity": "Double Rare",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 0
+    },
     {
       "id": 10,
       "category": "single",
