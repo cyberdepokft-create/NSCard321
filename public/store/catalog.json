@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T14:09:05.658Z",
+  "updatedAt": "2026-11-28T14:25:18.506Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -19,7 +19,7 @@
     "shippingPickup": 0,
     "pickupAddress": "",
     "freeShippingFrom": 0,
-    "payCard": false,
+    "payCard": true,
     "payTransfer": true,
     "payCod": true,
     "codFee": 0,
@@ -31,7 +31,7 @@
     "dispatchCutoff": 14,
     "deliveryText": "1–3 munkanap",
     "bankDetails": "",
-    "stockSyncedAt": "2026-11-28T14:07:25.562Z",
+    "stockSyncedAt": "2026-11-28T14:24:43.495Z",
     "lockerMap": true,
     "vatRate": "27%",
     "invoiceAuto": false,
