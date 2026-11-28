@@ -172,7 +172,7 @@ export async function onRequest({ request, env, params }) {
       const d = o.data, c = d.customer || {};
       rows.push([o.id, huDate(o.createdAt), o.statusLabel, o.paid ? "igen" : "nem", d.payLabel, d.methodLabel, o.name, o.email, o.phone,
         d.method === "locker" ? c.locker : d.method === "home" ? `${c.zip} ${c.city}, ${c.address}` : "személyes",
-        (d.lines || []).map(l => `${l.qty}× ${l.name}`).join(" | "), d.subtotal, d.discount, d.shipping, d.cod, d.total, o.invoice, o.tracking]);
+        (d.lines || []).map(l => `${l.qty}× ${l.name}`).join(" | "), d.subtotal, (d.discount || 0) + (d.packDiscount || 0), d.shipping, d.cod, d.total, o.invoice, o.tracking]);
     }
     return csv(rows, `nscard-rendelesek-${nowIso().slice(0, 10)}.csv`);
   }
