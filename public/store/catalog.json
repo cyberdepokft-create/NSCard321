@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T15:03:47.794Z",
+  "updatedAt": "2026-11-28T15:04:15.024Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -31,7 +31,7 @@
     "dispatchCutoff": 14,
     "deliveryText": "1–3 munkanap",
     "bankDetails": "",
-    "stockSyncedAt": "2026-11-28T15:02:51.576Z",
+    "stockSyncedAt": "2026-11-28T15:03:51.409Z",
     "lockerMap": true,
     "vatRate": "27%",
     "invoiceAuto": false,
@@ -379,7 +379,7 @@
       "name": "Pikachu",
       "set": "30th Celebration",
       "line": "",
-      "description": "1db kártya",
+      "description": "1db gyűjthető kártyalap",
       "price": 249,
       "oldPrice": null,
       "stock": 1,
