@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T20:16:32.199Z",
+  "updatedAt": "2026-11-28T20:22:21.191Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -31,7 +31,7 @@
     "dispatchCutoff": 14,
     "deliveryText": "1–3 munkanap",
     "bankDetails": "",
-    "stockSyncedAt": "2026-11-28T20:15:43.046Z",
+    "stockSyncedAt": "2026-11-28T20:21:43.184Z",
     "lockerMap": true,
     "vatRate": "27%",
     "invoiceAuto": false,
@@ -373,6 +373,32 @@
     }
   },
   "products": [
+    {
+      "id": 31,
+      "category": "booster",
+      "name": "Destined Rivals Booster",
+      "set": "Destined Rivals",
+      "line": "",
+      "description": "1db Destined Rivals Booster",
+      "price": 3590,
+      "oldPrice": null,
+      "stock": 36,
+      "availability": "in_stock",
+      "badge": "",
+      "flags": [],
+      "images": [
+        "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@04e1e42ba7c9865c75635a5c5fa43144771da56c/public/store/images/31-mx0uwml5-ru1sy9.png"
+      ],
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "",
+      "lang": "",
+      "cardNo": "",
+      "rarity": "",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 5
+    },
     {
       "id": 30,
       "category": "booster",
