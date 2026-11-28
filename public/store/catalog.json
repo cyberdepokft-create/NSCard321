@@ -1,269 +1,376 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T09:31:15.000Z",
-  "updatedBy": "NS Card",
+  "updatedAt": "2026-11-28T09:44:00.394Z",
+  "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
-    "email": "infonscard@gmail.com",
+    "email": "",
     "phone": "",
+    "address": "",
+    "instagram": "",
+    "facebook": "",
+    "tiktok": "",
     "announcement": "",
+    "shipHome": true,
     "shippingHome": 2500,
+    "shipLocker": true,
     "shippingLocker": 2500,
+    "shipPickup": false,
+    "shippingPickup": 0,
+    "pickupAddress": "",
     "freeShippingFrom": 0,
     "payCard": false,
     "payTransfer": true,
     "payCod": true,
     "codFee": 0,
     "lowStock": 3,
-    "shipHome": true,
-    "shipLocker": true,
-    "shipPickup": false,
-    "shippingPickup": 0,
-    "pickupAddress": "",
-    "address": "",
-    "instagram": "",
-    "facebook": "",
-    "tiktok": "",
-    "heroTitle": "A következő bontásod itt kezdődik.",
-    "heroText": "Pokémon TCG boosterek, tin dobozok, Elite Trainer Boxok és kollekciók – magyar webshopból, készletről.",
-    "featuredTitle": "Kiemelt termékek",
-    "featuredText": "A jelenlegi kínálat legkeresettebb darabjai.",
-    "footerText": "Pokémon TCG termékek gyűjtőknek és bontásra: boosterek, tin dobozok, Elite Trainer Boxok és kollekciók.",
+    "companyName": "",
+    "companyAddress": "",
+    "taxNumber": "",
+    "regNumber": "",
+    "dispatchCutoff": 14,
+    "deliveryText": "1–3 munkanap",
+    "bankDetails": "",
+    "stockSyncedAt": "",
+    "lockerMap": true,
+    "vatRate": "27%",
+    "invoiceAuto": false,
+    "invoiceElectronic": true,
+    "invoiceSend": true,
+    "billingoBlockId": 0,
+    "analyticsToken": "",
+    "giftWrap": false,
+    "giftWrapPrice": 0,
     "categories": [
       {
         "value": "booster",
         "label": "Booster csomagok",
-        "hidden": false
+        "hidden": false,
+        "color": "",
+        "image": "",
+        "desc": ""
       },
       {
         "value": "tinek",
         "label": "Tin dobozok",
-        "hidden": false
+        "hidden": false,
+        "color": "",
+        "image": "",
+        "desc": ""
       },
       {
         "value": "display",
         "label": "Displayek",
-        "hidden": false
+        "hidden": false,
+        "color": "",
+        "image": "",
+        "desc": ""
       },
       {
         "value": "etb",
         "label": "Elite Trainer Boxok",
-        "hidden": false
+        "hidden": false,
+        "color": "",
+        "image": "",
+        "desc": ""
       },
       {
         "value": "collections",
         "label": "Kollekciók",
-        "hidden": false
+        "hidden": false,
+        "color": "",
+        "image": "",
+        "desc": ""
       },
       {
         "value": "mysteri",
         "label": "Mystery boxok",
-        "hidden": false
+        "hidden": false,
+        "color": "",
+        "image": "",
+        "desc": ""
       },
       {
         "value": "single",
         "label": "Single kártyák",
-        "hidden": false
+        "hidden": false,
+        "color": "",
+        "image": "",
+        "desc": ""
       },
       {
         "value": "accessories",
         "label": "Kiegészítők",
-        "hidden": false
+        "hidden": false,
+        "color": "",
+        "image": "",
+        "desc": ""
       }
     ],
+    "coupons": [],
+    "pages": {},
+    "faq": [],
     "posts": [
       {
         "slug": "booster-etb-display-tin-melyiket-valaszd",
         "title": "Booster, ETB, display vagy tin – melyiket válaszd?",
-        "tag": "Vásárlási útmutató",
         "date": "2026-11-24",
         "excerpt": "Teljes útmutató a Pokémon TCG termékfajtákhoz: mi van a dobozban, hogyan számold ki a csomagonkénti árat, és melyik kinek ideális – kezdőknek, gyűjtőknek és ajándékozóknak.",
         "cover": "",
         "body": "Ha most nézel körül először a Pokémon kártyák között, könnyű elveszni a sok doboz, tin és kollekció között. Mindegyikben booster csomagok vannak, de nagyon más a mennyiség, a kiegészítők és az ár. Ebben az útmutatóban végigmegyünk a leggyakoribb termékfajtákon, megmutatjuk, hogyan hasonlítsd össze őket, és a végén adunk egy gyors döntési segítséget is.\n\n> **Röviden:** kipróbálásra booster vagy mini tin, ajándékba ETB vagy kollekció, komoly gyűjtéshez vagy közös bontáshoz display.\n\n## Egy pillantással: a termékfajták összehasonlítása\n| Termék | Mi van benne (jellemzően) | Kinek ajánljuk |\n|---|---|---|\n| Booster csomag | 1 csomag, kb. 10 lap | Kipróbálás, apró ajándék |\n| Mini tin | 2 booster + illusztrált lap | Gyerekeknek, gyűjthető dobozok kedvelőinek |\n| Tin doboz | 3–5 booster, gyakran promó lap | Ajándék, egyszerű belépő |\n| Booster bundle | 6 booster, doboz nélkül | Aki sokat bont, de nem kell kiegészítő |\n| Elite Trainer Box | 9 booster + sleeve, energia, kockák, tárolódoboz | Ajándék, szett-rajongók, kezdő játékosok |\n| Kollekció, prémium doboz | Booster + garantált promó lapok, figura, kitűző | Aki egy konkrét lapot vagy Pokémont szeretne |\n| Booster display | 36 booster (angol szetteknél) | Komoly gyűjtők, közös bontás |\n\nA pontos tartalom szettenként és termékenként eltérhet – a termékoldalon mindig feltüntetjük, mi van az adott dobozban.\n\n## Booster csomag – a klasszikus bontás\nA booster a legkisebb, gyárilag lezárt egység: egy adott szett véletlenszerű lapjai vannak benne. A jelenlegi angol nyelvű szetteknél egy csomagban jellemzően 10 lap és egy kódkártya van. Mindig jut bele legalább egy ritka (vagy annál ritkább) lap, és reverse holo lapok is, amelyek helyén néha egy különleges illusztrációs lap bújik meg.\n- **Előny:** olcsó belépő, minden bontás izgalom.\n- **Hátrány:** csomagonként ez a legdrágább megoldás, és nincs benne garantált különleges lap.\n- **Kinek:** kipróbálásra, apró ajándéknak, vagy ha egy új szettbe szeretnél belekóstolni.\n\n## Mini tin és tin doboz\nA tin fémdoboz, amelyben néhány booster és gyakran egy fix promó lap vagy kiegészítő van. A mini tinekben általában 2 booster és egy illusztrált lap (art card) található, a nagyobb tinekben több csomag és egy kiemelt, gyakran holografikus promó lap.\n- **Előny:** látványos, újrahasznosítható doboz, biztos meglepetés.\n- **Hátrány:** csomagonként általában drágább, mint egy ETB vagy display.\n- **Kinek:** ajándéknak, gyerekeknek, és azoknak, akik szeretik a sorozatba rendezhető dobozokat.\n\n[[termek:15]]\n\n> **Tipp:** a mini tineket sokan sorozatban gyűjtik, mert a dobozok tetején más-más illusztráció van. Ha valaki egy adott Pokémont szeret, a tin teteje is lehet a döntő szempont.\n\n## Elite Trainer Box (ETB)\nAz ETB a gyűjtők és játékosok kedvence. A mostani angol ETB-kben jellemzően 9 booster csomag van, mellette:\n- 65 kártyavédő (sleeve) a szett témájában,\n- 45 energia lap, így azonnal össze tudsz rakni egy paklit,\n- sebzésjelölő kockák, egy versenyen is használható érmedobó kocka és állapotjelölők,\n- egy teljes képes (full art) promó lap,\n- játékos útmutató a szetthez,\n- és egy elválasztólapos tárolódoboz, amiben később a paklidat és a kedvenc lapjaidat is tarthatod.\n\nA Pokémon Center saját kiadású ETB-jében több booster van (a legutóbbi szériákban 11), és egy plusz, csak abban kapható promó lap.\n- **Előny:** sok bontás egyben, hasznos kiegészítők, szép, tartós doboz.\n- **Hátrány:** drágább, mint pár külön booster.\n- **Kinek:** ajándéknak, és mindenkinek, aki egy szettből több csomagot bontana.\n\n[[termek:19]]\n\n## Booster bundle és Build & Battle Box\nA **booster bundle** egy egyszerű kartondoboz 6 boosterrel, kiegészítők nélkül. Jó választás, ha csak bontani szeretnél, és nem kell sleeve vagy energia.\n\nA **Build & Battle Box** a szettek megjelenésekor érkezik: 4 boostert és egy 40 lapos alappaklit tartalmaz, amivel az úgynevezett pre-release versenyeken is lehet játszani. Kezdő játékosoknak remek, mert azonnal játszható paklit kapnak.\n\n## Booster display (booster box)\nA display egy teljes, gyárilag lezárt doboz – az angol szetteknél 36 booster csomaggal. Csomagonként ez a legkedvezőbb ár, és egy egész display bontásakor nagyobb eséllyel jön ki több ritka lap is, de garancia erre sincs.\n- **Előny:** a legjobb ár/csomag arány, közös bontáshoz ideális.\n- **Hátrány:** egyszerre nagyobb kiadás.\n- **Kinek:** komoly gyűjtőknek, baráti bontásokhoz, illetve akik bontatlanul tennék félre.\n\n## Kollekciók és prémium dobozok\nA kollekciós dobozokban (Collection, Premium Collection, Illustration Collection, ex Box) booster csomagok mellett fix promó lapok, figurák, kitűzők vagy óriás lapok vannak. Itt a garantált tartalom a lényeg: biztosan megkapod a dobozon látható különleges lapot, így ha egy adott Pokémon a kedvenced, ez a legbiztosabb út.\n\n[[termek:13]]\n\n## Így számold ki a csomagonkénti árat\nA legegyszerűbb összehasonlítás: oszd el a termék árát a benne lévő booster csomagok számával. Ha egy 30 000 Ft-os dobozban 9 booster van, az csomagonként kb. 3 330 Ft. Ezután nézd meg, mit kapsz még mellé:\n1. **Promó lap:** egy jó promó lap önmagában is értékes lehet.\n2. **Kiegészítők:** sleeve, energia, kockák – ha játszol, ezeket úgyis megvennéd.\n3. **Doboz:** az ETB tárolódoboza vagy egy tin évekig használható.\n\n> **Jó tudni:** a csomagonkénti ár nem minden. Ajándéknál az élmény és a látvány gyakran többet ér, mint 300 Ft megtakarítás csomagonként.\n\n## Melyiket válaszd? Gyors döntési segítség\n| Költségkeret | Javaslat |\n|---|---|\n| 5 000 Ft alatt | Booster csomag vagy mini tin |\n| 5 000–15 000 Ft | Tin doboz, kisebb kollekció, booster bundle |\n| 15 000–30 000 Ft | Elite Trainer Box vagy prémium kollekció |\n| 30 000 Ft felett | Booster display vagy nagy prémium kollekció |\n\n## Tippek vásárlás előtt\n- **Nézd meg a szettet:** minden szettnek más a hangulata és más a „sztár” lapja. A termékoldalon feltüntetjük, melyik szettből van a doboz.\n- **Gyári fólia:** bontatlan termékeknél a fólia legyen feszes és sértetlen. Nálunk minden lezárt termék eredeti, gyári csomagolásban érkezik.\n- **Tárolás bontás után:** a jó lapokat azonnal tedd kártyavédőbe. Erről külön útmutatónk is van: [Így tárold a kártyáidat](/blog/igy-tarold-a-kartyaidat).\n\n## Gyakori kérdések\n### Melyikben a legnagyobb az esély ritka lapra?\nCsomagonként mindegyikben ugyanakkora, mert ugyanazok a booster csomagok vannak bennük. A különbség a csomagok számában van: egy 36 csomagos display-ben egyszerűen több esélyed van, mint egy 2 csomagos mini tinben.\n\n### Mi a különbség az ETB és a Pokémon Center ETB között?\nA Pokémon Center változatban több booster és egy plusz, exkluzív promó lap van, a doboza is másképp néz ki. Tartalmát tekintve egyébként ugyanaz a felépítés.\n\n### Érdemes bontatlanul félretenni dobozokat?\nVannak, akik így gyűjtenek, de egy doboz értéke emelkedhet és csökkenhet is. Ha félreteszed, tárold száraz, sötét helyen, a fóliát ne sértsd meg. Ezt ne tekintsd befektetési tanácsnak – vedd azt, aminek örülsz.\n\n### Kezdő játékosnak melyik a legjobb?\nEgy Build & Battle Box vagy egy ETB: mindkettőben van annyi lap és kiegészítő, hogy azonnal játszani tudjatok. A szabályokról itt olvashatsz: [Pokémon TCG kezdőknek](/blog/pokemon-tcg-kezdoknek).\n\nBizonytalan vagy? Írj nekünk, és segítünk kiválasztani a megfelelő dobozt a költségkeretedhez.",
-        "published": true,
+        "tag": "Vásárlási útmutató",
         "products": [
           19,
           15,
           11,
           13
-        ]
+        ],
+        "published": true
       },
       {
         "slug": "ajandekotletek-pokemon-rajongoknak",
         "title": "Ajándékötletek Pokémon rajongóknak – minden pénztárcához",
-        "tag": "Ajándék",
         "date": "2026-11-24",
         "excerpt": "Karácsonyra, szülinapra vagy csak úgy: ötletek kezdőknek, gyűjtőknek és játékosoknak, költségkeret és életkor szerint rendezve – ajándékcsomagolással.",
         "cover": "",
         "body": "Pokémon kártyát ajándékozni mindig jó ötlet: a bontás élménye gyerekeknek és felnőtteknek is izgalmas. De mit vegyél annak, aki már gyűjt, és mit annak, aki most kezdené? Összeszedtük a legjobb ötleteket költségkeret, életkor és érdeklődés szerint, és a végén azt is leírjuk, hogyan kérhetsz nálunk ajándékcsomagolást.\n\n> **Röviden:** ha nem tudod, mi a jó választás, egy Elite Trainer Box szinte mindig telitalálat – gyűjtőnek és játékosnak is örömet okoz.\n\n## Először két kérdés\nMielőtt választasz, érdemes tudni:\n1. **Játszik vagy gyűjt?** A játékos a kiegészítőknek és a kész pakliknak örül, a gyűjtő a ritka lapoknak, a szép dobozoknak és a tárolóeszközöknek.\n2. **Van kedvenc Pokémonja?** Ha igen, keress olyan tint vagy kollekciót, amelyiken az szerepel – a garantált promó lap miatt biztos lesz a siker.\n\n## Apró meglepetés (5 000 Ft alatt)\n- **Booster csomag:** a klasszikus. Egy-két csomag tökéletes kiegészítő ajándék, adventi naptárba vagy mikuláscsomagba is.\n- **Mini tin:** kis fémdoboz két boosterrel és illusztrált lappal, ami a polcon is jól mutat.\n- **Kártyavédők (sleeve):** egy szép mintás csomag minden gyűjtőnek jól jön.\n\n[[termek:11]]\n\n## Közepes ajándék (5 000–15 000 Ft)\n- **Tin doboz:** több booster és egy garantált promó lap egy szép fémdobozban.\n- **Kisebb kollekció vagy ex box:** fix különleges lap, boosterek, néha kitűző vagy figura.\n- **Kiegészítők:** mappa, toploader, deck box – a gyűjtő mindig örül nekik, mert a lapok tárolása sosem „kész”.\n\n[[termek:15]]\n\n## Nagy ajándék (15 000–30 000 Ft)\n- **Elite Trainer Box:** 9 booster, sleeve-ek, kocka, jelölők és tárolódoboz. A legnépszerűbb ajándék, mert gyűjtőnek és játékosnak is tökéletes.\n- **Prémium kollekció:** látványos doboz több promó lappal, gyakran figurával vagy óriás lappal.\n\n[[termek:19]]\n\n## Különleges ajándék (30 000 Ft felett)\n- **Booster display:** egy teljes doboz 36 boosterrel – közös, családi vagy baráti bontásra is ideális.\n- **Keresett single kártya:** ha tudod, kinek melyik a kedvenc Pokémonja, egy szép illusztrációs lap toploaderben vagy mágneses tokban örök emlék.\n- **Kombináció:** egy ETB mellé egy minőségi mappa és egy csomag belső sleeve – kész „kezdő gyűjtő” csomag.\n\n## Életkor szerint\n| Életkor | Amit ajánlunk | Miért |\n|---|---|---|\n| 6–8 év | Mini tin, tin doboz, kész pakli | Kezelhető méret, gyors siker, szép doboz |\n| 9–12 év | Elite Trainer Box, kollekció | Sok bontás, és a játékhoz minden benne van |\n| Tinédzser | ETB, single lap, mappa | Már tudatosabban gyűjt vagy játszik |\n| Felnőtt gyűjtő | Display, prémium kollekció, single lap | A ritka lapok és a teljes szett a cél |\n\nA gyártó a játékot 6 éves kortól ajánlja. Kisebbeknek is örömet okozhat a lapok nézegetése, de figyelj, hogy a kártyák ne kerüljenek a szájba.\n\n## Kinek mit? Gyors összefoglaló\n- **Gyereknek, kezdőnek:** mini tin vagy ETB, és ha játszani is szeretne, egy kész pakli. Mellé ajánljuk: [Pokémon TCG kezdőknek](/blog/pokemon-tcg-kezdoknek).\n- **Gyűjtőnek:** az aktuális szett ETB-je vagy egy illusztrált kollekció, esetleg egy minőségi mappa.\n- **Játékosnak:** sleeve, deck box, kész pakli vagy egy erős single lap.\n- **Annak, akinek „már mindene megvan”:** egy display közös bontásra, vagy egy különleges single lap.\n\n## Ajándékcsomagolás nálunk\nA pénztárban egy pipával kérhetsz ajándékcsomagolást, és írhatsz egy rövid üzenetet is, amit kártyán mellékelünk. Ilyenkor a csomagba tett lapon nem szerepel ár, így közvetlenül a megajándékozott címére is kérheted a szállítást. A csomagolás díját (ha van) a pénztárban, a végösszeg előtt látod.\n\n> **Tipp:** ha a megajándékozott címére küldöd, a szállítási adatoknál az ő nevét és telefonszámát add meg, a számlázási adatoknál pedig a sajátodat.\n\n## Mikor rendelj?\nÜnnepek előtt a futárszolgálatok leterheltebbek, ezért érdemes legalább egy héttel korábban rendelni. A termékoldalon mindig látod, mikor adjuk fel a rendelést. Előrendelhető terméknél a megjelenési dátumot is feltüntetjük – ha ajándékba vennéd, ellenőrizd, hogy időben megérkezik-e: [Hogyan működik az előrendelés?](/blog/elorendeles-hogyan-mukodik)\n\n## Gyakori kérdések\n### Kicserélhető az ajándék, ha nem tetszik?\nBontatlan terméknél az elállási jog szerint 14 napon belül visszaküldhető. Bontott booster csomagot értelemszerűen nem tudunk visszavenni. A részleteket a vásárlási feltételekben találod.\n\n### Mit vegyek, ha nem tudom, milyen lapjai vannak?\nBontatlan terméket: egy booster, tin vagy ETB sosem lesz „duplikátum”, mert a tartalma meglepetés. Single lapnál könnyebb mellényúlni.\n\n### Kérhetek számlát a saját nevemre, ha másnak küldöm?\nIgen, a pénztárban külön számlázási adatokat adhatsz meg.\n\n### Ajándékkártyát árultok?\nHa erre van igény, írj nekünk – addig is egy kedvezménykupon is jó megoldás lehet, ha éppen fut akció.",
-        "published": true,
+        "tag": "Ajándék",
         "products": [
           11,
           15,
           19,
           14,
           13
-        ]
+        ],
+        "published": true
       },
       {
         "slug": "pokemon-tcg-szotar",
         "title": "Pokémon TCG szótár: ETB, SIR, pull, toploader és a többi",
-        "tag": "Gyűjtési tippek",
         "date": "2026-11-23",
         "excerpt": "Mit jelent az ETB, a reverse holo, a pull vagy a rotáció? Több mint 50 gyakori kifejezés a termékektől a gyűjtői szlengig, témák szerint csoportosítva.",
         "cover": "",
         "body": "Aki most kezd el Pokémon kártyákkal foglalkozni, az első napokban rengeteg rövidítéssel és angol kifejezéssel találkozik: a bontós videókban, a fórumokon és a termékleírásokban is. Összegyűjtöttük a leggyakoribbakat, témák szerint csoportosítva. Ha valamit nem találsz, írj nekünk, és bővítjük a listát.\n\n> **Tipp:** az oldalon a böngésző keresőjével (Ctrl+F, telefonon a megosztás menüben a „Keresés az oldalon”) gyorsan megtalálsz egy kifejezést.\n\n## Termékek\n- **Booster (booster pack):** a legkisebb, gyárilag lezárt csomag véletlenszerű lapokkal.\n- **Booster box / display:** gyári doboz sok boosterrel (angol szetteknél 36 darab).\n- **Booster bundle:** 6 booster egy egyszerű dobozban.\n- **ETB (Elite Trainer Box):** 9 booster, sleeve-ek, energia lapok, kockák és tárolódoboz. Részletesen: [Booster, ETB, display vagy tin?](/blog/booster-etb-display-tin-melyiket-valaszd)\n- **PC ETB:** a Pokémon Center saját kiadású ETB-je, több boosterrel és plusz promó lappal.\n- **Tin, mini tin:** fémdoboz boosterekkel és promó vagy illusztrált lappal.\n- **Collection, Premium Collection:** kollekciós doboz garantált promó lapokkal, néha figurával.\n- **Build & Battle Box:** 4 booster és egy 40 lapos alappakli a megjelenési (pre-release) versenyekhez.\n- **Blister / checklane:** bliszteres csomag 1–3 boosterrel, gyakran egy promó lappal vagy érmével.\n- **Sealed:** bontatlan, gyárilag lezárt termék.\n- **Shrink:** a dobozokat borító gyári fólia.\n\n## Lapok és ritkaság\n- **Common, Uncommon, Rare:** gyakori (kör), kevésbé gyakori (rombusz) és ritka (csillag) lapok.\n- **Holo:** csillogó képű lap.\n- **Reverse holo (RH):** a kép nem csillog, a lap többi része igen.\n- **Full art (FA):** az illusztráció a teljes lapot kitölti.\n- **IR (Illustration Rare):** egész lapos, különleges illusztráció, egy arany csillaggal.\n- **SIR (Special Illustration Rare):** a szett legkeresettebb illusztrációs lapjai, két arany csillaggal.\n- **Hyper Rare / gold:** arany színű, három arany csillagos lapok.\n- **Secret rare:** a szett lapszámán túli sorszámú lap (például 199/165).\n- **Pokémon ex:** erősebb Pokémon lapok; kiütésükért 2 díjkártya jár.\n- **Mega ex:** a Mega Evolution sorozat lapjai; kiütésükért 3 díjkártya jár.\n- **Promo:** nem boosterből, hanem dobozokból, eseményekről vagy kiadványokból származó lap, külön „promó” jelöléssel.\n- **Stamped:** pecséttel (például esemény- vagy szettlogóval) ellátott változat.\n- **Alt art:** egy lap alternatív illusztrációjú változata.\n- **Shiny:** a Pokémon szokásostól eltérő színű, ritka változata.\n- **Energy:** a támadások „üzemanyaga”; alap és különleges energiák vannak.\n- **Trainer:** Item, Supporter, Stadium és Pokémon Tool lapok.\n- **ACE SPEC:** különösen erős Trainer lapok, amelyekből pakliba összesen csak egy tehető.\n- **Regulation Mark:** a lap alján lévő betű, ami azt mutatja, melyik versenyformátumban használható.\n- **Szettjel, kártyaszám:** a lap alján lévő szimbólum és szám (például 045/165). A ritkasági jelekről bővebben: [Ritkasági jelek és lapfajták](/blog/ritkasagi-jelek-es-lapfajtak).\n\n## Állapot, értékelés, tárolás\n- **NM, LP, MP, HP, DMG:** az állapot rövidítései Near Minttől Damagedig. Részletesen: [Kártyaállapotok](/blog/kartyaallapotok-nm-lp-mp-hp-dmg)\n- **Raw:** nem értékelt, tokozatlan lap.\n- **Grading:** független cég általi állapot-értékelés pontszámmal és tokkal.\n- **Slab:** a gradingelt lap lezárt, átlátszó tokja.\n- **PSA 10, Gem Mint:** a PSA skálájának legmagasabb, „hibátlan” fokozata.\n- **Black Label:** a BGS tökéletes, minden részpontszámban 10-es lapjainak jelölése.\n- **Pop report:** statisztika arról, egy lapból hányat értékeltek és milyen pontszámmal.\n- **Centering:** mennyire van középen a kép, vagyis egyformák-e a keretek.\n- **Whitening:** fehér kopásnyomok a lap szélén, főleg a hátoldalon.\n- **Sleeve:** kártyavédő tasak. **Penny sleeve:** vékony, olcsó változat. **Perfect fit:** szorosan simuló belső védő.\n- **Double sleeve:** két réteg sleeve, ellentétes nyílással.\n- **Toploader:** merev műanyag tok egy lapnak.\n- **One-touch / mágneses tok:** mágnessel záródó, vastag kemény tok.\n- **Binder:** gyűjtőmappa, ideálisan oldalról töltős zsebekkel. Tárolásról: [Így tárold a kártyáidat](/blog/igy-tarold-a-kartyaidat)\n- **Deck box:** doboz a pakli tárolására.\n\n## Játék\n- **Pakli (deck):** pontosan 60 lapból álló játékcsomag.\n- **Active, Bench:** az aktív Pokémon és a pad, ahol legfeljebb 5 Pokémon várakozik.\n- **Prize cards (díjkártyák):** a játék elején félretett 6 lap; aki mindet elvette, nyer.\n- **KO (Knock Out):** egy Pokémon kiütése.\n- **Mulligan:** újrahúzás, ha a kezdő kézben nincs Basic Pokémon.\n- **Retreat:** visszavonulás az aktív helyről.\n- **Standard, Expanded:** a két fő versenyformátum; a Standardban csak a legújabb lapok használhatók.\n- **Rotáció:** az évenkénti váltás, amikor a legrégebbi lapok kikerülnek a Standardból.\n- **Meta:** az adott időszakban legerősebbnek tartott, legtöbbet játszott paklik összessége.\n- **Pre-release:** megjelenés előtti verseny, ahol a Build & Battle Boxokkal játszanak.\n- **Pokémon TCG Live:** a hivatalos, ingyenes online kártyajáték-alkalmazás.\n- **Code card:** a termékekben lévő kódkártya, amellyel digitális lapokat kapsz a TCG Live-ban.\n- **Proxy:** helyettesítő lap, amit otthoni tesztjátékhoz használnak; versenyen nem engedélyezett.\n- A játékszabályokról: [Pokémon TCG kezdőknek](/blog/pokemon-tcg-kezdoknek)\n\n## Gyűjtői szleng\n- **Pull:** egy bontásból kihúzott lap („jó pull” = jó lap jött ki).\n- **Hit:** egy bontásban talált, különösen ritka vagy értékes lap.\n- **Chase card:** a szett legkeresettebb, „üldözött” lapja.\n- **Master set:** egy szett összes lapja, minden ritkasági és reverse holo változattal.\n- **Binder set / base set:** a szett alap lapjai, a secret lapok nélkül.\n- **Opening, unboxing, rip:** bontás, gyakran videóban vagy élőben.\n- **Reseal:** kibontott és visszazárt (hamisított) csomag. Erről: [Hamis Pokémon kártyák felismerése](/blog/hamis-pokemon-kartyak-felismerese)\n- **Weighed packs:** lemért, „átválogatott” boosterek, amelyekből már kiszűrhették a jó lapokat.\n- **Scalper:** aki tömegesen felvásárolja a keresett termékeket, hogy drágábban adja tovább.\n- **MSRP:** a gyártó által ajánlott fogyasztói ár.\n- **Singles:** egyenként árult lapok.\n- **Japanese / JP, English / EN:** a lap nyelve. A különbségekről: [Japán, angol vagy koreai kártyák?](/blog/japan-angol-koreai-kartyak)\n\n## Gyakori kérdések\n### Miért van ennyi angol kifejezés?\nA Pokémon kártyajáték nemzetközi közössége angolul kommunikál, és a termékek nevei is angolok. Magyarul is ezek terjedtek el, ezért mi is ezeket használjuk a termékleírásokban.\n\n### Mi a különbség a pull és a hit között?\nA pull bármelyik kihúzott lap, a hit egy különösen jó, ritka lap. Minden hit pull, de nem minden pull hit.\n\n### Mit jelent, ha egy terméket „sealed”-ként hirdetnek?\nAzt, hogy bontatlan, gyári állapotú. Nálunk minden bontatlan terméket eredeti, gyári csomagolásban küldünk.",
-        "published": true,
+        "tag": "Gyűjtési tippek",
         "products": [
           19
-        ]
+        ],
+        "published": true
       },
       {
         "slug": "kartyaallapotok-nm-lp-mp-hp-dmg",
         "title": "Kártyaállapotok: mit jelent az NM, LP, MP, HP és DMG?",
-        "tag": "Single kártyák",
         "date": "2026-11-22",
         "excerpt": "A single kártyák árát az állapot erősen befolyásolja. Így értelmezd a rövidítéseket, így vizsgáld át a lapot lépésről lépésre, és erre figyelj vásárláskor.",
         "cover": "",
         "body": "Single (egyenként árult) kártyáknál az állapot legalább annyira fontos, mint maga a lap. Két azonos kártya ára akár többszörösére is eltérhet attól függően, hogy mennyire kopott a széle, karcos-e a felülete, vagy van-e rajta hajlás. Ebben a cikkben elmagyarázzuk a nemzetközileg elterjedt skálát, amit mi is használunk, és megmutatjuk, hogyan vizsgálhatsz át te is egy lapot.\n\n## Az állapotok egy táblázatban\n| Állapot | Rövidítés | Jellemző | Mire jó |\n|---|---|---|---|\n| Near Mint | NM | Szinte hibátlan, legfeljebb egy-két alig látható nyom | Gyűjtemény, grading |\n| Lightly Played | LP | Kis kopás a széleken, apró fehéredés, finom karc | Gyűjtemény, játék |\n| Moderately Played | MP | Látható kopás, több karc, kisebb nyomódás | Játék, kedvező árú gyűjtés |\n| Heavily Played | HP | Erős kopás, felületi sérülés, kisebb hajlás | Játék, helykitöltő |\n| Damaged | DMG | Szakadás, erős hajlás, vízfolt, tollnyom | Ritka régi lapoknál még értékes lehet |\n\n## Mit vizsgálunk egy lapon?\nAz állapotot négy szempont alapján ítéljük meg:\n- **Sarkok:** élesek, vagy kopottak, fehéredők, lekerekedettek.\n- **Szélek:** a lap szélén látható fehér pöttyök (whitening), kopás, csorbulás. A hátoldal kék keretén ez sokkal jobban látszik.\n- **Felület:** karcok, ujjlenyomat, nyomódás, foltok, a holo réteg sérülései. A holo és a texturált lapok felülete a legérzékenyebb.\n- **Hajlás és deformáció:** törés, hullámosodás, nedvesség okozta görbülés.\n\n## Így vizsgálj át egy lapot lépésről lépésre\n1. **Tiszta, száraz kézzel dolgozz**, és tegyél le egy puha, tiszta alátétet (például mikroszálas kendőt).\n2. **Nézd meg a hátoldalt először.** A kék keret szélein a legkisebb kopás is fehér pöttyként jelenik meg.\n3. **Fordítsd meg, és nézd a sarkokat** egyenként, közelről. Az éles, hegyes sarok jó jel, a lekerekedett vagy rétegesen szétnyílt sarok kopást jelez.\n4. **Döntsd meg a lapot erős lámpa alatt.** A karcok, nyomódások és a holo réteg hibái csak szögben látszanak igazán.\n5. **Nézd meg oldalról, vízszintesen.** Így látszik, ha a lap hullámos vagy hajlott.\n6. **Ellenőrizd a centeringet:** egyforma szélesek-e a keretek a lap két oldalán, illetve fent és lent.\n\n> **Tipp:** telefonos fotónál kapcsold be a vakut, és fotózd le a lapot enyhén megdöntve is. A karcok így a képen is látszanak, ami eladásnál vagy cserénél sokat segít.\n\n## Near Mint (NM)\nSzinte hibátlan lap. Legfeljebb egy-két apró, alig látható nyom a széleken vagy a sarkokon. Csomagból bontott és azonnal védőbe tett lapoknál jellemző. Gyűjteménybe és grading előtt ez az elvárt állapot. Fontos: a frissen bontott lap sem automatikusan hibátlan, mert gyári nyomdai hiba vagy szélkopás már a csomagban is előfordulhat.\n\n## Lightly Played (LP)\nEnyhén használt: kisebb kopás a széleken, néhány apró fehéredés a sarkokon vagy egy-két finom karc a felületen. Távolról szép lap, közelről látszanak rajta a használat nyomai. Pakliban (kártyavédőben) játszott vagy albumban tartott lapoknál gyakori. Ár/érték arányban sokszor ez a legjobb választás.\n\n## Moderately Played (MP)\nKözepesen használt: jól látható kopás a széleken és sarkokon, több karc, esetleg kisebb nyomódás. Erős hajlás nincs rajta. Játékra tökéletes, gyűjteménybe kedvező áron jó választás.\n\n## Heavily Played (HP)\nErősen használt: jelentős kopás, felületi sérülések, kisebb hajlások. Főleg játékra vagy „helykitöltőnek” a gyűjteményben ajánljuk, amíg szebb példányt nem találsz.\n\n## Damaged (DMG)\nSérült: szakadás, erős hajlás, vízfolt, tollnyom vagy más komoly hiba. Ritka, régi lapoknál így is értékes lehet, de az ára jóval az NM példány alatt marad.\n\n## Más oldalakon más betűk: a skálák megfeleltetése\nAz európai piactereken (például a Cardmarketen) kicsit más elnevezéseket használnak. A megfeleltetés nem pontos, de nagyjából így viszonyulnak egymáshoz:\n\n| Nálunk | Cardmarket-skála |\n|---|---|\n| NM | Mint (MT) vagy Near Mint (NM) |\n| LP | Excellent (EX) |\n| MP | Good (GD) vagy Light Played (LP) |\n| HP | Played (PL) |\n| DMG | Poor (PO) |\n\n> **Fontos:** a Cardmarket „Light Played” jelölése szigorúbb skálán értendő, mint az amerikai LP. Ha máshol vásárolsz, mindig nézd meg, melyik skálát használja az eladó.\n\n## Mit jelent a centering?\nA centering azt mutatja, mennyire van középen a kép a kártyán, vagyis egyforma szélesek-e a keretek. Az állapot-skála ezt általában nem bünteti, de a gradingnél (PSA, CGC, BGS) sokat számít. Ha egy lapot értékeltetni szeretnél, a centeringet is nézd meg. Erről részletesen itt írunk: [Grading: PSA, CGC, BGS](/blog/grading-psa-cgc-bgs).\n\n## Grading lapok\nA független cégek által értékelt, lezárt tokba helyezett lapoknál a számmal jelölt minősítés (például PSA 10) a hivatalos állapot. Ezeknél a termékoldalon a minősítő cég és az érték is szerepel.\n\n## Hogyan árazzuk a lapokat?\n- Minden single lapot egyenként átnézünk erős fényben, elöl és hátul is.\n- Kétes esetben mindig az alacsonyabb kategóriát adjuk meg.\n- Drágább lapoknál szívesen küldünk további fotót, akár a hátoldalról is.\n- Minden lapot kártyavédőben és merev tokban (toploader) postázunk, hogy úgy érkezzen meg, ahogy elküldtük.\n\n## Gyakori kérdések\n### A bontatlan csomagból jött lap mindig Near Mint?\nNem feltétlenül. Gyári nyomdai hiba, szélkopás vagy a vágás miatti egyenetlenség már a csomagban is lehet. Ezért a frissen bontott lapokat is átnézzük, mielőtt besoroljuk őket.\n\n### Mi számít többet: a felület vagy a sarkok?\nMindkettő fontos, de a felületi karc egy holo lapon általában jobban rontja az összképet, mint egy apró fehéredés a sarkon. A hajlás a legsúlyosabb hiba, mert nem javítható.\n\n### Lehet javítani egy kopott lapot?\nNem. A „lapjavítás” (préselés, festés) az értéket inkább csökkenti, a grading cégek pedig kiszűrik. A legjobb védekezés a megelőzés: kártyavédő és jó tárolás.\n\n### Mi a különbség a „played” és a „damaged” között?\nA played lapok használat nyomait mutatják, de egyben vannak. A damaged lapon szerkezeti hiba van: szakadás, erős hajlás, vízkár vagy írás.\n\nKérdésed van egy lap állapotáról? Írj nekünk a termék nevével, és küldünk róla részletes képeket.",
-        "published": true,
-        "products": []
+        "tag": "Single kártyák",
+        "products": [],
+        "published": true
       },
       {
         "slug": "japan-angol-koreai-kartyak",
         "title": "Japán, angol vagy koreai kártyák? A különbségek érthetően",
-        "tag": "Gyűjtési tippek",
         "date": "2026-11-21",
         "excerpt": "Miért jelennek meg előbb a japán szettek, miért van kevesebb lap egy japán csomagban, melyik nyelvű lappal lehet versenyen játszani, és melyiket érdemes gyűjteni?",
         "cover": "",
         "body": "A Pokémon kártyák több nyelven jelennek meg, és a kiadások nem csak a lapok szövegében különböznek. Más a szettek felosztása, a csomagok mérete, a ritkasági jelölés, és más a piaci értékük is. Ebben a cikkben összefoglaljuk, mit érdemes tudni, mielőtt japán, angol vagy koreai terméket választasz.\n\n## A legfontosabb különbségek egy táblázatban\n| | Angol (és más nyugati nyelvek) | Japán | Koreai |\n|---|---|---|---|\n| Megjelenés | Néhány hónappal a japán után | Elsőként | Jellemzően a japán után nem sokkal |\n| Szettek | Gyakran több japán szett anyagát fogja össze | Kisebb, sűrűbben érkező szettek | Nagyrészt a japán szetteket követi |\n| Lapok csomagonként | Jellemzően 10 | Alap szetteknél 5, különleges szetteknél 10 | Jellemzően a japánhoz hasonló |\n| Ritkaság jelölése | Szimbólumok (kör, rombusz, csillag) | Betűkód (például C, U, R, RR, AR, SAR, UR) | Betűkód |\n| Versenyen (Európában) | Engedélyezett | Nem engedélyezett | Nem engedélyezett |\n| Ár | Közepes | Csomagonként gyakran olcsóbb | Gyakran a legolcsóbb |\n\n## Miért jönnek előbb a japán szettek?\nA Pokémon kártyajáték Japánból indult, és ma is ott tervezik a szetteket. A japán kiadás érkezik elsőként, a nemzetközi (angol, német, francia stb.) változat pedig néhány hónappal később. Az angol szettek gyakran két japán szett lapjait fogják össze, ezért egy angol szett lapszáma általában nagyobb.\n\n> **Jó tudni:** ha kíváncsi vagy, milyen lapok érkeznek a következő angol szettben, a japán megjelenések jó előzetest adnak. A pontos összeállítás azonban eltérhet.\n\n## Csomagok és dobozok\nA japán alap szettek booster csomagjaiban jellemzően 5 lap van, és egy doboz (display) 30 csomagot tartalmaz. A különleges, úgynevezett „high class” szetteknél egy csomag 10 lapos, és egy dobozban kevesebb csomag van. Az angol csomagokban jellemzően 10 lap és egy kódkártya található, egy display pedig 36 csomagos.\n\nA japán dobozokat gyakran gyári fóliával („shrink”) árulják. Gyűjtők körében a fóliázott japán doboz jobban kelendő, mert nehezebb újracsomagolni.\n\n## Ritkasági betűkódok a japán lapokon\nA japán (és koreai) lapokon a ritkaságot betűk jelölik a lap alján. A legfontosabbak:\n| Kód | Jelentés | Angol megfelelő (nagyjából) |\n|---|---|---|\n| C, U, R | Common, Uncommon, Rare | Kör, rombusz, csillag |\n| RR, RRR | Double Rare, Triple Rare | Pokémon ex lapok |\n| AR | Art Rare | Illustration Rare |\n| SR | Super Rare | Ultra Rare (full art) |\n| SAR | Special Art Rare | Special Illustration Rare |\n| UR | Ultra Rare | Hyper Rare (arany) |\n\nA megfeleltetés nem mindig egy az egyben, mert a japán és az angol szettek összeállítása eltérhet. A betűjelekről és szimbólumokról bővebben itt írunk: [Ritkasági jelek és lapfajták](/blog/ritkasagi-jelek-es-lapfajtak).\n\n## Nyomtatási minőség\nA japán lapokat sok gyűjtő a jobb nyomtatási minőségük miatt szereti: a vágás és a centering gyakran egyenletesebb, a felület kevésbé hajlamos a gyári hibákra. Ez a gradingnél is előny lehet. Az angol lapok minősége szettenként és nyomdánként változhat.\n\n## Lehet velük versenyen játszani?\nOtthon, barátokkal bármilyen nyelvű lappal játszhattok, akár vegyesen is. A hivatalos európai versenyeken viszont csak a nyugati nyelvű kiadások (például angol, német, francia, olasz, spanyol, portugál) engedélyezettek, a japán, koreai és kínai lapok nem. Ha versenyezni szeretnél, angol (vagy más nyugati nyelvű) lapokat válassz.\n\n## Melyiket érdemes gyűjteni?\n- **Angol:** Európában ez a legkeresettebb, a legnagyobb a piaca, és könnyebb eladni vagy cserélni. Játékhoz is ezt ajánljuk.\n- **Japán:** gyönyörű lapok, gyakran jobb minőség, és csomagonként olcsóbb bontás. Remek választás, ha csak gyűjtesz, vagy egy adott illusztrációt szeretnél.\n- **Koreai:** a legolcsóbb bontás, de kisebb a viszonteladási piaca. Ha a bontás élménye a cél, kiváló.\n\n> **Tipp:** sok gyűjtő a kedvenc illusztrációs lapjait több nyelven is beszerzi. Egy mappában egymás mellett a japán és az angol változat különleges látvány.\n\n## Mire figyelj nem angol termék vásárlásakor?\n1. **Ellenőrizd a nyelvet a termékoldalon** – nálunk minden single lapnál és terméknél feltüntetjük.\n2. **Japán és koreai dobozoknál** nézd meg, hogy gyári fóliás-e.\n3. **A kódkártya** (digitális lapok a Pokémon TCG Live-ban) a nemzetközi, nyugati nyelvű termékekben van, a japán és koreai termékekben nincs.\n4. **Áraknál** ne hasonlítsd közvetlenül a japán csomag árát az angoléhoz, mert kevesebb lap van benne.\n\n[[termek:19]]\n\n## Gyakori kérdések\n### Ugyanazok a lapok vannak a japán és az angol szettben?\nNagyrészt igen, de nem mindig. Az angol szettek gyakran több japán szett lapjait egyesítik, és néhány lap csak az egyik kiadásban jelenik meg.\n\n### Miért olcsóbb egy japán booster?\nMert kevesebb lap van benne (alap szetteknél 5), és Japánban más az árazás. Laponként nézve a különbség kisebb.\n\n### Melyik nyelvű lap ér többet?\nSzettenként és laponként eltér. Európában általában az angol lapok a legkeresettebbek, de egyes japán exkluzív lapok és promók nagyon értékesek lehetnek.\n\n### A német vagy francia lapok ugyanazok, mint az angolok?\nIgen, ugyanazok a szettek, csak más nyelven. Versenyen is használhatók, gyűjtésnél viszont az angol változat piaca általában nagyobb.",
-        "published": true,
+        "tag": "Gyűjtési tippek",
         "products": [
           19,
           12
-        ]
+        ],
+        "published": true
       },
       {
         "slug": "igy-tarold-a-kartyaidat",
         "title": "Így tárold a Pokémon kártyáidat: sleeve, toploader, mappa",
-        "tag": "Gyűjtési tippek",
         "date": "2026-11-20",
         "excerpt": "Néhány egyszerű eszközzel és szokással a lapjaid évekig megőrzik az állapotukat és az értéküket. Lépésről lépésre a bontástól a mappáig, érték szerinti tárolási táblázattal.",
         "cover": "",
         "body": "A kártyák értéke nagyban függ az állapotuktól, és az állapot a tároláson múlik. A jó hír: nem kell sokat költeni ahhoz, hogy a gyűjteményed hosszú távon is szép maradjon. Ebben az útmutatóban végigmegyünk a legfontosabb eszközökön és szokásokon, és összeállítottunk egy táblázatot is arról, melyik lapot hogyan érdemes tárolni.\n\n## Melyik lapot hogyan tárold?\n| A lap | Ajánlott tárolás |\n|---|---|\n| Hétköznapi lapok (common, uncommon) | Dobozban, szettenként vagy típusonként rendezve |\n| Pakliban használt lapok | Játék sleeve + deck box |\n| Szép holo, ex lapok | Belső sleeve, oldalról töltős mappában |\n| Illusztrációs és full art lapok | Belső sleeve + toploader, vagy mappa egy zsebben egy lappal |\n| Legértékesebb lapok | Double sleeve + mágneses tok, vagy grading |\n| Bontatlan dobozok | Száraz, sötét hely, akril védődoboz |\n\n## 1. Bontás: már itt kezdődik a védelem\n- Tiszta, száraz kézzel és sima, tiszta asztalon bonts.\n- Ne kapkodj: a csomag tetejét óvatosan nyisd fel, hogy a lapok ne hajoljanak meg. Sokan a csomag hátoldalán, a ragasztásnál nyitják.\n- Ne hajlítsd a lapköteget, és ne „pörgesd” végig a hüvelykujjaddal: a holo lapok ilyenkor karcolódnak.\n- A ritka lapokat azonnal tedd védőbe, ne az asztalon tárold őket a bontás végéig.\n\n> **Tipp:** készíts elő a bontás előtt egy pakk belső sleeve-et és néhány toploadert. Ha jön egy nagy lap, nem kell keresgélni.\n\n## 2. Sleeve – az első védelmi vonal\nA vékony műanyag védő megóvja a lapot a karcoktól, az ujjlenyomatoktól és a portól. Háromféle sleeve-et érdemes ismerni:\n- **Penny sleeve:** vékony, átlátszó, olcsó védő. Toploaderbe ezzel tedd a lapot.\n- **Perfect fit / belső sleeve:** szorosan a lapra simul, a ritka lapok első rétege, és a double sleeve alapja.\n- **Játék sleeve:** vastagabb, színes hátoldalú, paklihoz ideális. Az ETB-kben is ilyen van.\n\n### Mi az a double sleeve?\nA ritka lapot először egy belső (perfect fit) sleeve-be teszed fejjel lefelé, majd az egészet egy normál játék sleeve-be fejjel felfelé. Így a két nyílás ellentétes oldalon van, és a por, a nedvesség sem jut be. Versenyjátékosok is így védik a paklijukat.\n\n## 3. Toploader és mágneses tok\nA toploader merev műanyag tok, amely a hajlástól is véd. Az értékes lapot mindig sleeve-ben tedd bele, így nem csúszik és nem karcolódik. A normál vastagságú lapokhoz a 35 pt-os toploader és mágneses tok a megfelelő.\n\nA legértékesebb lapoknak a mágneses vagy csavaros tok (one-touch) a legszebb és legbiztonságosabb megoldás: kiállításra és polcra is tökéletes.\n\n> **Fontos:** ne tegyél lapot szalaggal lezárt toploaderbe úgy, hogy a ragasztó a nyíláshoz közel van. Kivételkor a lap hozzáérhet a ragasztóhoz. Postázásnál inkább egy kis szalagdarab a sleeve fülén, vagy egy lezárható „team bag”.\n\n## 4. Mappa (binder): gyűjtéshez és bemutatáshoz\n- Válassz **oldalról töltős**, zipzáras vagy erős borítójú mappát. Így a lap nem csúszik ki.\n- A zsebek legyenek **savmentesek** és PVC-mentesek. A PVC idővel kipárologhat, és ragacsossá, foltossá teheti a lapot.\n- Kerüld a hagyományos gyűrűs mappákat: a gyűrű közelében a lapok meggyűrődhetnek.\n- Ne tömd túl: zsebenként egy lap, és ne tegyél bele vastag tokokat. A túltömött mappa gerince felé a lapok meghajolhatnak.\n- A mappát **állítva** tárold a polcon, mint egy könyvet – ha laposan egymásra pakolsz többet, az alsók lapjai nyomódhatnak.\n\n## 5. Pakli és játék\nA játékban használt lapok kopnak a leggyorsabban. Mindig sleeve-ben játssz, és tarts a paklinak egy saját deck boxot. A legértékesebb lapokat érdemes egy olcsóbb, azonos nevű és hatású változatra cserélni a pakliban.\n\n## 6. Bontatlan dobozok tárolása\n- Tartsd száraz, hűvös helyen, közvetlen napfénytől távol.\n- A fólia ne sérüljön: egy plusz akril védődoboz sokat segít a display-eknél és ETB-knél.\n- Ne rakj rájuk nehéz tárgyakat, és ne tárold őket pincében vagy padláson.\n- Tartsd meg a szállítási dobozt is, ha később el szeretnéd adni vagy költöztetnéd a gyűjteményt.\n\n## 7. Környezet: a csendes ellenségek\n- **Páratartalom:** a magas pára miatt a lapok hullámosodhatnak. Szilikagél tasak a dobozban sokat segít; az ideális a közepes, 40–50% körüli páratartalom.\n- **Napfény:** kifakítja a színeket, a polcon tartott mappát is érdemes takarni.\n- **Hőmérséklet-ingadozás:** autóban, radiátor mellett ne tárold a gyűjteményt.\n- **Háziállatok és italok:** a legtöbb sérülés egyszerű baleset. Bontásnál a pohár kerüljön messzebb.\n\n## 8. Rendszerezés\nEgy egyszerű táblázat (szett, kártyaszám, állapot, beszerzési ár) rengeteget segít: tudni fogod, mid van, mi hiányzik, és mennyit ér a gyűjteményed. Érdemes a legértékesebb lapokról fotót is készíteni, elöl és hátul is – ez biztosításnál vagy eladásnál is hasznos.\n\nNéhány bevált rendezési mód:\n1. **Szett és kártyaszám szerint:** a „master set” gyűjtők kedvence, azonnal látszik, mi hiányzik.\n2. **Pokémon szerint:** ha egy kedvenc Pokémon összes lapját gyűjtöd.\n3. **Típus szerint:** játékosoknak kényelmes, pakliépítéshez.\n\n## Gyors ellenőrzőlista\n- Ritka lap → belső sleeve + sleeve + toploader vagy mágneses tok.\n- Gyűjtemény → savmentes, PVC-mentes, oldalról töltős mappa.\n- Bontatlan → száraz, sötét hely, védődoboz.\n- Szilikagél, és távol a hőtől és a napfénytől.\n\n## Gyakori kérdések\n### Gyűrűs mappát tényleg ne használjak?\nGyűrűs mappa is működhet, ha a lapok messze vannak a gyűrűtől és a zsebek jó minőségűek, de a gyűrű közelében könnyen nyomódik, gyűrődik a lap. Az oldalról töltős, rögzített lapos mappa biztonságosabb.\n\n### Mennyi ideig jó egy sleeve?\nA sleeve is kopik: ha a pakli sleeve-jei fehéredni kezdenek a szélükön, vagy ragacsosak, cseréld le őket. Gyűjteményben a belső sleeve évekig jó, ha nem érik nagy hatások.\n\n### Mi az a „team bag”?\nEgy lezárható, átlátszó tasak, amibe egy toploadert vagy egy kisebb köteg lapot tehetsz. Postázásnál és tárolásnál is véd a portól.\n\n### Érdemes a lapokat gradingre küldeni a tárolás miatt?\nA grading tok nagyon jó védelmet ad, de költséges, ezért csak értékes lapoknál éri meg. Erről itt írunk részletesen: [Grading: PSA, CGC, BGS](/blog/grading-psa-cgc-bgs).\n\nKérdésed van a tárolásról? Írj nekünk, szívesen segítünk.",
-        "published": true,
-        "products": []
+        "tag": "Gyűjtési tippek",
+        "products": [],
+        "published": true
       },
       {
         "slug": "pokemon-tcg-kezdoknek",
         "title": "Pokémon TCG kezdőknek: így játszd le az első meccsedet",
-        "tag": "Játékszabályok",
         "date": "2026-11-19",
         "excerpt": "A Pokémon kártyajáték alapjai érthetően: pakli, egy lap felépítése, díjkártyák, egy kör menete, támadás, státuszhatások és a győzelem három módja.",
         "cover": "",
         "body": "A Pokémon kártyajáték (TCG) első ránézésre bonyolultnak tűnhet, de az alapok egy délután alatt megtanulhatók. Ebben az útmutatóban a mostani szabályok szerint lépésről lépésre végigmegyünk egy meccsen: mit jelentenek a lapon lévő adatok, mit csinálhatsz a körödben, és hogyan nyerhetsz.\n\n> **Tipp:** a legegyszerűbb kezdés egy kész pakli (például egy League Battle Deck vagy egy Battle Academy doboz). Azonnal játszhatsz, nem kell paklit építeni, és közben megtanulod, mi miért működik.\n\n## Mire van szükséged?\n- **Pakli:** pontosan 60 lap. Egy névből legfeljebb 4 darab lehet benne, kivéve az alap energiákat.\n- **Kiegészítők:** érme vagy kocka, sebzésjelzők, státuszjelölők. Ezek az Elite Trainer Boxokban is benne vannak.\n- **Hely:** egy asztal, ahol mindkét játékos elfér a paklijával, a dobópaklival és a díjkártyákkal.\n\n## A lapok három fajtája\n- **Pokémon:** Basic (alap), Stage 1 és Stage 2 lapok. A fejlett alakokat a kisebbre teszed rá (fejlődés). A Pokémon ex lapok erősebbek, de kiütésükért több díjkártya jár.\n- **Energia:** ezzel fizeted a támadások költségét. Vannak alap energiák (például Fire, Water) és különleges energiák.\n- **Trainer:** Item (tárgy), Supporter (segítő), Stadium (helyszín) és Pokémon Tool (eszköz) lapok.\n\n## Egy Pokémon lap felépítése\n| Hol van a lapon | Mit jelent |\n|---|---|\n| Bal felső sarok | Fejlődési fokozat (Basic, Stage 1, Stage 2), és hogy miből fejlődik |\n| Jobb felső sarok | Életerő (HP) és a Pokémon típusa |\n| Középen | Képesség (Ability) és támadások: energia-költség, név, sebzés, hatás |\n| Alul balra | Gyengeség (Weakness) és ellenállás (Resistance) |\n| Alul jobbra | Visszavonulási költség (Retreat) energiákban |\n| Legalul | Szabályjelölő betű, szettjel, kártyaszám és ritkaság |\n\n## Előkészület\n1. Keverd meg a paklidat, és húzz 7 lapot.\n2. Tegyél le egy Basic Pokémont aktívnak, és legfeljebb 5-öt a padra (Bench) – lefordítva.\n3. Ha nincs Basic Pokémonod, mutasd meg a kezed, keverj és húzz újra (mulligan). Az ellenfél minden ilyen újrahúzásért húzhat egy extra lapot.\n4. Tedd félre a pakli felső 6 lapját lefordítva: ezek a **díjkártyák** (Prize cards).\n5. Érmedobással döntsétek el, ki kezd, majd fordítsátok fel a Pokémonokat.\n\n## Egy kör menete\nA köröd elején mindig húzol egy lapot. Utána tetszőleges sorrendben:\n- Basic Pokémont tehetsz a padra (legfeljebb 5 lehet ott).\n- Fejleszthetsz – de nem abban a körben, amikor a Pokémont letetted, és egyik játékos sem az első körében.\n- **Körönként egy** energiát csatolhatsz egy Pokémonodra (aktívra vagy a padon lévőre).\n- Bármennyi Item és Tool lapot kijátszhatsz, de **körönként csak egy** Supportert és egy Stadiumot.\n- Körönként egyszer visszavonulhatsz (retreat): eldobod a visszavonulási költségnek megfelelő energiát, és egy padon lévő Pokémon jön előre.\n- Használhatod a Pokémonok képességeit (Ability), ahogy a lap leírja.\n\nA kör a **támadással ér véget**. Aki kezd, az első körében nem támadhat, és Supportert sem játszhat ki.\n\n| Kör lépése | Kötelező? | Hányszor |\n|---|---|---|\n| Lap húzása | Igen | 1 |\n| Basic Pokémon a padra | Nem | Bármennyi (max. 5 a padon) |\n| Fejlődés | Nem | Pokémononként 1 |\n| Energia csatolása | Nem | 1 |\n| Item, Tool | Nem | Bármennyi |\n| Supporter | Nem | 1 |\n| Stadium | Nem | 1 |\n| Visszavonulás | Nem | 1 |\n| Támadás | Nem – de vele ér véget a kör | 1 |\n\n## Támadás, gyengeség és ellenállás\nA támadáshoz a Pokémonodon kell lennie a szükséges energiáknak. A sebzést sebzésjelzőkkel jelöljük (egy jelző 10 sebzés). Ha a célpontnak gyengesége (Weakness) van a támadó típusára, a sebzés dupla; ha ellenállása (Resistance), akkor kevesebb (a jelenlegi lapokon általában −30).\n\nHa egy Pokémon sebzése eléri az életerejét (HP), kiesik (Knock Out). Ilyenkor az ellenfele elvesz egy díjkártyát. A **Pokémon ex** lapok kiütésekor 2 díjkártya jár, a Mega Evolution sorozat Mega ex lapjainál pedig 3. A kiesett Pokémon helyére azonnal fel kell hoznod egyet a padról.\n\n## Státuszhatások\n| Hatás | Jelölés | Mit csinál |\n|---|---|---|\n| Alvás (Asleep) | A lapot balra fordítod | Nem támadhat és nem vonulhat vissza. A körök között érmét dobsz: fej esetén felébred. |\n| Bénultság (Paralyzed) | A lapot jobbra fordítod | Nem támadhat és nem vonulhat vissza. A tulajdonos következő körének végén elmúlik. |\n| Zavarodottság (Confused) | A lapot fejjel lefelé fordítod | Támadáskor érmét dobsz: írás esetén a támadás elmarad, és a Pokémon 30 sebzést kap. |\n| Mérgezés (Poisoned) | Jelölő a lapon | A körök között 10 sebzést kap. |\n| Égés (Burned) | Jelölő a lapon | A körök között 20 sebzést kap, utána érmét dobsz: fej esetén elmúlik. |\n\nAz alvás, a bénultság és a zavarodottság felülírják egymást (egyszerre csak egy lehet), a mérgezés és az égés viszont ezek mellett is megmaradhat. Ha a Pokémon visszavonul a padra vagy fejlődik, minden státuszhatás megszűnik róla.\n\n## Hogyan nyerhetsz?\n- Elveszed az összes díjkártyádat.\n- Az ellenfélnek nem marad Pokémonja játékban.\n- Az ellenfél nem tud lapot húzni a köre elején, mert elfogyott a paklija.\n\n## Tippek az első meccsekhez\n- Tarts 1–2 Pokémont a padon, hogy legyen kit előre küldeni, ha az aktív kiesik.\n- Ne csatold az összes energiát egy Pokémonra: ha kiesik, minden elveszik.\n- A Supporter lapok (például a lapot húzató segítők) a pakli motorjai – használd őket minden körben.\n- Számold ki előre, hány kör alatt tudsz támadni, és melyik Pokémonodat tudja kiütni az ellenfél a következő körben.\n- Nyugodtan játszatok nyitott lapokkal az első meccseken, és beszéljétek meg a döntéseket – így gyorsabban tanul mindenki.\n\n## Hol tudsz játszani?\n- **Otthon, barátokkal:** két kész pakli bőven elég az elejére.\n- **Online:** a hivatalos Pokémon TCG Live alkalmazásban ingyen játszhatsz, és a fizikai termékekben lévő kódkártyákkal digitális lapokat is kaphatsz.\n- **Helyi bajnokságok:** sok kártyabolt szervez Pokémon League alkalmakat és versenyeket, kezdőket is szívesen látnak.\n\n## Gyakori kérdések\n### Hány éves kortól ajánlott?\nA gyártó 6 éves kortól ajánlja. Kisebb gyerekekkel is lehet játszani egyszerűsített szabályokkal, például státuszhatások nélkül.\n\n### Kell saját paklit építenem?\nAz elején nem. Egy kész pakli tökéletes a tanuláshoz, és később lapokat cserélhetsz benne. Ha már építenél, itt találsz segítséget: [Pakliépítés alapjai](/blog/pakliepites-alapjai).\n\n### Játszhatok japán vagy angol lapokkal is?\nOtthon bármilyen nyelvű lappal játszhattok. A hivatalos európai versenyeken viszont csak bizonyos nyelvű lapok engedélyezettek – erről itt írunk: [Japán, angol vagy koreai kártyák?](/blog/japan-angol-koreai-kartyak).\n\n### Mi történik, ha elfogynak a lapjaim a pakliból?\nHa a köröd elején nem tudsz húzni, elveszíted a meccset. Ezért nem érdemes túl sok lapot húzatni magaddal a meccs végén.\n\nHa szeretnél belevágni, egy Elite Trainer Box tökéletes kezdés: sleeve-ek, energiák, kockák és 9 booster van benne.\n\n[[termek:19]]",
-        "published": true,
+        "tag": "Játékszabályok",
         "products": [
           19,
           14
-        ]
+        ],
+        "published": true
       },
       {
         "slug": "mennyit-er-a-kartyam",
         "title": "Mennyit ér a Pokémon kártyám? Így nézz utána az árának",
-        "tag": "Single kártyák",
         "date": "2026-11-18",
         "excerpt": "Lépésről lépésre: hogyan azonosítsd a lapot, hol nézd meg az árát, mitől függ az érték, és miért nem a legolcsóbb hirdetés az igazi piaci ár.",
         "cover": "",
         "body": "Előkerült egy régi gyűjtemény, vagy egy bontásból kijött egy szép lap, és kíváncsi vagy, mennyit ér? A jó hír, hogy pár perc alatt utánanézhetsz. A rossz hír, hogy egy lap értéke sok mindentől függ, ezért nem elég rákeresni a nevére. Ebben az útmutatóban megmutatjuk, hogyan kapsz reális képet.\n\n> **Röviden:** azonosítsd a lapot pontosan (szett, szám, változat), mérd fel az állapotát, és a ténylegesen eladott darabok árát nézd, ne a legmagasabb hirdetést.\n\n## 1. Azonosítsd a lapot pontosan\nUgyanannak a Pokémonnak egy szettben is több változata lehet, ezért a név nem elég. Nézd meg:\n- **A szett jelét és a kártyaszámot** a lap alján (például 045/165).\n- **A ritkasági jelet** (kör, rombusz, csillag, arany csillagok).\n- **A változatot:** sima, holo, reverse holo, full art, promó, pecsétes.\n- **A nyelvet:** angol, japán, német stb. – a piacuk eltér.\n- **A kiadást:** a régi lapoknál az „1st Edition” jelölés vagy a „Shadowless” változat sokat számít.\n\n## 2. Mérd fel az állapotot\nEgy Near Mint és egy kopott lap ára között többszörös lehet a különbség. Erős fényben nézd meg a sarkokat, a széleket és a felületet. Ha bizonytalan vagy, a szigorúbb kategóriával számolj. Az állapotokról részletesen: [Kártyaállapotok](/blog/kartyaallapotok-nm-lp-mp-hp-dmg).\n\n## 3. Nézd meg az árakat megbízható helyen\n| Hol | Mire jó | Mire figyelj |\n|---|---|---|\n| Cardmarket | Európa legnagyobb kártyás piactere, euróban | Az „árirányzat” (trend) és a legolcsóbb ajánlat nem ugyanaz |\n| TCGplayer | Amerikai piactér, dollárban | Az amerikai árak nem mindig érvényesek Európában |\n| eBay eladott hirdetések | Valós eladási árak, gradingelt lapokra is | Szűrj a „sold / eladott” tételekre, ne az aktív hirdetésekre |\n| Grading cégek és árgyűjtő oldalak | Tokozott lapok árai pontszám szerint | Csak ugyanarra a pontszámra hasonlíts |\n| Helyi csoportok, boltok | A hazai piac | Kevesebb adat, nagyobb szórás |\n\n> **Fontos:** a hirdetésben kért ár nem egyenlő a lap értékével. Az számít, amennyiért ténylegesen elkel. Egy lap, amit sokan hirdetnek drágán, de senki nem vesz meg, nem ér annyit.\n\n## 4. Értsd meg, mitől változik az ár\n- **Ritkaság és népszerűség:** egy népszerű Pokémon különleges illusztrációs lapja sokkal többet ér, mint egy gyakori lap.\n- **Állapot és grading:** a hibátlan, gradingelt példányok ára a legmagasabb.\n- **Kereslet a játékban:** a versenyeken sokat használt lapok ára a meta szerint mozog, rotáció után pedig csökkenhet.\n- **Új utánnyomás:** ha egy szettet újranyomnak, a lapjainak ára átmenetileg eshet.\n- **Szezon:** az ünnepek előtt és a nagy megjelenések idején megnő a kereslet.\n\n## 5. Számolj az eladás költségeivel\nHa el szeretnéd adni a lapot, az eladási árból le kell vonni a piactér díját, a szállítást és a csomagolás költségét. Egy olcsó lapnál ezek elvihetik a hasznot, ezért az olcsóbb lapokat sokan inkább csomagban vagy cserében értékesítik.\n\n## Egy gyors példa\nTegyük fel, hogy egy angol nyelvű, Near Mint illusztrációs lapod van.\n1. Megkeresed a pontos lapot szett és kártyaszám alapján.\n2. A piactéren megnézed az NM angol példányok árirányzatát és a legutóbbi eladásokat.\n3. Ha a legutóbbi eladások egy szűk sávban mozognak, az a reális érték.\n4. Ha a lapod szélén kopás van, az LP-s árakkal számolsz, ami jellemzően érezhetően kevesebb.\n\n## Mikor érdemes gradingre küldeni?\nHa a lap értékes, és nagyon jó állapotú, egy magas pontszám jelentősen emelheti az árát. Ennek a költségeit és kockázatait itt mutatjuk be: [Grading: PSA, CGC, BGS](/blog/grading-psa-cgc-bgs).\n\n## Gyakori kérdések\n### Miért ér többet ugyanaz a lap japánul vagy angolul?\nMert más a kereslet. Európában az angol lapok a legkeresettebbek, de egyes japán lapok és promók is nagyon értékesek. Bővebben: [Japán, angol vagy koreai kártyák?](/blog/japan-angol-koreai-kartyak)\n\n### A régi lapok mindig értékesek?\nNem. A régi, gyakori lapok többsége ma is olcsó. Az érték a ritkaságon, az állapoton és a keresleten múlik, nem csak a koron.\n\n### Megveszitek a lapjaimat?\nHa felvásárlás vagy beszámítás érdekel, írj nekünk fotókkal, és megnézzük, tudunk-e ajánlatot adni.\n\n### Ez befektetési tanács?\nNem. Az árak változnak, és a múltbeli áremelkedés nem garantálja a jövőbelit. Gyűjts elsősorban azért, mert örömet okoz.",
-        "published": true,
-        "products": []
+        "tag": "Single kártyák",
+        "products": [],
+        "published": true
       },
       {
         "slug": "ritkasagi-jelek-es-lapfajtak",
         "title": "Ritkasági jelek és lapfajták: Commontól a Special Illustration Rare-ig",
-        "tag": "Gyűjtési tippek",
         "date": "2026-11-17",
         "excerpt": "Mit jelent a kör, a rombusz és a csillag a lap alján? Így olvasd a ritkasági jeleket, a kártyaszámot, a szett jelét és a szabályjelölő betűt – és így ismered fel a valódi kincseket.",
         "cover": "",
         "body": "Minden Pokémon kártya alján ott van egy kis jel, egy szám és egy szett-szimbólum. Ezekből pontosan kiolvasható, mennyire ritka a lap, melyik szettből származik, és versenyen használható-e még. Ez az útmutató a Scarlet & Violet és a Mega Evolution sorozat lapjain alapul.\n\n## Hol találod az információkat?\nA lap **alsó sávjában**, bal oldalon van három fontos adat:\n- **Szabályjelölő betű (Regulation Mark):** egy kis betű keretben (például G, H, I). Azt mutatja, melyik versenyformátumban használható a lap.\n- **Szett jele és kódja:** a szett szimbóluma, újabban rövid kód is (például az angol szettek háromjegyű kódja).\n- **Kártyaszám és ritkasági jel:** például 045/165 ●. Az első szám a lap sorszáma, a második a szett „hivatalos” lapszáma.\n\n## A ritkasági jelek\n| Jel | Ritkaság | Milyen lapok |\n|---|---|---|\n| ● fekete kör | Common (gyakori) | A csomagok nagy része |\n| ◆ fekete rombusz | Uncommon (kevésbé gyakori) | Csomagonként néhány |\n| ★ fekete csillag | Rare (ritka) | Csomagonként legalább egy ritka vagy jobb lap |\n| ★★ két fekete csillag | Double Rare | Általában a Pokémon ex lapok |\n| ★★ két ezüst csillag | Ultra Rare | Teljes képes (full art) ex és Trainer lapok |\n| ★ egy arany csillag | Illustration Rare (IR) | Egész lapos, különleges illusztráció, gyakran hétköznapi Pokémonokról |\n| ★★ két arany csillag | Special Illustration Rare (SIR) | A szett legkeresettebb, különleges illusztrációjú lapjai |\n| ★★★ három arany csillag | Hyper Rare | Arany színű lapok, nagyon ritkák |\n\nEgyes szettekben további ritkaságok is vannak – például a „shiny” (más színű) Pokémonok lapjai vagy a csak egyetlen példányban pakliba tehető ACE SPEC lapok. Az újabb szériákban új ritkasági szintek is megjelenhetnek, ezért egy új szettnél mindig érdemes megnézni a hivatalos lapjegyzéket.\n\n> **Jó tudni:** a pontos esélyek szettenként eltérnek, és a gyártó nem hozza nyilvánosságra őket. Egy-egy SIR húzása sok csomagot is igényelhet, ezért ha egy konkrét lapra vágysz, gyakran olcsóbb single kártyaként megvenni.\n\n## Holo, reverse holo és textúra\n- **Holo:** a kép csillogó, a keret nem. A ritka lapok jellemzően ilyenek.\n- **Reverse holo:** a kép nem csillog, a lap többi része igen. Szinte bármelyik lapnak van reverse holo változata; csomagonként általában kettő ilyen hely van, és ezek egyikén bújhat meg a különleges illusztrációs lap.\n- **Textúrás felület:** a teljes képes ritka lapok felülete finoman bordázott, ujjlenyomat-szerű. Ez a hamisítványokról gyakran hiányzik – erről itt írunk: [Hamis Pokémon kártyák felismerése](/blog/hamis-pokemon-kartyak-felismerese).\n\n## Secret rare: amikor a szám nagyobb\nHa a kártyaszám nagyobb, mint a szett lapszáma (például 199/165), akkor „secret” lapról van szó, ami a szett hivatalos listáján túl van. Ide tartoznak a legritkább illusztrált és arany lapok. Egy szett teljes gyűjteménye („master set”) ezért jóval több lapból áll, mint amennyit a perjel utáni szám mutat.\n\n## A szabályjelölő betű és a rotáció\nA versenyeken használt Standard formátumban csak a legújabb néhány betűjelű lapok használhatók. A hivatalos szervezők évente egyszer, tavasszal „rotálnak”: a legrégebbi betű kikerül a Standardból. Otthoni játékra ez nem számít, de ha versenyen játszanál, vásárlás előtt nézd meg a betűt. Gyűjtésnél a rotáció nem csökkenti a lap értékét, a játékosok keresletét viszont igen.\n\n## Mitől lesz értékes egy lap?\n- **Ritkaság:** a SIR és Hyper Rare lapok a legkeresettebbek.\n- **Népszerű Pokémon:** a Charizard, Pikachu, az Eevee-család, Mewtwo vagy Gengar lapjai mindig keresettek.\n- **Illusztráció:** egy különlegesen szép rajz akár egy kevésbé népszerű Pokémon lapját is keresetté teheti.\n- **Állapot:** egy hibátlan (Near Mint) példány sokkal többet ér. Erről külön cikkünk szól: [Kártyaállapotok](/blog/kartyaallapotok-nm-lp-mp-hp-dmg).\n- **Nyelv és kiadás:** az angol, japán és koreai lapok piaca eltér.\n- **Játékbeli erő:** a versenyeken sokat használt lapok ára a meta szerint mozog.\n\n## Hogyan kezdj gyűjteni?\n1. **Válassz egy célt:** egy szett, egy kedvenc Pokémon, vagy csak az illusztrációs lapok.\n2. **Szerezz egy mappát** és belső sleeve-eket, hogy a lapok szépek maradjanak: [Így tárold a kártyáidat](/blog/igy-tarold-a-kartyaidat).\n3. **Bonts mértékkel:** az alap lapokat és a reverse holókat a bontás hozza.\n4. **A hiányzó ritka lapokat** single kártyaként szerezd be, így nem kell mindent bontásból összeszedni.\n\n[[termek:12]]\n\n## Gyakori kérdések\n### Miért van két csillag ezüstben és aranyban is?\nA szín is a ritkaság része. A két ezüst csillag az Ultra Rare, a két arany csillag a Special Illustration Rare – utóbbi jóval ritkább és keresettebb.\n\n### Mi az a „hit”?\nA gyűjtők így hívják a bontásból kijött, Double Rare vagy annál ritkább lapokat. Egy „jó hit” általában egy illusztrációs vagy arany lapot jelent.\n\n### Ugyanaz a lap értékesebb reverse holóban?\nHétköznapi lapoknál a reverse holo kicsit többet ér, mint a sima változat. Különleges esetekben (például promó vagy pecsétes változatnál) a különbség nagy is lehet.\n\n### Hol találom egy szett teljes lapjegyzékét?\nA hivatalos Pokémon oldalon és a nagy kártyás adatbázisokban szettenként listázva megtalálod. Ott a ritkaságok és a secret lapok is szerepelnek.",
-        "published": true,
+        "tag": "Gyűjtési tippek",
         "products": [
           12,
           13
-        ]
+        ],
+        "published": true
       },
       {
         "slug": "hamis-pokemon-kartyak-felismerese",
         "title": "Eredeti vagy hamis? 10 jel, amiből felismered a hamis Pokémon kártyát",
-        "tag": "Vásárlási útmutató",
         "date": "2026-11-15",
         "excerpt": "A hamis lapok és újracsomagolt dobozok egyre gyakoribbak. Ezekre a jelekre figyelj, mielőtt piactéren vagy ismeretlen eladótól vásárolsz – gyors ellenőrzőtáblázattal.",
         "cover": "",
         "body": "A Pokémon kártyák népszerűségével a hamisítványok is elszaporodtak – különösen online piactereken és közösségi oldalakon. A jó hír, hogy a legtöbb hamis lap néhány egyszerű teszttel kiszúrható. Az alábbi jeleket érdemes egyszerre több lapon is megnézni, és ha lehet, mindig egy biztosan eredeti lappal összehasonlítani.\n\n## Gyors ellenőrzés egy táblázatban\n| Mit nézz | Eredeti lap | Gyanús jel |\n|---|---|---|\n| Betűk és szöveg | Egyenletes betűtípus, hibátlan helyesírás | Más betűtípus, elcsúszott szöveg, elírás |\n| Értékek | A szabályokhoz illő HP és sebzés | Irreálisan nagy HP vagy sebzés |\n| Hátoldal | Mély, egyenletes kék, éles nyomat | Fakó, lilás vagy túl világos kék |\n| Fény | Kevés fényt enged át | Szinte átvilágítható |\n| Felület | Ritka lapoknál finom textúra | Túl fényes, sima vagy teljesen matt |\n| Szél | Vékony, sötét középső réteg látszik | Egyszínű, fehér vagy szálas szél |\n| Méret | Pontosan egyezik egy eredetivel | Kicsit nagyobb, kisebb vagy vékonyabb |\n| Ár | Piaci ár körül | Gyanúsan olcsó |\n\n## 1. Betűtípus és helyesírás\nA hamis lapokon gyakran eltér a betűtípus, rossz a betűköz, vagy helyesírási hiba van a támadások nevében és a szövegben. Figyeld a „é” betűt a Pokémon szóban: az eredeti lapokon mindig ékezetes. Hasonlítsd össze egy biztosan eredeti lappal vagy a hivatalos lapjegyzék képével.\n\n## 2. Életerő és sebzés\nGyanúsak a valószínűtlen értékek: például 1000 HP vagy irreálisan nagy sebzés. Az eredeti lapok értékei a játékszabályokhoz igazodnak, és a HP mindig tízzel osztható szám.\n\n## 3. Színek és nyomat\nAz eredeti lapok színei élénkek, de nem harsányak, a nyomat éles. A hamisítványok gyakran fakók vagy túlszaturáltak, a hátoldal kékje pedig túl világos vagy túl lila. Nagyítva nézd meg az apró szövegeket: hamis lapon gyakran elmosódottak.\n\n## 4. Fényáteresztés (lámpa teszt)\nTarts egy erős lámpát (például a telefon zseblámpáját) a lap mögé. Az eredeti kártyák közepén egy vékony, sötét réteg van, ezért kevés fényt engednek át. A hamis lapok gyakran szinte átvilágíthatók. A jobb hamisítványok ezen a teszten már átmehetnek, ezért ezt soha ne használd egyedüli bizonyítékként.\n\n## 5. A lap széle\nNagyítóval vagy a telefon kamerájával nézd meg a lap szélét: az eredeti lapoknál gyakran látható a középső sötét réteg vékony vonala.\n\n## 6. Felület és fényesség\nA hamis lapok gyakran túl fényesek vagy éppen teljesen mattok. A teljes képes ritka lapok eredetiben finoman bordázott tapintásúak – a hamisítványokról ez sokszor hiányzik. A holo minta az eredetin a fény szögével együtt mozog és változik, a hamison sokszor csak egy „csillámos” réteg.\n\n## 7. Méret és vastagság\nTedd egy eredeti lap mellé, és igazítsd egymáshoz a sarkokat: a hamisak lehetnek kicsit nagyobbak, kisebbek, vékonyabbak vagy hajlékonyabbak. Ha van konyhai mérlegged, egy-egy lap tömege is árulkodó lehet.\n\n## 8. A hátoldal és a keret\nAz eredeti hátoldal mintája szimmetrikus, a Poké Ball rajza éles. A hamisokon gyakran el van csúszva, vagy a keret nem egyforma széles. Az előlapon a sárga (vagy ezüst) keret színe is gyakran más.\n\n## 9. Bontatlan termékek: újracsomagolás\nBontatlan dobozoknál és boostereknél a hamisítás mellett az újracsomagolás (reseal) a gyakoribb trükk: valaki kibontja, kiveszi a jó lapokat, majd visszazárja.\n- A **booster csomag** varratai legyenek egyenletesek, gyáriak. Gyűrött, ragasztónyomos vagy „égetett” szélű csomagot ne vegyél.\n- A **dobozok fóliája** legyen feszes, egyenletes, a hajtások rendezettek. A laza, gyűrött vagy „házi” fóliázás újracsomagolásra utalhat.\n- Az ismeretlen helyről származó, egyenként árult **laza boosterek** között lehetnek „átválogatott” csomagok is, amelyekből már kiszűrték a jó lapokat (például mérlegeléssel).\n\n> **Fontos:** a gyári lezárás sem garancia mindenre, de a megbízható forrás igen. Nálunk minden lezárt termék eredeti, gyári csomagolásban érkezik, a single lapokat pedig egyenként átnézzük.\n\n## 10. Ár és eladó\nHa egy bontatlan doboz vagy egy keresett lap gyanúsan olcsó, az figyelmeztető jel. Nézd meg az eladó előzményeit és értékeléseit, és ha teheted, olyan fizetési módot válassz, amelyik vevővédelmet ad.\n\n## Online vásárlás előtti ellenőrzőlista\n1. Kérj **saját fotót** a lap elejéről, hátuljáról és széléről – nem letöltött képet.\n2. Kérd, hogy a fotón legyen egy cetli az eladó nevével és a dátummal.\n3. Hasonlítsd össze a lapot a hivatalos lapjegyzék képével (szöveg, szám, ritkaság).\n4. Nézd meg az eladó korábbi értékeléseit.\n5. Drágább lapnál kérj gradingelt példányt, vagy fizess vevővédelemmel.\n\n## Mit tegyél, ha gyanús egy lap?\n- Kérj részletes fotót a lap elejéről, hátuljáról és széléről.\n- Hasonlítsd össze egy eredeti lappal vagy hivatalos képpel.\n- Drága lapnál fontold meg a független értékelést (grading): a nagy cégek a hitelességet is vizsgálják. Részletek: [Grading: PSA, CGC, BGS](/blog/grading-psa-cgc-bgs).\n- Ha bizonyosan hamis lapot kaptál, jelezd a piactér felé, és kérd vissza a pénzed.\n\n## Gyakori kérdések\n### A „rip teszt” (a lap kettétépése) megbízható?\nIgen, de csak akkor van értelme, ha a lap biztosan értéktelen – egy eredeti lapot ezzel tönkreteszel. A lámpa- és a széltesztet érdemes inkább használni.\n\n### Léteznek hamis gradingelt tokok is?\nIgen, sajnos előfordulnak. A nagy grading cégek honlapján a tok sorszámával ellenőrizheted a lapot: a találatnál a lap képe és adatai is megjelennek.\n\n### Gyerekemnek vettem lapokat egy játékboltban, lehetnek hamisak?\nIsmert áruházláncban vagy szaküzletben ez nagyon ritka. A kockázat az ismeretlen online eladóknál és a gyanúsan olcsó „kártyacsomagoknál” nagy.\n\n### Mi a különbség a hamis és a proxy lap között?\nA proxy egy otthon nyomtatott vagy kézzel írt helyettesítő lap, amit játéknál használnak, és nem adnak el eredetiként. Hivatalos versenyen nem használható.",
-        "published": true,
-        "products": []
+        "tag": "Vásárlási útmutató",
+        "products": [],
+        "published": true
       },
       {
         "slug": "pakliepites-alapjai",
         "title": "Pakliépítés alapjai: így rakd össze az első 60 lapos paklidat",
-        "tag": "Játékszabályok",
         "date": "2026-11-14",
         "excerpt": "Hány Pokémon, Trainer és energia kerüljön a paklidba? A legfontosabb szabályok, egy bevált arány, egy mintapakli felépítése és a kezdők leggyakoribb hibái.",
         "cover": "",
         "body": "Ha már lejátszottál néhány meccset kész paklival, eljön a pillanat, amikor sajátot szeretnél építeni. Elsőre ijesztő lehet a sok lap, de néhány egyszerű szabállyal és egy bevált aránnyal gyorsan összerakhatsz egy jól működő paklit. Ebben az útmutatóban végigvezetünk az alapokon.\n\n> **Tipp:** ha a szabályokkal még ismerkedsz, előbb olvasd el ezt: [Pokémon TCG kezdőknek](/blog/pokemon-tcg-kezdoknek).\n\n## A kötelező szabályok\n- A pakli **pontosan 60 lapból** áll.\n- Egy adott nevű lapból **legfeljebb 4 darab** lehet benne – kivéve az alap energiákat, azokból bármennyi.\n- **ACE SPEC** lapból az egész pakliban csak **egy** lehet.\n- Legalább **egy Basic Pokémon** kell, különben el sem tudod kezdeni a játékot.\n- Versenyen a formátum szabályai is számítanak: a **Standard** formátumban csak a legújabb szabályjelölő betűs lapok használhatók.\n\n## Egy bevált kiinduló arány\n| Lapfajta | Mennyiség | Mire kell |\n|---|---|---|\n| Pokémon | 12–18 | A támadók és a segítő Pokémonok |\n| Trainer | 30–38 | Lapot húzatnak, Pokémont keresnek, gyorsítanak |\n| Energia | 8–14 | A támadások költsége |\n\nEz kiindulópont, nem szabály. A gyors, kevés energiát igénylő paklik kevesebb energiával is működnek, a nagy támadásokra építő paklik többet igényelnek.\n\n## 1. Válassz egy fő támadót\nMinden jó pakli egy-két fő támadó köré épül. Válassz egy Pokémont, amelyiknek erős a támadása, és nézd meg, mire van szüksége: milyen energiából mennyi kell, és milyen fejlődési lánca van.\n\n## 2. Építsd fel a fejlődési vonalakat\nHa a fő támadód Stage 2 Pokémon, a fejlődéshez több alapra van szükség. Egy gyakori felépítés:\n- **4 Basic – 3 Stage 1 – 3 Stage 2** (rövidítve 4-3-3): stabil, a legfontosabb vonalhoz.\n- **2-1-2** vagy **3-2-2**: másodlagos vonalakhoz, ha van lap, ami átugorja a köztes fokot.\n- **Basic Pokémon ex**: nem kell fejleszteni, ezért gyorsabb, de kiütésükért 2 díjkártya jár.\n\n## 3. A pakli motorja: lapot húzató és kereső lapok\nA Trainer lapok adják a pakli következetességét:\n- **Supporterek:** körönként egy játszható; sokan lapot húzatnak vagy keresnek. Egy pakliban 8–12 Supporter gyakori.\n- **Pokémon kereső Itemek:** a fejlődéshez és a fő támadó előhozásához.\n- **Energia gyorsítók:** lapok vagy képességek, amelyekkel körönként több energiát tehetsz le.\n- **Váltó lapok:** a visszavonulás helyett gyorsan cserélhetsz Pokémont.\n\n> **Jó tudni:** a kezdők leggyakoribb hibája, hogy túl sok Pokémont és túl kevés Trainert tesznek a paklijukba. A Trainerek nélkül a pakli „beragad”: nem találod meg, amire szükséged van.\n\n## 4. Energiák\nSzámold össze, mennyi és milyen energia kell a fő támadóidnak. Kezdetben érdemes egy-, legfeljebb kéttípusú paklit építeni, mert így ritkábban marad a kezedben rossz energia. Ha a paklidban sok energia-kereső vagy -gyorsító lap van, kevesebb energia is elég.\n\n## 5. Egy mintapakli felépítése\nÍgy nézhet ki egy egyszerű, egy fő támadóra épülő pakli vázlata:\n| Rész | Darab | Példa szerepre |\n|---|---|---|\n| Fő támadó vonal | 10 | 4 Basic, 3 Stage 1, 3 Stage 2 |\n| Segítő Pokémonok | 4 | Lapot húzató vagy kereső képességű Pokémonok |\n| Supporterek | 10 | Lapot húzatók, keresők, zavarók |\n| Itemek | 20 | Pokémon keresők, váltók, gyógyítók, fejlődést segítők |\n| Stadium, Tool | 4 | A pakli stratégiáját erősítő lapok |\n| Energia | 12 | A fő támadó típusa |\n| **Összesen** | **60** | |\n\nA konkrét lapok szettről szettre változnak, ezért itt csak a szerepeket írtuk le. Egy ETB-ből vagy egy kész pakliból sok ilyen lapot összeszedhetsz.\n\n[[termek:19]]\n\n## 6. Teszteld és javítsd\n1. Játssz legalább 5–10 meccset a paklival.\n2. Jegyezd fel, mi hiányzott a leggyakrabban: Pokémon, energia vagy lapot húzató lap?\n3. Cserélj egyszerre csak 2–3 lapot, így látod, mi működik.\n4. Kipróbálhatod online is: a hivatalos Pokémon TCG Live alkalmazásban ingyen építhetsz és tesztelhetsz paklikat.\n\n## A leggyakoribb kezdő hibák\n- Túl sok különböző Pokémon, egy-egy példányban – így ritkán jön ki, amire szükséged van.\n- Túl kevés Supporter és kereső lap.\n- Három vagy több energiatípus egy pakliban.\n- Csak erős, de lassú Stage 2 támadók, korai segítség nélkül.\n- Nem számolsz a díjkártyákkal: két ex lap kiütése már 4 díjkártya az ellenfélnek.\n\n## Gyakori kérdések\n### Mi a különbség a Standard és az Expanded formátum között?\nA Standardban csak a legújabb lapok (a legutóbbi néhány szabályjelölő betű) használhatók, ezért ez a leggyakoribb versenyformátum. Az Expandedben régebbi lapok is játszhatók. Otthoni játékra bármelyik lapot használhatjátok.\n\n### Mi az a rotáció?\nÉvente egyszer a legrégebbi szabályjelölő betűs lapok kikerülnek a Standard formátumból. Ha versenyre építesz, vásárlás előtt nézd meg a lap alján lévő betűt.\n\n### Hány darab legyen a legfontosabb lapokból?\nA pakli kulcslapjaiból általában 3–4 darab, hogy minél korábban a kezedbe kerüljenek. A ritkábban kellő lapokból elég 1–2.\n\n### Mennyi pénzbe kerül egy jó pakli?\nOtthoni játékhoz egy kész pakli vagy egy-két ETB lapjai bőven elegendők. Versenyre szánt pakliknál a kulcs single lapokat érdemes egyenként beszerezni, mert az olcsóbb, mint bontásból összegyűjteni.",
-        "published": true,
+        "tag": "Játékszabályok",
         "products": [
           19,
           14
-        ]
+        ],
+        "published": true
       },
       {
         "slug": "grading-psa-cgc-bgs",
         "title": "Grading: PSA, CGC, BGS – mikor éri meg értékeltetni egy lapot?",
-        "tag": "Single kártyák",
         "date": "2026-11-13",
         "excerpt": "Mit jelent a PSA 10, miben különbözik a három nagy értékelő cég, hogyan számold ki, megéri-e, és hogyan készítsd elő a lapot a beküldésre.",
         "cover": "",
         "body": "A grading (értékeltetés) során egy független cég megvizsgálja a lapot, számmal minősíti az állapotát, és egy lezárt, átlátszó tokba (slab) helyezi. Egy jól sikerült értékelés jelentősen növelheti a lap értékét, és a vevők is jobban megbíznak egy hitelesített lapban – de nem minden lapnál éri meg. Ebben a cikkben segítünk eldönteni, melyik lapodat érdemes beküldeni.\n\n## Mit vizsgálnak?\n- **Centering:** mennyire középre nyomtatott a kép, vagyis egyformák-e a keretek.\n- **Sarkok:** élesség, kopás, fehéredés.\n- **Szélek:** csorbulás, fehér pöttyök.\n- **Felület:** karcok, nyomódások, nyomdai hibák, ujjlenyomat.\n- **Hitelesség:** az értékelő cégek a lap eredetiségét is ellenőrzik, a hamis lapot nem tokozzák be.\n\n## A három legismertebb cég\n| Cég | Skála | Különlegesség | Kinek |\n|---|---|---|---|\n| PSA | 1–10, egész pontok | A legnagyobb piac, a PSA 10 a legismertebb jelölés | Aki eladásra vagy befektetésre gondol |\n| CGC | 1–10, félpontokkal | „Pristine 10” a tökéletes lapokra, részletes címke | Aki átlátható, modern címkét szeretne |\n| BGS (Beckett) | 1–10, félpontokkal | Négy részpontszám, a tökéletes lap „Black Label” | Aki a részletes értékelést szereti |\n\nMellettük újabb cégek is megjelentek, és Európában is van néhány értékelő. A nagy nemzetközi piacon azonban jellemzően a fenti három cég tokjait ismerik el leginkább.\n\n> **Jó tudni:** a gyűjtők között a PSA 10 és a BGS Black Label a legkeresettebb, de a választás a piactól és a saját céljaidtól függ. Ha főleg Európában adnál el, érdemes megnézni, az adott lapból melyik cég tokjai fogynak jobb áron.\n\n## Mit jelentenek a számok?\n| Pontszám | Elnevezés (PSA) | Röviden |\n|---|---|---|\n| 10 | Gem Mint | Gyakorlatilag hibátlan, jó centeringgel |\n| 9 | Mint | Egy apró hiba, például enyhe szélkopás |\n| 8 | Near Mint–Mint | Néhány apró hiba |\n| 7 | Near Mint | Látható, de kis kopás |\n| 6 és alatta | Excellent–Mint és lejjebb | Egyre több használati nyom |\n\nA legmagasabb pontszámhoz a centering is szinte tökéletes kell legyen. A pontos határokat (például hogy elöl és hátul mekkora eltérés még elfogadható) a cégek a honlapjukon közzéteszik, és időnként módosítják.\n\n## Így számold ki, megéri-e\nA döntés egyszerű matek: **mennyivel ér többet a tokozott lap, mint a díj, a szállítás és a kockázat?** Egy elképzelt példa:\n1. A lap tokozatlanul (raw) 20 000 Ft-ot ér.\n2. PSA 10-ként 60 000 Ft-ot, PSA 9-ként 25 000 Ft-ot érne.\n3. A díj, a szállítás és a biztosítás összesen 12 000 Ft.\n\nHa 10-est kap, jól jártál. Ha „csak” 9-est, akkor 25 000 Ft-ot ér, de 32 000 Ft-ba került (20 000 + 12 000) – vagyis veszteség. Ezért csak olyan lapot küldj be, amelyikről erős fényben, nagyítóval is úgy látod, hogy esélyes a legmagasabb pontszámra.\n\n> **Fontos:** a számok csak szemléltetnek, a valós árak lapról lapra és hónapról hónapra változnak. Ez nem befektetési tanács.\n\n## Mennyi idő és mennyibe kerül?\nA díj a lap értékétől és a választott szolgáltatási szinttől függ, a feldolgozási idő pedig néhány héttől több hónapig terjedhet. Ehhez jön a kiküldés, a visszaszállítás és a biztosítás. Magyarországról gyakran közös beküldő szolgáltatáson (group submission) keresztül éri meg, mert a szállítási költség megoszlik a beküldők között.\n\n## Mikor éri meg?\n- A lap **értékes**, és egy magas pontszám jelentős értéknövekedést hoz.\n- A lap **Near Mint** állapotú, jó centeringgel.\n- **Hosszú távra** tennéd el, és a tok védelmet ad.\n- **Eladnád**, és a hitelesített állapot bizalmat ad a vevőnek.\n- **Érzelmi okból:** egy különleges, személyes lapot is megérhet tokba tenni.\n\n## Mikor nem?\n- Ha a várható értéknövekedés kisebb, mint a díj és a szállítás.\n- Ha a lapon látható hiba van (karc, kopott sarok): alacsony pontszám esetén a lap nem ér többet, sőt, néha kevesebbet.\n- Gyakori, olcsó lapoknál, hacsak nem érzelmi okból szeretnéd.\n\n## Beküldés előtti ellenőrzőlista\n1. Nézd át a lapot erős fényben, nagyítóval, elöl és hátul. Az állapotok leírását itt találod: [Kártyaállapotok](/blog/kartyaallapotok-nm-lp-mp-hp-dmg).\n2. Mérd fel a centeringet (bal–jobb, fent–lent keret). Egy vonalzó vagy egy centering-mérő app is segít.\n3. Tisztítsd meg óvatosan mikroszálas kendővel – csak a felületet, nyomás nélkül, egy irányban.\n4. Tedd penny sleeve-be, majd félmerev tokba (card saver) – a cégek többsége így kéri.\n5. Készíts fotót minden lapról beküldés előtt, elöl és hátul.\n6. Írd fel a lap pontos nevét, szettjét és számát – a beküldő űrlapon ezek kellenek.\n\n## Néhány hasznos fogalom\n- **Slab:** a lezárt, átlátszó tok, benne a lappal és a címkével.\n- **Pop report (population report):** a cégek nyilvános statisztikája arról, egy lapból hányat értékeltek és milyen pontszámmal. Minél kevesebb a 10-es, annál ritkább.\n- **Crossover:** egy másik cég tokjában lévő lap átküldése, hogy az új cég is értékelje.\n- **Regrade:** újraértékelés, ha úgy gondolod, a lap jobb pontot érdemel.\n\n## Gyakori kérdések\n### Kibonthatom a tokot, ha nem tetszik a pontszám?\nIgen, de a tok feltörése kockázatos, és utána a lap újra „raw” lesz. Ha regrade-et szeretnél, inkább küldd vissza tokban.\n\n### A gradingelt lap biztosan eredeti?\nA nagy cégek ellenőrzik a hitelességet. A tok sorszámát a cég honlapján visszakeresheted – így a hamis tokokat is kiszűrheted.\n\n### Japán lapot is értékeltethetek?\nIgen, a nagy cégek a japán és más nyelvű lapokat is értékelik. A japán lapok nyomtatási minősége sokszor jobb, ezért gyakran kapnak magas pontszámot.\n\n### Ti vállaltok beküldést?\nA beküldést nem mi végezzük, de ha szeretnéd, fotók alapján szívesen megmondjuk, szerintünk melyik lapodat érdemes beküldeni. Írj nekünk!",
-        "published": true,
-        "products": []
+        "tag": "Single kártyák",
+        "products": [],
+        "published": true
       },
       {
         "slug": "elorendeles-hogyan-mukodik",
         "title": "Előrendelés az NS Cardnál: hogyan működik?",
-        "tag": "Vásárlási útmutató",
         "date": "2026-11-12",
         "excerpt": "Lefoglalnád a következő szett dobozát a megjelenés előtt? Így működik nálunk az előrendelés lépésről lépésre: rendelés, fizetés, szállítás, és mi a teendő, ha csúszik a megjelenés.",
         "cover": "",
         "body": "Az új szettek népszerű dobozai a megjelenés napján gyorsan elfogyhatnak, főleg az Elite Trainer Boxok és a display-ek. Előrendeléssel már most biztosíthatod a saját példányodat, és nem kell a megjelenés reggelén a frissítés gombot nyomkodnod. Így működik nálunk.\n\n## Az előrendelés menete egy pillantással\n| Mikor | Mi történik |\n|---|---|\n| A megjelenés előtt | Leadod a rendelést, mi e-mailben visszaigazoljuk, és a darabod le van foglalva |\n| A megjelenés előtt pár nappal | Ha a forgalmazó dátumot módosít, e-mailben szólunk |\n| Amikor a termék megérkezik hozzánk | Becsomagoljuk, és a lehető leghamarabb feladjuk |\n| Feladáskor | E-mailben küldjük a csomagkövetési számot |\n| 1–3 munkanappal később | Megérkezik hozzád a csomag |\n\n## 1. Válaszd ki az előrendelhető terméket\nAz előrendelhető termékeket „Előrendelés” címkével jelöljük, a termékoldalon pedig látod a várható megjelenés dátumát. A kezdőlapon a **Megjelenési naptárban** az összes közelgő megjelenést megtalálod, a terméklistában pedig külön szűrővel is kiválaszthatod az előrendelhető termékeket.\n\nHa egy termék még csak „Hamarosan” állapotú, vagyis még nem rendelhető, az „Értesíts, ha kapható” gombbal feliratkozhatsz, és e-mailt küldünk, amint elérhető lesz.\n\n## 2. Rendelés és fizetés\nA rendelés pontosan úgy működik, mint bármelyik másik terméknél: kosárba teszed, megadod a szállítási adataidat, és kiválasztod a fizetési módot.\n- **Bankkártya:** a fizetés a rendeléskor történik.\n- **Átutalás:** az utalási adatokat a visszaigazoló e-mailben találod.\n- **Utánvét:** ha a pénztárban elérhető, a futárnak fizetsz átvételkor.\n\nA rendelés után e-mailben visszaigazoljuk, és a rendelésszámmal bármikor megnézheted az állapotát a [Rendelés követése](/rendeles) oldalon.\n\n> **Jó tudni:** az előrendelt darabot a rendelés pillanatától neked tartjuk, akkor is, ha közben a termék „elfogy” az oldalon.\n\n## 3. Szállítás a megjelenés után\nAmint a termék megérkezik hozzánk, a lehető leghamarabb feladjuk, és e-mailben küldjük a csomagkövetési számot. Csomagautomatát és házhozszállítást is választhatsz, ugyanúgy, mint a többi terméknél.\n\n> **Tipp:** ha a rendelésben készleten lévő és előrendelt termék is van, alapból egyben adjuk fel, a megjelenés után. Ha a készleten lévőket előbb kérnéd, írd meg a megjegyzésben, vagy adj le két külön rendelést.\n\n## 4. Ha csúszik a megjelenés\nA megjelenési dátumot a gyártó és a forgalmazó határozza meg, ezért ritkán előfordulhat csúszás, főleg az új szettek első napjaiban. Ilyenkor e-mailben értesítünk az új dátumról. Ha nem szeretnél várni, írj nekünk, és megbeszéljük a lehetőségeket.\n\n## 5. Darabszám-korlát\nA legkeresettebb termékeknél rendelésenként korlátozhatjuk a megvásárolható mennyiséget, hogy minél több gyűjtőnek jusson. Ezt mindig feltüntetjük a termékoldalon („Rendelésenként legfeljebb … db”), és a kosár sem enged ennél többet.\n\n## Miért éri meg előrendelni?\n- **Biztos darab:** a legnépszerűbb dobozok a megjelenés után napokon belül elfogyhatnak.\n- **Nincs rohanás:** nem kell a megjelenés napján figyelni, mikor kerül fel a termék.\n- **Ajándéknak:** ha egy szett a születésnap vagy a karácsony előtt jelenik meg, előre gondoskodhatsz róla.\n\n## Gyakori kérdések\n### Mikor kapom meg a terméket?\nA megjelenés napja körül adjuk fel, a kézbesítés általában 1–3 munkanap. A pontos feladást e-mailben jelezzük.\n\n### Lemondhatom az előrendelést?\nÍrj nekünk a rendelésszámmal, és segítünk. A vásárlói jogaidat a vásárlási feltételekben (ÁSZF) is megtalálod.\n\n### Szólni fogtok, ha megérkezik?\nIgen: a feladáskor e-mailt küldünk a csomagkövetési számmal, és a rendelés állapotát a [Rendelés követése](/rendeles) oldalon is látod.\n\n### Változhat az ár a megjelenésig?\nAz előrendeléskor látott ár a te rendelésedre érvényes. Ha a megjelenés után az ár változik, az a már leadott rendelésedet nem érinti.\n\n### Rendelhetek egyszerre több előrendelhető terméket?\nIgen. Ha különböző időpontban jelennek meg, írd meg a megjegyzésben, hogy külön szeretnéd-e kapni őket, vagy egyben, az utolsó megjelenés után.",
-        "published": true,
-        "products": []
+        "tag": "Vásárlási útmutató",
+        "products": [],
+        "published": true
       }
-    ]
+    ],
+    "releases": [],
+    "texts": {},
+    "theme": {
+      "preset": "sarkanytuz",
+      "colors": {
+        "bg": "#061230",
+        "surface": "#0b1a44",
+        "primary": "#ff7a1f",
+        "accent": "#ffd23f",
+        "secondary": "#45aaff",
+        "text": "#f2f5ff"
+      },
+      "fontDisplay": "archivo",
+      "fontBody": "dmsans",
+      "displayScale": 100,
+      "radius": "rounded",
+      "buttons": "pill",
+      "cards": "glass",
+      "colsDesktop": 4,
+      "colsMobile": 2,
+      "heroSide": "right",
+      "customCss": "",
+      "anim": {
+        "float": true,
+        "sparkles": true,
+        "glow": true,
+        "tilt": true,
+        "reveal": true,
+        "ticker": true,
+        "fly": true,
+        "pack": true,
+        "level": "full",
+        "speed": "normal"
+      },
+      "sections": [
+        {
+          "id": "ticker",
+          "on": true
+        },
+        {
+          "id": "categories",
+          "on": true
+        },
+        {
+          "id": "recent",
+          "on": true
+        },
+        {
+          "id": "pack",
+          "on": true
+        },
+        {
+          "id": "featured",
+          "on": true
+        },
+        {
+          "id": "soon",
+          "on": true
+        },
+        {
+          "id": "releases",
+          "on": true
+        },
+        {
+          "id": "reviews",
+          "on": true
+        },
+        {
+          "id": "steps",
+          "on": true
+        },
+        {
+          "id": "blog",
+          "on": true
+        },
+        {
+          "id": "faq",
+          "on": true
+        },
+        {
+          "id": "newsletter",
+          "on": true
+        },
+        {
+          "id": "contact",
+          "on": true
+        }
+      ]
+    }
   },
   "products": [
-    {
-      "id": 11,
-      "category": "tinek",
-      "name": "Pokémon TCG: Mega Heroes Mini Tin",
-      "set": "",
-      "line": "",
-      "description": "",
-      "price": 7490,
-      "oldPrice": null,
-      "stock": 50,
-      "badge": "",
-      "flags": [
-        "popular",
-        "home"
-      ],
-      "images": [
-        "img/products/11-1.webp"
-      ],
-      "availability": "in_stock",
-      "hidden": false
-    },
     {
       "id": 12,
       "category": "display",
@@ -274,6 +381,7 @@
       "price": 15990,
       "oldPrice": null,
       "stock": 5,
+      "availability": "in_stock",
       "badge": "",
       "flags": [
         "popular"
@@ -281,8 +389,15 @@
       "images": [
         "img/products/12-1.webp"
       ],
-      "availability": "in_stock",
-      "hidden": false
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "",
+      "lang": "",
+      "cardNo": "",
+      "rarity": "",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 0
     },
     {
       "id": 13,
@@ -294,6 +409,7 @@
       "price": 11990,
       "oldPrice": null,
       "stock": 6,
+      "availability": "in_stock",
       "badge": "",
       "flags": [
         "new"
@@ -301,8 +417,15 @@
       "images": [
         "img/products/13-1.webp"
       ],
-      "availability": "in_stock",
-      "hidden": false
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "",
+      "lang": "",
+      "cardNo": "",
+      "rarity": "",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 0
     },
     {
       "id": 14,
@@ -314,6 +437,7 @@
       "price": 14690,
       "oldPrice": null,
       "stock": 6,
+      "availability": "in_stock",
       "badge": "",
       "flags": [
         "home"
@@ -321,8 +445,15 @@
       "images": [
         "img/products/14-1.webp"
       ],
-      "availability": "in_stock",
-      "hidden": false
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "",
+      "lang": "",
+      "cardNo": "",
+      "rarity": "",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 0
     },
     {
       "id": 15,
@@ -334,13 +465,21 @@
       "price": 6990,
       "oldPrice": null,
       "stock": 6,
+      "availability": "in_stock",
       "badge": "",
       "flags": [],
       "images": [
         "img/products/15-1.webp"
       ],
-      "availability": "in_stock",
-      "hidden": false
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "",
+      "lang": "",
+      "cardNo": "",
+      "rarity": "",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 0
     },
     {
       "id": 16,
@@ -352,13 +491,21 @@
       "price": 11990,
       "oldPrice": null,
       "stock": 2,
+      "availability": "in_stock",
       "badge": "",
       "flags": [],
       "images": [
         "img/products/16-1.webp"
       ],
-      "availability": "in_stock",
-      "hidden": false
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "",
+      "lang": "",
+      "cardNo": "",
+      "rarity": "",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 0
     },
     {
       "id": 17,
@@ -370,13 +517,21 @@
       "price": 11990,
       "oldPrice": null,
       "stock": 2,
+      "availability": "in_stock",
       "badge": "",
       "flags": [],
       "images": [
         "img/products/17-1.webp"
       ],
-      "availability": "in_stock",
-      "hidden": false
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "",
+      "lang": "",
+      "cardNo": "",
+      "rarity": "",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 0
     },
     {
       "id": 18,
@@ -388,13 +543,21 @@
       "price": 11990,
       "oldPrice": null,
       "stock": 2,
+      "availability": "in_stock",
       "badge": "",
       "flags": [],
       "images": [
         "img/products/18-1.webp"
       ],
-      "availability": "in_stock",
-      "hidden": false
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "",
+      "lang": "",
+      "cardNo": "",
+      "rarity": "",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 0
     },
     {
       "id": 19,
@@ -406,13 +569,21 @@
       "price": 29990,
       "oldPrice": null,
       "stock": 10,
+      "availability": "coming_soon",
       "badge": "",
       "flags": [],
       "images": [
         "img/products/19-1.webp"
       ],
-      "availability": "coming_soon",
-      "hidden": false
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "",
+      "lang": "",
+      "cardNo": "",
+      "rarity": "",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 0
     }
   ]
 }
