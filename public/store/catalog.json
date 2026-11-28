@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T20:26:50.650Z",
+  "updatedAt": "2026-11-28T20:27:01.377Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -567,7 +567,9 @@
       "stock": 1,
       "availability": "in_stock",
       "badge": "",
-      "flags": [],
+      "flags": [
+        "home"
+      ],
       "images": [
         "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@2b625e0a9da54778a758529de93e626499ea9ef8/public/store/images/24-mx0t5xlc-ag0tbi.png"
       ],
