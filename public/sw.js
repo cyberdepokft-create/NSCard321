@@ -1,7 +1,7 @@
 /* NS Card – service worker: gyorsabb betöltés és telepíthető alkalmazás.
  * Oldalak: hálózat elsőként (mindig a friss verzió), offline esetén a mentett példány.
  * Verziózott fájlok és képek: gyorsítótárból, háttérben frissítve. Az admin, az API és a katalógus kimarad. */
-const VERSION = "nsc-5.3.1";
+const VERSION = "nsc-5.4.1";
 const PAGES = `${VERSION}-pages`;
 const STATIC = `${VERSION}-static`;
 
