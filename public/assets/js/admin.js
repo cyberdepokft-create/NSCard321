@@ -955,7 +955,7 @@
     $("[data-token-hint]").hidden = srv;
     /* előre kitöltött GitHub tokenoldal: név, tulajdonos, 1 év, Contents írás */
     const tl = $("[data-gh-tokenlink]");
-    if (tl) tl.href = `https://github.com/settings/personal-access-tokens/new?${new URLSearchParams({ name: "NS Card admin", description: `NS Card webshop admin – publikálás a ${g.owner}/${g.repo} repóba`, target_name: g.owner, expires_in: "366", contents: "write" })}`;
+    if (tl) tl.href = `https://github.com/settings/personal-access-tokens/new?${new URLSearchParams({ name: "NS Card admin", description: `NS Card webshop admin – publikálás a ${g.owner}/${g.repo} repóba`, target_name: g.owner, expires_in: "365", contents: "write" })}`;
     renderGhPill();
   }
 
