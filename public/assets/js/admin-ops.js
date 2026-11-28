@@ -238,6 +238,7 @@
           <div class="op-sum">
             <div><span>Részösszeg</span><span>${fmtFt(d.subtotal)}</span></div>
             ${d.discount ? `<div><span>Kupon (${esc(d.coupon)})</span><span>−${fmtFt(d.discount)}</span></div>` : d.coupon ? `<div><span>Kupon (${esc(d.coupon)})</span><span>ingyenes szállítás</span></div>` : ""}
+            ${d.packDiscount ? `<div><span>Csomagbontás kedvezmény (5%)</span><span>−${fmtFt(d.packDiscount)}</span></div>` : ""}
             <div><span>${esc(d.methodLabel || "Szállítás")}</span><span>${d.shipping ? fmtFt(d.shipping) : "ingyenes"}</span></div>
             ${d.cod ? `<div><span>Utánvételi díj</span><span>${fmtFt(d.cod)}</span></div>` : ""}
             ${d.gift ? `<div><span>Ajándékcsomagolás</span><span>${d.giftFee ? fmtFt(d.giftFee) : "ingyenes"}</span></div>` : ""}
