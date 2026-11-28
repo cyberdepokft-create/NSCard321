@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T19:33:35.889Z",
+  "updatedAt": "2026-11-28T19:44:09.967Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -31,7 +31,7 @@
     "dispatchCutoff": 14,
     "deliveryText": "1–3 munkanap",
     "bankDetails": "",
-    "stockSyncedAt": "2026-11-28T19:32:42.967Z",
+    "stockSyncedAt": "2026-11-28T19:43:20.482Z",
     "lockerMap": true,
     "vatRate": "27%",
     "invoiceAuto": false,
@@ -373,6 +373,32 @@
     }
   },
   "products": [
+    {
+      "id": 25,
+      "category": "booster",
+      "name": "Twilight Masquerade Booster",
+      "set": "Twilight Masquerade Booster",
+      "line": "",
+      "description": "1db Twilight Masquerade Booster Pack",
+      "price": 3990,
+      "oldPrice": null,
+      "stock": 36,
+      "availability": "in_stock",
+      "badge": "",
+      "flags": [],
+      "images": [
+        "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@4d3a60f0101844b385ab1f617a832d9c001d5baf/public/store/images/25-mx0tjj1a-emwl4y.png"
+      ],
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "",
+      "lang": "",
+      "cardNo": "",
+      "rarity": "",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 5
+    },
     {
       "id": 24,
       "category": "single",
