@@ -37,7 +37,8 @@ const catalog = {
   },
   products: [
     { id: 1, name: "ETB <A> & B", category: "etb", price: 500, stock: 10, availability: "in_stock", images: [] },
-    { id: 2, name: "Booster", category: "etb", price: 2490, stock: 10, availability: "in_stock", images: [] }
+    { id: 2, name: "Booster", category: "etb", price: 2490, stock: 10, availability: "in_stock", images: [] },
+    { id: 3, name: "Tin C", category: "etb", price: 6990, stock: 10, availability: "in_stock", images: [] }
   ]
 };
 
@@ -162,6 +163,23 @@ assert.equal(r.data.szamlazz.ok, false); assert.equal(r.data.invoice.ok, false);
 mode = "ok";
 r = await call("functions/api/admin/[[path]].js", "onRequest", req(`/api/admin/orders/${o3}/invoice`, { method: "POST", headers: ADMIN }), { path: ["orders", o3, "invoice"] });
 assert.equal(r.status, 200); assert.equal(r.data.order.data.invoiceError, undefined);
+
+// 7/b. csomagbontás: a kihúzott 3 termék együtt 5% kedvezménnyel – a végösszegben és a számlán is
+catalog.settings.vatRate = "27%";
+r = await call("functions/api/orders.js", "onRequestPost", req("/api/orders", { method: "POST", body: { items: [{ id: 1, qty: 1 }, { id: 2, qty: 1 }, { id: 3, qty: 2 }], customer, shipping: "home", pay: "transfer", pack: [3, 1, 2] } }));
+assert.equal(r.status, 200, JSON.stringify(r.data));
+assert.equal(r.data.total, 500 + 2490 + 6990 * 2 - Math.round((500 + 2490 + 6990) * 0.05) + 2500); // a kedvezmény termékenként egy darabra jár
+const o4 = r.data.id;
+r = await call("functions/api/admin/[[path]].js", "onRequest", req(`/api/admin/orders/${o4}`, { method: "PATCH", body: { status: "paid", notify: false }, headers: ADMIN }), { path: ["orders", o4] });
+assert.equal(r.data.order.data.packDiscount, 499); assert.deepEqual(r.data.order.data.pack, [3, 1, 2]);
+it = items(sent.at(-1).xml);
+assert.ok(it.some(i => i.megnevezes === "Csomagbontás kedvezmény (5%)" && i.bruttoErtek === "-499"));
+assert.equal(it.reduce((a, i) => a + Number(i.bruttoErtek), 0), r.data.order.total);
+// csak 2 egyezik, vagy ugyanaz a termék háromszor: nincs kedvezmény
+r = await call("functions/api/orders.js", "onRequestPost", req("/api/orders", { method: "POST", body: { items: [{ id: 1, qty: 1 }, { id: 2, qty: 1 }], customer, shipping: "home", pay: "transfer", pack: [1, 2, 3] } }));
+assert.equal(r.data.total, 500 + 2490 + 2500);
+r = await call("functions/api/orders.js", "onRequestPost", req("/api/orders", { method: "POST", body: { items: [{ id: 1, qty: 3 }], customer, shipping: "home", pay: "transfer", pack: [1, 1, 1] } }));
+assert.equal(r.data.total, 1500 + 2500);
 
 // 7. választó: Billingo kiválasztva, de nincs kulcs → érthető hiba; kulcs nélkül automatikus = nincs számlázó
 const inv = await imp("lib/invoicing.js");
