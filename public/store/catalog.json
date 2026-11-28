@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T19:31:28.601Z",
+  "updatedAt": "2026-11-28T19:31:37.651Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -421,32 +421,6 @@
       "lang": "",
       "cardNo": "",
       "rarity": "",
-      "grade": "",
-      "ean": "",
-      "maxPerOrder": 0
-    },
-    {
-      "id": 24,
-      "category": "single",
-      "name": "Arboliva ex (másolat)",
-      "set": "Destined Rivals",
-      "line": "",
-      "description": "1db gyűjthető kártya",
-      "price": 249,
-      "oldPrice": null,
-      "stock": 1,
-      "availability": "in_stock",
-      "badge": "",
-      "flags": [],
-      "images": [
-        "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@de232ae4fccac8befe5b1d0dbeb2f4e128b66423/public/store/images/22-mx0szod2-yfizbi.png"
-      ],
-      "hidden": true,
-      "releaseDate": "",
-      "condition": "NM",
-      "lang": "EN",
-      "cardNo": "023/182",
-      "rarity": "Double Rare",
       "grade": "",
       "ean": "",
       "maxPerOrder": 0
