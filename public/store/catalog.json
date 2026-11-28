@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T18:03:14.881Z",
+  "updatedAt": "2026-11-28T18:03:23.764Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -390,32 +390,6 @@
         "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@c12de5f0e89151ff7eddfad7eb3b6ecf2116a9d7/public/store/images/4-mx0pwi2n-j3rtgf.png"
       ],
       "hidden": false,
-      "releaseDate": "",
-      "condition": "NM",
-      "lang": "EN",
-      "cardNo": "003/086",
-      "rarity": "Double Rare",
-      "grade": "",
-      "ean": "",
-      "maxPerOrder": 0
-    },
-    {
-      "id": 5,
-      "category": "single",
-      "name": "Serperior ex (másolat)",
-      "set": "Black Bolt",
-      "line": "",
-      "description": "",
-      "price": 249,
-      "oldPrice": null,
-      "stock": 1,
-      "availability": "in_stock",
-      "badge": "",
-      "flags": [],
-      "images": [
-        "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@c12de5f0e89151ff7eddfad7eb3b6ecf2116a9d7/public/store/images/4-mx0pwi2n-j3rtgf.png"
-      ],
-      "hidden": true,
       "releaseDate": "",
       "condition": "NM",
       "lang": "EN",
