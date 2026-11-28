@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T15:04:29.227Z",
+  "updatedAt": "2026-11-28T15:04:34.066Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -421,32 +421,6 @@
       "lang": "EN",
       "cardNo": "133/128",
       "rarity": "Illustrator Rare",
-      "grade": "",
-      "ean": "",
-      "maxPerOrder": 0
-    },
-    {
-      "id": 1,
-      "category": "booster",
-      "name": "Próba 1",
-      "set": "",
-      "line": "proba",
-      "description": "proba",
-      "price": 500,
-      "oldPrice": null,
-      "stock": 0,
-      "availability": "in_stock",
-      "badge": "",
-      "flags": [],
-      "images": [
-        "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@a3955f423449a684bce394eca5dcc3942893636a/public/store/images/1-mx0i5si1-s92xtp.png"
-      ],
-      "hidden": false,
-      "releaseDate": "",
-      "condition": "",
-      "lang": "",
-      "cardNo": "",
-      "rarity": "",
       "grade": "",
       "ean": "",
       "maxPerOrder": 0
