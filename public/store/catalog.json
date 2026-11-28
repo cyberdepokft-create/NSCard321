@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T12:06:07.240Z",
+  "updatedAt": "2026-11-28T12:06:11.082Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -283,14 +283,14 @@
     "releases": [],
     "texts": {},
     "theme": {
-      "preset": "aranyelit",
+      "preset": "jegvihar",
       "colors": {
-        "bg": "#0c0a07",
-        "surface": "#1b1610",
-        "primary": "#e7b743",
-        "accent": "#ffe7a1",
-        "secondary": "#e08a3c",
-        "text": "#fbf6ea"
+        "bg": "#03141d",
+        "surface": "#08283a",
+        "primary": "#2fd3ff",
+        "accent": "#e9fbff",
+        "secondary": "#7cf3c8",
+        "text": "#eef9ff"
       },
       "fontDisplay": "archivo",
       "fontBody": "dmsans",
