@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T09:44:00.394Z",
+  "updatedAt": "2026-11-28T09:44:23.480Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -371,34 +371,6 @@
     }
   },
   "products": [
-    {
-      "id": 12,
-      "category": "display",
-      "name": "Pokémon TCG SV10.5 Unova Victini Illustration Collection",
-      "set": "",
-      "line": "",
-      "description": "",
-      "price": 15990,
-      "oldPrice": null,
-      "stock": 5,
-      "availability": "in_stock",
-      "badge": "",
-      "flags": [
-        "popular"
-      ],
-      "images": [
-        "img/products/12-1.webp"
-      ],
-      "hidden": false,
-      "releaseDate": "",
-      "condition": "",
-      "lang": "",
-      "cardNo": "",
-      "rarity": "",
-      "grade": "",
-      "ean": "",
-      "maxPerOrder": 0
-    },
     {
       "id": 13,
       "category": "booster",
