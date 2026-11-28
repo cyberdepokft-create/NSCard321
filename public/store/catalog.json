@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T18:22:46.883Z",
+  "updatedAt": "2026-11-28T18:24:56.823Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -31,7 +31,7 @@
     "dispatchCutoff": 14,
     "deliveryText": "1–3 munkanap",
     "bankDetails": "",
-    "stockSyncedAt": "2026-11-28T18:22:17.429Z",
+    "stockSyncedAt": "2026-11-28T18:24:17.427Z",
     "lockerMap": true,
     "vatRate": "27%",
     "invoiceAuto": false,
@@ -373,6 +373,32 @@
     }
   },
   "products": [
+    {
+      "id": 13,
+      "category": "single",
+      "name": "Mega Abomasnow ex",
+      "set": "Mega Evolution",
+      "line": "",
+      "description": "1db gyűjthető kártya",
+      "price": 249,
+      "oldPrice": null,
+      "stock": 1,
+      "availability": "in_stock",
+      "badge": "",
+      "flags": [],
+      "images": [
+        "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@3f4fc7bfdb223531a96146cee502768693119dc0/public/store/images/13-mx0qpn9g-n86y1a.png"
+      ],
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "NM",
+      "lang": "EN",
+      "cardNo": "036/132",
+      "rarity": "Double Rare",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 0
+    },
     {
       "id": 12,
       "category": "single",
