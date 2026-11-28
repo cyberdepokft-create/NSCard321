@@ -12,6 +12,7 @@
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const finePointer = window.matchMedia("(pointer: fine)").matches;
   const mobileMQ = window.matchMedia("(max-width: 860px)");
+  const PACK_KEY = "nsc.pack.v1", PACK_RATE = 5; // csomagbontás: a kihúzott 3 termék együtt ennyi % kedvezménnyel
 
   /* Animáció kapcsolók: az admin „Haladó → Animációk” beállítása a <html> data-fx / data-anim attribútumában */
   const motionOK = () => !reduceMotion && root.dataset.anim !== "off";
@@ -357,6 +358,7 @@
     }
     foot.hidden = false;
     const subtotal = cart.subtotal();
+    const deal = packDeal(lines);
     const s = N.settings();
     const free = s.freeShippingFrom > 0 && subtotal >= s.freeShippingFrom;
     const inCart = new Set(lines.map(l => l.product.id));
@@ -367,6 +369,7 @@
     foot.innerHTML = `
       ${freeShipHTML(subtotal)}
       <div class="sum-row"><span>Részösszeg</span><strong>${fmtFt(subtotal)}</strong></div>
+      ${deal ? `<div class="sum-row discount"><span>Csomagbontás kedvezmény (−${PACK_RATE}%)</span><strong>−${fmtFt(deal.discount)}</strong></div>` : ""}
       <div class="sum-row"><span>Szállítás</span><strong>${free ? "Ingyenes" : shipShortLabel()}</strong></div>
       <a class="btn btn-primary btn-block" href="/checkout">${esc(t("cart.checkout"))}</a>
       <button class="btn btn-ghost btn-block" type="button" data-close>${esc(t("cart.continue"))}</button>`;
@@ -741,10 +744,11 @@
     if (ticker) {
       const cats = categoriesWithCounts().map(c => c.label);
       const items = [...cats, s.freeShippingFrom > 0 ? `Ingyenes szállítás ${fmtFt(s.freeShippingFrom)} felett` : `Szállítás ${shipShortLabel()}`, `${buyable.length} termék készleten`, ...buyable.filter(p => p.flags.includes("new")).slice(0, 3).map(p => `Új: ${p.name}`)];
-      const row = items.map(x => `<span>${esc(x)}</span>`).join("");
-      ticker.innerHTML = `<div class="ticker-track">${row}${row}</div>`;
+      const sig = JSON.stringify(items);
+      if (ticker.dataset.sig !== sig) { ticker.dataset.sig = sig; ticker.dataset.w = ""; }
     }
     showSection("ticker", true);
+    fillTicker();
 
     const setText = (sel, text) => { const el = $(sel); if (el) el.textContent = text; };
     setText("[data-fact-stock]", `${buyable.length} termék készleten${soon.length ? `, ${soon.length} érkezik` : ""}`);
@@ -841,7 +845,78 @@
     if (pool.length >= 3 && pack.sig !== sig) { pack.sig = sig; resetPack(true); }
   }
 
+  /* --- futó szalag: annyiszor ismétli a sort, hogy kitöltse a képernyőt, így nincs üres rés és ugrás; csak változáskor rajzol újra --- */
+  function fillTicker() {
+    const ticker = $("[data-ticker]");
+    if (!ticker || ticker.hidden) return;
+    let items = [];
+    try { items = JSON.parse(ticker.dataset.sig || "[]"); } catch {}
+    if (!items.length) return;
+    const w = ticker.clientWidth || window.innerWidth;
+    if (ticker.dataset.w && Number(ticker.dataset.w) >= w) return;
+    const row = items.map(x => `<span>${esc(x)}</span>`).join("");
+    if (!fx("ticker")) { ticker.innerHTML = `<div class="ticker-track">${row}</div>`; ticker.dataset.w = "99999"; return; }
+    ticker.innerHTML = `<div class="ticker-track"><div class="ticker-half">${row}</div></div>`;
+    const track = ticker.firstElementChild, half = track.firstElementChild;
+    const rowW = half.scrollWidth || 300;
+    half.innerHTML = row.repeat(Math.max(1, Math.ceil(w / rowW) + 1));
+    track.appendChild(half.cloneNode(true));
+    track.style.setProperty("--ticker-time", `${Math.max(14, Math.round(half.scrollWidth / 70))}s`);
+    ticker.dataset.w = String(w);
+  }
+  let tickerRz = 0;
+  window.addEventListener("resize", () => { clearTimeout(tickerRz); tickerRz = setTimeout(fillTicker, 200); });
+  document.fonts?.ready?.then(() => { const tk = $("[data-ticker]"); if (tk) { tk.dataset.w = ""; fillTicker(); } });
+
   /* --- csomagbontó --- */
+  /* a kihúzott 3 termék akkor kap kedvezményt, ha mindhárom a kosárban van */
+  function packDeal(lines = cart.lines()) {
+    const saved = N.store.get(PACK_KEY);
+    const ids = Array.isArray(saved?.ids) ? saved.ids.map(Number) : [];
+    if (ids.length !== 3 || new Set(ids).size !== 3) return null;
+    const hit = ids.map(id => lines.find(l => Number(l.product.id) === id)).filter(Boolean);
+    if (hit.length !== 3) return null;
+    return { ids, discount: Math.round(hit.reduce((a, l) => a + l.product.price, 0) * PACK_RATE / 100) };
+  }
+  const clearPackDeal = () => N.store.del(PACK_KEY);
+  function packOffer() {
+    const res = $("[data-pack-result]");
+    if (!res) return;
+    let btn = $("[data-pack-buy]", res);
+    if (!btn) {
+      btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "btn btn-primary btn-sm pack-buy";
+      btn.setAttribute("data-pack-buy", "");
+      res.insertBefore(btn, $("[data-pack-again]", res));
+      $("[data-pack-again]", res)?.classList.replace("btn-primary", "btn-ghost");
+    }
+    const picks = pack.picks.filter(p => N.isBuyable(p));
+    const sum = picks.reduce((a, p) => a + p.price, 0);
+    btn.hidden = picks.length !== 3;
+    btn.innerHTML = `Mind a 3 kosárba <em>−${PACK_RATE}%</em> · ${fmtFt(sum - Math.round(sum * PACK_RATE / 100))}`;
+    const copy = $(".pack-copy");
+    if (copy && !$("[data-pack-note]", copy)) {
+      const note = document.createElement("p");
+      note.className = "pack-note";
+      note.setAttribute("data-pack-note", "");
+      note.textContent = `Ha a kihúzott 3 terméket együtt megveszed, ${PACK_RATE}% kedvezményt kapsz rájuk.`;
+      $(".hero-actions", copy)?.before(note);
+    }
+  }
+  function buyPack() {
+    const picks = pack.picks.filter(p => N.isBuyable(p));
+    if (picks.length !== 3) { toast("Ez a húzás már nem vásárolható meg egyben. Nyiss új csomagot!"); return; }
+    for (const p of picks) {
+      if (cart.qtyOf(p.id) > 0) continue;
+      const r = cart.add(p.id, 1);
+      if (!r.ok && r.reason !== "max") { toast(`${p.name}: sajnos elfogyott. Nyiss új csomagot!`); return; }
+    }
+    N.store.set(PACK_KEY, { ids: picks.map(p => p.id), at: Date.now() });
+    updateCount(true);
+    toast(`A 3 termék a kosárban – ${PACK_RATE}% csomag kedvezménnyel.`);
+    openCart();
+  }
   const pack = { picks: [], timers: [], sig: "", busy: false };
   const packPool = () => N.products().filter(p => N.isBuyable(p) && p.images[0]);
   const TINTS = ["var(--ember)", "var(--spark)", "#3ccb76", "#b56aff", "#ffb02e", "#ff5d8f", "#2fd3ff", "#e7b743"];
@@ -884,6 +959,7 @@
     box.innerHTML = pack.picks.map((p, i) => pullHTML(p, i, i === 1)).join("");
     const total = $("[data-pack-total]");
     if (total) total.textContent = fmtFt(pack.picks.reduce((s, p) => s + p.price, 0));
+    packOffer();
     layoutPulls();
   }
   function layoutPulls() {
@@ -973,6 +1049,7 @@
       const stage = $("[data-pack-stage]");
       if (!stage) return;
       if (e.target.closest(".pc-view")) return;
+      if (e.target.closest("[data-pack-buy]")) { buyPack(); return; }
       const card = e.target.closest(".pull");
       if (card && stage.classList.contains("spread")) {
         if (!card.classList.contains("flip")) flipPull(card); else setFocus(card);
@@ -1507,7 +1584,9 @@
     const cod = coState.pay === "cod" && subtotal ? s.codFee : 0;
     const gift = !!(s.giftWrap && coState.gift === "1");
     const giftFee = gift ? s.giftWrapPrice : 0;
-    return { subtotal, shipping, cod, gift, giftFee, discount, coupon, couponState: cp, freeShip, total: Math.max(0, subtotal - discount) + shipping + cod + giftFee };
+    const deal = packDeal();
+    const packDiscount = deal ? deal.discount : 0;
+    return { subtotal, shipping, cod, gift, giftFee, discount, coupon, couponState: cp, freeShip, deal, packDiscount, total: Math.max(0, subtotal - discount - packDiscount) + shipping + cod + giftFee };
   }
 
   function couponHTML(s, tt) {
@@ -1541,6 +1620,7 @@
           ${tt.freeShip ? "" : freeShipHTML(tt.subtotal)}
           <div class="sum-row"><span>Részösszeg</span><strong>${fmtFt(tt.subtotal)}</strong></div>
           ${tt.discount ? `<div class="sum-row discount"><span>Kedvezmény (${esc(tt.coupon.code)})</span><strong>−${fmtFt(tt.discount)}</strong></div>` : ""}
+          ${tt.packDiscount ? `<div class="sum-row discount"><span>Csomagbontás kedvezmény (−${PACK_RATE}%)</span><strong>−${fmtFt(tt.packDiscount)}</strong></div>` : ""}
           <div class="sum-row"><span>Szállítás</span><strong>${tt.shipping ? fmtFt(tt.shipping) : "Ingyenes"}</strong></div>
           ${tt.cod ? `<div class="sum-row"><span>Utánvételi díj</span><strong>${fmtFt(tt.cod)}</strong></div>` : ""}
           ${tt.gift ? `<div class="sum-row"><span>Ajándékcsomagolás</span><strong>${tt.giftFee ? fmtFt(tt.giftFee) : "Ingyenes"}</strong></div>` : ""}
@@ -1687,6 +1767,7 @@
     o.lines.forEach(l => L.push(`- ${l.name} (#${l.id}) – ${l.qty} db × ${fmtFt(l.price)} = ${fmtFt(l.qty * l.price)}`));
     L.push("", `Részösszeg: ${fmtFt(o.subtotal)}`);
     if (o.coupon) L.push(`Kupon (${o.coupon}): ${o.discount ? `−${fmtFt(o.discount)}` : "ingyenes szállítás"}`);
+    if (o.packDiscount) L.push(`Csomagbontás kedvezmény (${PACK_RATE}%): −${fmtFt(o.packDiscount)}`);
     L.push(`Szállítás (${o.shipLabel}): ${o.shipping ? fmtFt(o.shipping) : "ingyenes"}`);
     if (o.cod) L.push(`Utánvételi díj: ${fmtFt(o.cod)}`);
     if (o.gift) L.push(`Ajándékcsomagolás: ${o.giftFee ? fmtFt(o.giftFee) : "ingyenes"}${o.c.giftMessage ? ` – üzenet: „${o.c.giftMessage}”` : ""}`);
@@ -1758,7 +1839,7 @@
         const res = await fetch("/api/create-checkout-session", {
           method: "POST",
           headers: { "Content-Type": "application/json", Accept: "application/json" },
-          body: JSON.stringify({ items: lines.map(l => ({ id: l.product.id, qty: l.qty })), customer: c, shipping: coState.ship, coupon: tt.coupon?.code || "", gift: tt.gift, giftMessage: tt.gift ? c.giftMessage : "", website: honey })
+          body: JSON.stringify({ items: lines.map(l => ({ id: l.product.id, qty: l.qty })), customer: c, shipping: coState.ship, coupon: tt.coupon?.code || "", pack: tt.deal ? tt.deal.ids : [], gift: tt.gift, giftMessage: tt.gift ? c.giftMessage : "", website: honey })
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok || !data.url) { stockConflict(data); throw new Error(data.error || ""); }
@@ -1780,7 +1861,7 @@
         res = await fetch("/api/orders", {
           method: "POST",
           headers: { "Content-Type": "application/json", Accept: "application/json" },
-          body: JSON.stringify({ items: lines.map(l => ({ id: l.product.id, qty: l.qty })), customer: c, shipping: coState.ship, pay: coState.pay, coupon: tt.coupon?.code || "", gift: tt.gift, giftMessage: tt.gift ? c.giftMessage : "", website: honey })
+          body: JSON.stringify({ items: lines.map(l => ({ id: l.product.id, qty: l.qty })), customer: c, shipping: coState.ship, pay: coState.pay, coupon: tt.coupon?.code || "", pack: tt.deal ? tt.deal.ids : [], gift: tt.gift, giftMessage: tt.gift ? c.giftMessage : "", website: honey })
         });
         data = /json/.test(res.headers.get("content-type") || "") ? await res.json().catch(() => null) : null;
       } catch {}
@@ -1789,7 +1870,7 @@
         coDone = { server: true, id: data.id, token: data.token || "", total: data.total, pay: data.pay, method: data.method, preorder: data.preorder, emailed: data.emailed, email: c.email, bankDetails: data.bankDetails || s.bankDetails || "",
           lines: lines.map(l => ({ id: l.product.id, name: l.product.name, qty: l.qty, price: l.product.price })) };
         N.store.set(N.KEYS.lastOrder, { id: data.id, pay: data.pay, token: data.token || "", at: Date.now() });
-        cart.clear();
+        cart.clear(); clearPackDeal();
         renderCheckout();
         window.scrollTo({ top: 0, behavior: motionOK() ? "smooth" : "auto" });
         return;
@@ -1807,7 +1888,7 @@
       id: orderNumber(),
       createdAt: new Date().toISOString(),
       lines: lines.map(l => ({ id: l.product.id, name: l.product.name, qty: l.qty, price: l.product.price })),
-      subtotal: tt.subtotal, shipping: tt.shipping, cod: tt.cod, total: tt.total, discount: tt.discount, coupon: tt.coupon?.code || "", gift: tt.gift, giftFee: tt.giftFee,
+      subtotal: tt.subtotal, shipping: tt.shipping, cod: tt.cod, total: tt.total, discount: tt.discount, coupon: tt.coupon?.code || "", gift: tt.gift, giftFee: tt.giftFee, packDiscount: tt.packDiscount,
       ship: coState.ship, shipLabel: (N.shippingMethods().find(m => m.value === coState.ship)?.label || "szállítás").toLowerCase(),
       pay: coState.pay, payLabel: coState.pay === "cod" ? "utánvét" : "banki átutalás",
       c
@@ -2415,7 +2496,7 @@
       const d = await res.json();
       if (!res.ok) throw new Error(d.error || "");
       if (d.payment_status === "paid" || d.status === "complete") {
-        cart.clear(); updateCount(false);
+        cart.clear(); clearPackDeal(); updateCount(false);
         el.className = "notice success";
         el.innerHTML = `<strong>Sikeres fizetés.</strong> Köszönjük${d.customer_name ? `, ${esc(d.customer_name)}` : ""}! A ${fmtFt(d.amount_total)} összegű rendelésről ${d.email ? `a(z) <strong>${esc(d.email)}</strong> címre ` : ""}küldünk visszaigazolást.`;
         if (d.items?.length) {
