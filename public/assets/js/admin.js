@@ -2076,7 +2076,10 @@ A termék átvételétől számított 14 napon belül indoklás nélkül elállh
       headers: { Accept: "application/json", Authorization: `Bearer ${authToken()}`, ...(init.body ? { "Content-Type": "application/json" } : {}), ...(init.headers || {}) }
     });
     const type = res.headers.get("content-type") || "";
-    if (init.raw) { if (!res.ok) throw new Error(`Hiba (${res.status})`); return res; }
+    if (init.raw) {
+      if (!res.ok) { const d = /json/.test(type) ? await res.json().catch(() => ({})) : {}; throw new Error(d.error || `Hiba (${res.status})`); }
+      return res;
+    }
     const data = /json/.test(type) ? await res.json().catch(() => ({})) : {};
     if (res.status === 401 && state.server) { sessionExpired(); const e = new Error("Lejárt a belépés."); e.status = 401; throw e; }
     if (!res.ok) {
