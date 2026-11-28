@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T09:46:50.000Z",
+  "updatedAt": "2026-11-28T11:02:49.983Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -31,7 +31,7 @@
     "dispatchCutoff": 14,
     "deliveryText": "1–3 munkanap",
     "bankDetails": "",
-    "stockSyncedAt": "",
+    "stockSyncedAt": "2026-11-28T11:02:42.959Z",
     "lockerMap": true,
     "vatRate": "27%",
     "invoiceAuto": false,
