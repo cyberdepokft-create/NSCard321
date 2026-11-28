@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T19:31:37.651Z",
+  "updatedAt": "2026-11-28T19:33:35.889Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -31,7 +31,7 @@
     "dispatchCutoff": 14,
     "deliveryText": "1–3 munkanap",
     "bankDetails": "",
-    "stockSyncedAt": "2026-11-28T19:30:42.944Z",
+    "stockSyncedAt": "2026-11-28T19:32:42.967Z",
     "lockerMap": true,
     "vatRate": "27%",
     "invoiceAuto": false,
@@ -373,6 +373,32 @@
     }
   },
   "products": [
+    {
+      "id": 24,
+      "category": "single",
+      "name": "Ethan's Ho-Oh ex",
+      "set": "Destined Rivals",
+      "line": "",
+      "description": "1db gyűjthető kártya",
+      "price": 349,
+      "oldPrice": null,
+      "stock": 1,
+      "availability": "in_stock",
+      "badge": "",
+      "flags": [],
+      "images": [
+        "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@2b625e0a9da54778a758529de93e626499ea9ef8/public/store/images/24-mx0t5xlc-ag0tbi.png"
+      ],
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "NM",
+      "lang": "EN",
+      "cardNo": "039/182",
+      "rarity": "Double Rare",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 0
+    },
     {
       "id": 23,
       "category": "single",
