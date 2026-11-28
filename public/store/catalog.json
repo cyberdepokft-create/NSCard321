@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T19:47:25.537Z",
+  "updatedAt": "2026-11-28T19:47:29.956Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -382,7 +382,7 @@
       "description": "1db Pitch Black Booster Pack",
       "price": 2190,
       "oldPrice": null,
-      "stock": 1,
+      "stock": 2,
       "availability": "in_stock",
       "badge": "",
       "flags": [],
