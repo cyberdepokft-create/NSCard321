@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T14:08:37.590Z",
+  "updatedAt": "2026-11-28T14:08:50.300Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -373,34 +373,6 @@
     }
   },
   "products": [
-    {
-      "id": 13,
-      "category": "booster",
-      "name": "Pokémon TCG: Pokémon Day 2026 Collection",
-      "set": "",
-      "line": "",
-      "description": "",
-      "price": 11990,
-      "oldPrice": null,
-      "stock": 5,
-      "availability": "in_stock",
-      "badge": "",
-      "flags": [
-        "new"
-      ],
-      "images": [
-        "img/products/13-1.webp"
-      ],
-      "hidden": false,
-      "releaseDate": "",
-      "condition": "",
-      "lang": "",
-      "cardNo": "",
-      "rarity": "",
-      "grade": "",
-      "ean": "",
-      "maxPerOrder": 0
-    },
     {
       "id": 14,
       "category": "booster",
