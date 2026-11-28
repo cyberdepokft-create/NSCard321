@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T18:59:50.988Z",
+  "updatedAt": "2026-11-28T18:59:59.777Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -434,7 +434,7 @@
       "description": "1db gyűjthető kártya",
       "price": 249,
       "oldPrice": null,
-      "stock": 0,
+      "stock": 1,
       "availability": "in_stock",
       "badge": "",
       "flags": [],
