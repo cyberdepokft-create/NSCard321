@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T18:05:58.114Z",
+  "updatedAt": "2026-11-28T18:07:55.258Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -31,7 +31,7 @@
     "dispatchCutoff": 14,
     "deliveryText": "1–3 munkanap",
     "bankDetails": "",
-    "stockSyncedAt": "2026-11-28T18:05:17.155Z",
+    "stockSyncedAt": "2026-11-28T18:07:17.113Z",
     "lockerMap": true,
     "vatRate": "27%",
     "invoiceAuto": false,
@@ -373,6 +373,32 @@
     }
   },
   "products": [
+    {
+      "id": 6,
+      "category": "single",
+      "name": "Meloetta ex",
+      "set": "Black Bolt",
+      "line": "",
+      "description": "1db gyűjthető kártyalap",
+      "price": 249,
+      "oldPrice": null,
+      "stock": 1,
+      "availability": "in_stock",
+      "badge": "",
+      "flags": [],
+      "images": [
+        "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@66afda5c94d1c88c3fbe9a4de4f6bf27b6930cf5/public/store/images/6-mx0q3r88-jjlu7b.png"
+      ],
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "NM",
+      "lang": "EN",
+      "cardNo": "044/086",
+      "rarity": "Double Rare",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 0
+    },
     {
       "id": 5,
       "category": "single",
