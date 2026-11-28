@@ -65,7 +65,7 @@ A szövegek listája a `public/assets/js/texts.js` fájlban van (a forrás a fej
 | Adatbázis (kötelező a rendelésekhez) | Bindings → D1 database | `DB` |
 | E-mail | Variables and Secrets (Secret) | `RESEND_API_KEY`, opcionális `MAIL_FROM`, `ADMIN_EMAIL` |
 | Kártyás fizetés | Variables and Secrets (Secret) | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` |
-| Számlázás | Variables and Secrets (Secret) | `BILLINGO_API_KEY` |
+| Számlázás | Variables and Secrets (Secret) | `SZAMLAZZ_AGENT_KEY` (Számlázz.hu) vagy `BILLINGO_API_KEY` |
 
 Minden módosítás után: Deployments → Retry deployment. Adatbázis nélkül a bolt a korábbi, levelezős rendelésre vált. A szerver kód a `functions/` és `lib/` mappában van; a szerver tesztek Node alatt futnak (node:sqlite a D1 helyett).
 
@@ -110,3 +110,19 @@ Levelek: rendelés visszaigazolás (utalási adatokkal, tételek képpel, száll
 A Gmail napi korlátja kb. 500 címzett: a hírlevél egyszerre legfeljebb 80 címzettnek megy ki, az újbóli Küldés a hátralévőknek folytatja.
 Próbalevél: admin → Beállítások → Szolgáltatások → E-mail küldés → Próbalevél küldése.
 Resend továbbra is használható (`RESEND_API_KEY`), ha nincs SMTP beállítva.
+
+### 5.4: Számlázz.hu számlázás (Számla Agent)
+A számlát a Számlázz.hu is kiállíthatja (a Billingo továbbra is választható). Fizetéskor automatikusan, vagy a rendelés adatlapján egy kattintással; a Számlázz.hu e-mailben elküldi a vásárlónak, és a NAV felé is onnan megy az adatszolgáltatás.
+
+| Név | Típus | Érték |
+|---|---|---|
+| `SZAMLAZZ_AGENT_KEY` | Secret | Számla Agent kulcs: Számlázz.hu → [Vezérlőpult](https://www.szamlazz.hu/szamla/?page=dashboard) → Fiók hozzáférések → Számla Agent kulcsok → kulcs ikon |
+
+Mentés után: Deployments → Retry deployment. Az adminban: Beállítások → Számlázás (számlázó, ÁFA, előtag, automatikus számla, e-számla, kiküldés), és a Szolgáltatások listában ellenőrizhető, hogy a kulcs működik-e.
+
+- A tételek bruttó árból, a Számlázz.hu kerekítési szabálya szerint kerülnek a számlára (27% vagy AAM); a kupon negatív tétel, a szállítás, utánvét és ajándékcsomagolás külön sor.
+- A rendelésszám a számla `rendelesSzam` mezőjébe kerül. Ha a Számlázz.hu-ban be van kapcsolva a „Rendelésszám ismétlődés tiltása” (Beállítások → Számlázás és nyugtázás beállítások), egy rendelésre biztosan nem készül két számla.
+- Ha a csomag nem enged e-számlát (#free), a rendszer magától papír alapú számlát állít ki, ezt a rendelésnél jelzi.
+- A Számlázz.hu számla PDF-je az admin rendelés adatlapjáról letölthető.
+- A Számla Agent külön díjas szolgáltatás (a #free csomag mellett is használható), a havi díj az API-val kiállított számlák számától függ.
+- Kód: `lib/szamlazz.js` (Számla Agent), `lib/invoicing.js` (számlázó választás). Teszt: `node tests/szamlazz.test.mjs`.
