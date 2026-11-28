@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T20:06:35.923Z",
+  "updatedAt": "2026-11-28T20:10:32.362Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -31,7 +31,7 @@
     "dispatchCutoff": 14,
     "deliveryText": "1–3 munkanap",
     "bankDetails": "",
-    "stockSyncedAt": "2026-11-28T20:04:43.024Z",
+    "stockSyncedAt": "2026-11-28T20:09:42.943Z",
     "lockerMap": true,
     "vatRate": "27%",
     "invoiceAuto": false,
@@ -373,6 +373,32 @@
     }
   },
   "products": [
+    {
+      "id": 28,
+      "category": "booster",
+      "name": "Surging Sparks Booster",
+      "set": "Surging Sparks",
+      "line": "",
+      "description": "1db Surging Sparks Booster",
+      "price": 3590,
+      "oldPrice": null,
+      "stock": 36,
+      "availability": "in_stock",
+      "badge": "",
+      "flags": [],
+      "images": [
+        "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@aa9cd9caaef11d2fd8aae37ca64ff9221e143986/public/store/images/28-mx0uhg6r-044f92.png"
+      ],
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "",
+      "lang": "",
+      "cardNo": "",
+      "rarity": "",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 5
+    },
     {
       "id": 27,
       "category": "booster",
