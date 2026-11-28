@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T19:30:56.714Z",
+  "updatedAt": "2026-11-28T19:31:28.601Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -443,10 +443,10 @@
       ],
       "hidden": true,
       "releaseDate": "",
-      "condition": "",
-      "lang": "",
-      "cardNo": "",
-      "rarity": "",
+      "condition": "NM",
+      "lang": "EN",
+      "cardNo": "023/182",
+      "rarity": "Double Rare",
       "grade": "",
       "ean": "",
       "maxPerOrder": 0
