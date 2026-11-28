@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T20:26:34.725Z",
+  "updatedAt": "2026-11-28T20:26:50.650Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -31,7 +31,7 @@
     "dispatchCutoff": 14,
     "deliveryText": "1–3 munkanap",
     "bankDetails": "",
-    "stockSyncedAt": "2026-11-28T20:25:43.278Z",
+    "stockSyncedAt": "2026-11-28T20:26:43.260Z",
     "lockerMap": true,
     "vatRate": "27%",
     "invoiceAuto": false,
@@ -671,7 +671,9 @@
       "stock": 1,
       "availability": "in_stock",
       "badge": "",
-      "flags": [],
+      "flags": [
+        "home"
+      ],
       "images": [
         "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@d65371bc16b98d90196614e4e812b9396c6413ec/public/store/images/20-mx0rg1xr-8039nq.png"
       ],
