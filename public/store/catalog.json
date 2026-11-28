@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T14:50:19.336Z",
+  "updatedAt": "2026-11-28T15:03:47.794Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -31,7 +31,7 @@
     "dispatchCutoff": 14,
     "deliveryText": "1–3 munkanap",
     "bankDetails": "",
-    "stockSyncedAt": "2026-11-28T14:49:58.792Z",
+    "stockSyncedAt": "2026-11-28T15:02:51.576Z",
     "lockerMap": true,
     "vatRate": "27%",
     "invoiceAuto": false,
@@ -374,6 +374,32 @@
   },
   "products": [
     {
+      "id": 3,
+      "category": "single",
+      "name": "Pikachu",
+      "set": "30th Celebration",
+      "line": "",
+      "description": "1db kártya",
+      "price": 249,
+      "oldPrice": null,
+      "stock": 1,
+      "availability": "in_stock",
+      "badge": "",
+      "flags": [],
+      "images": [
+        "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@3b2ed2dc74a5d6aed7edac25f16a9f62b389f032/public/store/images/3-mx0jiz8g-0a74xb.png"
+      ],
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "NM",
+      "lang": "EN",
+      "cardNo": "043/128",
+      "rarity": "None",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 0
+    },
+    {
       "id": 2,
       "category": "single",
       "name": "Zapdos",
@@ -382,7 +408,7 @@
       "description": "1db gyűjthető kártyalap",
       "price": 749,
       "oldPrice": null,
-      "stock": 1,
+      "stock": 0,
       "availability": "in_stock",
       "badge": "",
       "flags": [],
