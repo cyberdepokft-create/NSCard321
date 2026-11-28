@@ -4,7 +4,8 @@
  * GET    orders?status=&q=&limit=          rendelések listája
  * GET    orders/ID                         egy rendelés
  * PATCH  orders/ID {status, paid, tracking, carrier, note, notify}
- * POST   orders/ID/invoice                 Billingo számla
+ * POST   orders/ID/invoice                 számla (Számlázz.hu vagy Billingo)
+ * GET    orders/ID/invoice.pdf             a számla PDF-je (Számlázz.hu)
  * POST   orders/ID/resend                  visszaigazolás újraküldése
  * GET    orders.csv | subscribers.csv      export
  * GET    summary                           számok a menühöz és az áttekintéshez
@@ -24,7 +25,9 @@ import { isAdmin, serverAuthReady } from "../../../lib/auth.js";
 import { STATUS, CARRIERS, getOrder, rowToOrder, saveOrder, setStatus } from "../../../lib/orders.js";
 import { sendMail, sendMany, sendBatch, BATCH_LIMIT, mailReady, mailTransport, fromOf, shopEmail, testEmail, shippedEmail, statusEmail, orderConfirmation, backInStockEmail, newsletterEmail } from "../../../lib/mail.js";
 import { maybeInvoice } from "../../../lib/flow.js";
-import { billingoReady, billingoBlocks, createInvoice } from "../../../lib/billingo.js";
+import { billingoReady, billingoBlocks } from "../../../lib/billingo.js";
+import { szamlazzCheck, invoicePdf } from "../../../lib/szamlazz.js";
+import { issueInvoice, invoiceProvider, PROVIDERS } from "../../../lib/invoicing.js";
 
 const csvCell = v => { const s = String(v ?? ""); return /[",;\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
 const csv = (rows, name) => new Response("﻿" + rows.map(r => r.map(csvCell).join(";")).join("\r\n"), {
@@ -106,11 +109,14 @@ export async function onRequest({ request, env, params }) {
       try { billingo.blocks = await billingoBlocks(env); billingo.ok = true; }
       catch (e) { billingo.ok = false; billingo.error = e.message; }
     }
+    const szamlazz = await szamlazzCheck(env);
     const cat = await loadCatalog(request, env).catch(() => ({ settings: {} }));
+    const provider = invoiceProvider(env, cat.settings || {});
     return json({
       db: !!env.DB, mail: mailReady(env), mailTransport: mailTransport(env), mailFrom: mailReady(env) ? fromOf(env, cat.settings || {}) : "", adminEmail: shopEmail(env, cat.settings || {}),
       adminAuth: serverAuthReady(env), github: !!env.GITHUB_TOKEN,
-      stripe: !!env.STRIPE_SECRET_KEY, webhook: !!env.STRIPE_WEBHOOK_SECRET, billingo
+      stripe: !!env.STRIPE_SECRET_KEY, webhook: !!env.STRIPE_WEBHOOK_SECRET, billingo, szamlazz,
+      invoice: { provider, label: PROVIDERS[provider] || "", ok: provider === "szamlazz" ? !!szamlazz.ok : provider === "billingo" ? !!billingo.ok : false }
     });
   }
 
@@ -214,7 +220,7 @@ export async function onRequest({ request, env, params }) {
     if (method === "POST" && action === "invoice") {
       if (o.invoice) return json({ error: `Már van számla: ${o.invoice}` }, 409);
       try {
-        const inv = await createInvoice(env, o, s);
+        const inv = await issueInvoice(env, o, s);
         o.invoice = inv.number;
         o.data.invoice = { ...inv, at: nowIso() };
         delete o.data.invoiceError;
@@ -226,6 +232,15 @@ export async function onRequest({ request, env, params }) {
         await saveOrder(DB, o);
         return json({ error: e.message }, 502);
       }
+    }
+
+    if (method === "GET" && action === "invoice.pdf") {
+      if (!o.invoice) return json({ error: "Ehhez a rendeléshez még nincs számla." }, 404);
+      if (o.data.invoice?.provider !== "szamlazz") return json({ error: "A PDF letöltés a Számlázz.hu számláknál érhető el. A Billingo számlát a Billingo felületén találod." }, 400);
+      try {
+        const pdf = await invoicePdf(env, o.invoice);
+        return new Response(pdf, { headers: { "Content-Type": "application/pdf", "Content-Disposition": `attachment; filename="szamla-${String(o.invoice).replace(/[^\w.-]+/g, "_")}.pdf"`, "Cache-Control": "no-store" } });
+      } catch (e) { return json({ error: e.message }, 502); }
     }
 
     if (method === "POST" && action === "resend") {
