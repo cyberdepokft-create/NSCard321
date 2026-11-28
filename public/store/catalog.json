@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T20:13:35.492Z",
+  "updatedAt": "2026-11-28T20:16:32.199Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -31,7 +31,7 @@
     "dispatchCutoff": 14,
     "deliveryText": "1–3 munkanap",
     "bankDetails": "",
-    "stockSyncedAt": "2026-11-28T20:12:43.002Z",
+    "stockSyncedAt": "2026-11-28T20:15:43.046Z",
     "lockerMap": true,
     "vatRate": "27%",
     "invoiceAuto": false,
@@ -373,6 +373,32 @@
     }
   },
   "products": [
+    {
+      "id": 30,
+      "category": "booster",
+      "name": "Mega Evolutin Booster",
+      "set": "Mega Evolution",
+      "line": "",
+      "description": "1db Mega Evolution Booster",
+      "price": 3350,
+      "oldPrice": null,
+      "stock": 36,
+      "availability": "in_stock",
+      "badge": "",
+      "flags": [],
+      "images": [
+        "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@c399787d3bf6016468a89cc7cd5e789e66be9c27/public/store/images/30-mx0up5sc-bugqqk.png"
+      ],
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "",
+      "lang": "",
+      "cardNo": "",
+      "rarity": "",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 5
+    },
     {
       "id": 29,
       "category": "booster",
