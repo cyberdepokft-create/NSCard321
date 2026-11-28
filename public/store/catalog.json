@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T20:10:32.362Z",
+  "updatedAt": "2026-11-28T20:13:35.492Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -31,7 +31,7 @@
     "dispatchCutoff": 14,
     "deliveryText": "1–3 munkanap",
     "bankDetails": "",
-    "stockSyncedAt": "2026-11-28T20:09:42.943Z",
+    "stockSyncedAt": "2026-11-28T20:12:43.002Z",
     "lockerMap": true,
     "vatRate": "27%",
     "invoiceAuto": false,
@@ -373,6 +373,32 @@
     }
   },
   "products": [
+    {
+      "id": 29,
+      "category": "booster",
+      "name": "Scarlet & Violet Booster",
+      "set": "Scarlet & Violet",
+      "line": "",
+      "description": "1db Scarlet & Violet Booster",
+      "price": 3290,
+      "oldPrice": null,
+      "stock": 36,
+      "availability": "in_stock",
+      "badge": "",
+      "flags": [],
+      "images": [
+        "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@e61e6fe49285f5c8aec9c156c7733a56fdfd5698/public/store/images/29-mx0uldl4-g9b8py.png"
+      ],
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "",
+      "lang": "",
+      "cardNo": "",
+      "rarity": "",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 5
+    },
     {
       "id": 28,
       "category": "booster",
