@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T18:39:36.320Z",
+  "updatedAt": "2026-11-28T18:41:49.800Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -31,7 +31,7 @@
     "dispatchCutoff": 14,
     "deliveryText": "1–3 munkanap",
     "bankDetails": "",
-    "stockSyncedAt": "2026-11-28T18:39:17.432Z",
+    "stockSyncedAt": "2026-11-28T18:41:17.550Z",
     "lockerMap": true,
     "vatRate": "27%",
     "invoiceAuto": false,
@@ -373,6 +373,32 @@
     }
   },
   "products": [
+    {
+      "id": 19,
+      "category": "single",
+      "name": "Mega Mawile ex",
+      "set": "Mega Evolution",
+      "line": "",
+      "description": "1db gyűjthető kártya",
+      "price": 249,
+      "oldPrice": null,
+      "stock": 1,
+      "availability": "in_stock",
+      "badge": "",
+      "flags": [],
+      "images": [
+        "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@de7db5c309a10a6475c1ea48e09d609d18f3ed98/public/store/images/19-mx0rbdas-aw4l4w.png"
+      ],
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "NM",
+      "lang": "EN",
+      "cardNo": "094/132",
+      "rarity": "Double Rare",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 0
+    },
     {
       "id": 18,
       "category": "single",
