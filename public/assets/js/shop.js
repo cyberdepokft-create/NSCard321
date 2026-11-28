@@ -1008,7 +1008,7 @@
           .then(r => r.json().then(d => ({ ok: r.ok, d })))
           .then(({ ok: sent, d }) => {
             if (!sent) throw new Error(d.error || "");
-            f.innerHTML = `<div class="notice success"><strong>Köszönjük, megkaptuk az üzeneted!</strong> Általában 1 munkanapon belül válaszolunk a(z) ${esc(email)} címre.</div>`;
+            f.innerHTML = `<div class="notice success"><strong>Köszönjük, megkaptuk az üzeneted!${d.ref ? ` (${esc(d.ref)})` : ""}</strong> ${d.confirmed ? `Visszaigazolást küldtünk a(z) <strong>${esc(email)}</strong> címre – ha nem látod, nézd meg a Spam mappát is.` : ""} Általában 1 munkanapon belül válaszolunk.</div>`;
           })
           .catch(err => { btn.disabled = false; toast(err.message || "Az üzenet most nem ment el. Próbáld újra, vagy írj e-mailt."); });
         return;
@@ -2176,7 +2176,7 @@
       const res = await fetch("/api/subscribe", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, consent: true, source: f.dataset.source, website: f.website.value }) });
       const d = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(d.error || "");
-      f.innerHTML = `<p class="nf-done">${ICON.check}<span>${esc(d.already ? "Már feliratkoztál, köszönjük!" : d.confirm ? t("news.ok") : t("news.okDirect"))}</span></p>`;
+      f.innerHTML = `<p class="nf-done">${ICON.check}<span>${d.already ? "Már feliratkoztál, köszönjük!" : d.confirm ? `Majdnem kész! Küldtünk egy megerősítő levelet a(z) <strong>${esc(email)}</strong> címre – kattints benne a gombra. Ha nem látod, nézd meg a Spam vagy a Promóciók mappát.` : esc(t("news.okDirect"))}</span></p>`;
     } catch (err) { msg.textContent = err.message || "Most nem sikerült. Próbáld újra később."; btn.disabled = false; }
   });
 
@@ -2491,7 +2491,7 @@
   {
     const hl = new URLSearchParams(location.search).get("hirlevel");
     if (hl) {
-      setTimeout(() => toast(hl === "ok" ? "Feliratkozás megerősítve. Köszönjük!" : hl === "leiratkozva" ? "Leiratkoztál a hírlevélről." : "Ez a link már nem érvényes."), 400);
+      setTimeout(() => toast(hl === "ok" ? "Feliratkozás megerősítve! Küldtünk egy üdvözlő levelet." : hl === "leiratkozva" ? "Leiratkoztál a hírlevélről." : "Ez a link már nem érvényes."), 400);
       history.replaceState(null, "", location.pathname);
     }
   }

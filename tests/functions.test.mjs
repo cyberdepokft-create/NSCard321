@@ -230,6 +230,9 @@ assert.equal(r.status, 404);
 
 // 14. kapcsolat űrlap → admin üzenetek
 r = await call("functions/api/contact.js", "onRequestPost", req("/api/contact", { method: "POST", body: { name: "Kata", email: "kata@example.com", subject: "Előrendelés", message: "Mikor érkezik a következő ETB?" } }));
+assert.match(r.data.ref, /^#\d+$/); assert.equal(r.data.confirmed, true);
+{ const cm = allMails().filter(m => m.to[0] === "kata@example.com").at(-1); assert.match(cm.subject, /Megkaptuk az üzeneted \(#\d+\)/); assert.match(cm.html, /Hivatkozási szám/); assert.match(cm.html, /Mikor érkezik a következő ETB\?/);
+  const am = allMails().filter(m => /^\[#\d+\] Üzenet a webshopból/.test(m.subject)).at(-1); assert.ok(am, "admin értesítő hivatkozási számmal"); assert.equal(am.reply_to, "kata@example.com"); }
 assert.equal(r.data.ok, true); assert.equal(r.data.mailed, true);
 r = await call("functions/api/admin/[[path]].js", "onRequest", req("/api/admin/community", { headers: ADMIN }), { path: ["community"] });
 assert.equal(r.data.messages.length, 1); assert.equal(r.data.messages[0].status, "new");
