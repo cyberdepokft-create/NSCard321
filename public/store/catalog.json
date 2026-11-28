@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T18:13:11.875Z",
+  "updatedAt": "2026-11-28T18:15:45.611Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -31,7 +31,7 @@
     "dispatchCutoff": 14,
     "deliveryText": "1–3 munkanap",
     "bankDetails": "",
-    "stockSyncedAt": "2026-11-28T18:12:17.112Z",
+    "stockSyncedAt": "2026-11-28T18:15:17.385Z",
     "lockerMap": true,
     "vatRate": "27%",
     "invoiceAuto": false,
@@ -373,6 +373,32 @@
     }
   },
   "products": [
+    {
+      "id": 9,
+      "category": "single",
+      "name": "Jellicent ex",
+      "set": "White Flare",
+      "line": "",
+      "description": "1db gyűjthető kártya",
+      "price": 249,
+      "oldPrice": null,
+      "stock": 1,
+      "availability": "in_stock",
+      "badge": "",
+      "flags": [],
+      "images": [
+        "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@5ef27e62f9498a807e9ab80470031a4cf7967220/public/store/images/9-mx0qdtww-aicz4r.png"
+      ],
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "NM",
+      "lang": "EN",
+      "cardNo": "045/086",
+      "rarity": "Double Rare",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 0
+    },
     {
       "id": 8,
       "category": "single",
