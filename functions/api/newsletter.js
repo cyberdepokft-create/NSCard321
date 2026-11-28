@@ -1,8 +1,9 @@
 /* GET /api/newsletter?confirm=TOKEN | ?unsubscribe=TOKEN – megerősítés és leiratkozás, majd vissza a boltba. */
 import { getDb } from "../../lib/db.js";
-import { nowIso } from "../../lib/core.js";
+import { nowIso, loadCatalog } from "../../lib/core.js";
+import { mailReady, sendMail, welcomeEmail } from "../../lib/mail.js";
 
-export async function onRequestGet({ request, env }) {
+export async function onRequestGet({ request, env, waitUntil }) {
   const u = new URL(request.url);
   const go = q => Response.redirect(`${u.origin}/?hirlevel=${q}`, 302);
   const DB = await getDb(env).catch(() => null);
@@ -10,9 +11,17 @@ export async function onRequestGet({ request, env }) {
   const confirm = u.searchParams.get("confirm"), unsub = u.searchParams.get("unsubscribe");
   const token = String(confirm || unsub || "");
   if (!/^[a-f0-9]{16,64}$/.test(token)) return go("hiba");
-  const row = await DB.prepare("SELECT email FROM subscribers WHERE token = ?").bind(token).first();
+  const row = await DB.prepare("SELECT email, confirmed FROM subscribers WHERE token = ?").bind(token).first();
   if (!row) return go("hiba");
-  if (confirm) { await DB.prepare("UPDATE subscribers SET confirmed = 1, unsubscribed = 0, confirmed_at = ? WHERE token = ?").bind(nowIso(), token).run(); return go("ok"); }
+  if (confirm) {
+    await DB.prepare("UPDATE subscribers SET confirmed = 1, unsubscribed = 0, confirmed_at = ? WHERE token = ?").bind(nowIso(), token).run();
+    /* üdvözlő levél csak az első megerősítéskor, az átirányítást nem várakoztatva */
+    if (!row.confirmed && mailReady(env)) {
+      const job = loadCatalog(request, env).then(cat => sendMail(env, cat?.settings || {}, { to: row.email, ...welcomeEmail(cat?.settings || {}, u.origin, token) })).catch(() => {});
+      if (typeof waitUntil === "function") waitUntil(job); else await job;
+    }
+    return go("ok");
+  }
   await DB.prepare("UPDATE subscribers SET unsubscribed = 1 WHERE token = ?").bind(token).run();
   return go("leiratkozva");
 }

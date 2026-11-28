@@ -2,6 +2,9 @@
 import { DatabaseSync } from "node:sqlite";
 import { readFileSync } from "node:fs";
 import assert from "node:assert/strict";
+import { register } from "node:module";
+// a Workers „cloudflare:sockets” modulja Node alatt: a teszt saját álcázott kapcsolatát adja
+register("data:text/javascript," + encodeURIComponent(`export async function resolve(s, c, n) { if (s === "cloudflare:sockets") return { url: "data:text/javascript,export const connect = (...a) => globalThis.__smtpConnect(...a);", shortCircuit: true }; return n(s, c); }`));
 
 const ROOT = process.argv[2] || new URL("..", import.meta.url).pathname.replace(/\/$/, "");
 const imp = p => import(`${ROOT}/${p}`);
@@ -79,7 +82,8 @@ assert.equal(r.status, 200, JSON.stringify(r.data)); assert.match(r.data.id, /^N
 assert.equal(r.data.total, 19990 * 2 - 3998 + 0); // ingyenes szállítás 30 000 felett
 assert.equal(r.data.emailed, true);
 const o1 = r.data.id;
-const mails = calls.filter(c => c.url === "https://api.resend.com/emails").map(c => JSON.parse(c.init.body));
+const allMails = () => calls.filter(c => /^https:\/\/api\.resend\.com\/emails(\/batch)?$/.test(c.url)).flatMap(c => [].concat(JSON.parse(c.init.body)));
+const mails = allMails();
 assert.ok(mails.some(m => m.to[0] === "elek@example.com" && /Rendelés visszaigazolás/.test(m.subject) && /11111111-22222222/.test(m.html)));
 assert.ok(mails.some(m => m.to[0] === "bolt@example.com" && /Új rendelés/.test(m.subject)));
 
@@ -163,7 +167,8 @@ r = await call("functions/api/subscribe.js", "onRequestPost", req("/api/subscrib
 assert.equal(r.status, 400);
 r = await call("functions/api/admin/[[path]].js", "onRequest", req("/api/admin/newsletter", { method: "POST", body: { subject: "Decemberi megjelenések", body: "## Hamarosan\nÚj ETB érkezik." }, headers: ADMIN }), { path: ["newsletter"] });
 assert.equal(r.data.sent, 1);
-const nl = JSON.parse(calls.filter(c => c.url === "https://api.resend.com/emails/batch").at(-1).init.body)[0];
+const nl = allMails().filter(m => m.subject === "Decemberi megjelenések").at(-1);
+assert.ok(allMails().some(m => m.to[0] === "fan@example.com" && /Sikeres feliratkozás/.test(m.subject)), "üdvözlő levél megerősítés után");
 assert.match(nl.html, /unsubscribe=/); assert.match(nl.html, /<h2[^>]*>Hamarosan<\/h2>/);
 
 // 9. újra kapható értesítő
@@ -212,7 +217,7 @@ assert.equal(r.status, 409); assert.match(r.data.error, /legfeljebb 1 db/); asse
 r = await call("functions/api/orders.js", "onRequestPost", req("/api/orders", { method: "POST", body: { items: [{ id: 3, qty: 1 }], customer, shipping: "home", pay: "cod", gift: true, giftMessage: "Boldog karácsonyt!" } }));
 assert.equal(r.status, 200, JSON.stringify(r.data)); assert.equal(r.data.total, 29990 + 2500 + 500 + 990); assert.ok(r.data.token.length >= 16);
 const gid = r.data.id, gtok = r.data.token;
-let rm = JSON.parse(calls.filter(c => c.url === "https://api.resend.com/emails").at(-2).init.body);
+let rm = allMails().filter(m => /Rendelés visszaigazolás/.test(m.subject) && m.html.includes(gid)).at(-1);
 assert.match(rm.html, /Ajándékcsomagolás/); assert.match(rm.html, /rendeles\?id=/);
 r = await call("functions/api/order-status.js", "onRequestGet", req(`/api/order-status?id=${gid}&t=${gtok}`));
 assert.equal(r.status, 200); assert.equal(r.data.order.status, "new"); assert.equal(r.data.order.gift, true); assert.equal(r.data.order.lines.length, 1); assert.equal(r.data.order.email, undefined);
@@ -231,6 +236,93 @@ assert.equal(r.data.messages.length, 1); assert.equal(r.data.messages[0].status,
 await call("functions/api/admin/[[path]].js", "onRequest", req(`/api/admin/messages/${r.data.messages[0].id}`, { method: "PATCH", body: { status: "done" }, headers: ADMIN }), { path: ["messages", String(r.data.messages[0].id)] });
 r = await call("functions/api/admin/[[path]].js", "onRequest", req("/api/admin/summary", { headers: ADMIN }), { path: ["summary"] });
 assert.equal(r.data.newMessages, 0); assert.ok(r.data.daily.length >= 1); assert.ok(r.data.top.length >= 1);
+
+// Gmail SMTP: álcázott SMTP szerver
+function fakeSmtp({ failAuth = false } = {}) {
+  const log = [], mails = [], sessions = [];
+  const make = () => {
+    let enqueue, mode = "cmd", data = "";
+    const readable = new ReadableStream({ start(c) { enqueue = t => c.enqueue(new TextEncoder().encode(t)); } });
+    const say = t => setTimeout(() => enqueue(t), 0);
+    say("220 smtp.gmail.com ESMTP ready\r\n");
+    const writable = new WritableStream({ write(chunk) {
+      const t = new TextDecoder().decode(chunk);
+      if (mode === "data") { data += t; if (data.endsWith("\r\n.\r\n")) { mails.push(data); data = ""; mode = "cmd"; say("250 2.0.0 OK queued\r\n"); } return; }
+      for (const line of t.split("\r\n").filter(Boolean)) {
+        log.push(line);
+        if (/^EHLO/.test(line)) say("250-smtp.gmail.com at your service\r\n250-AUTH LOGIN PLAIN XOAUTH2\r\n250 SMTPUTF8\r\n");
+        else if (/^AUTH PLAIN/.test(line)) say(failAuth ? "535-5.7.8 Username and Password not accepted.\r\n535 5.7.8 BadCredentials\r\n" : "235 2.7.0 Accepted\r\n");
+        else if (/^MAIL FROM/.test(line)) say("250 OK\r\n");
+        else if (/^RCPT TO/.test(line)) say(/bad@/.test(line) ? "550 5.1.1 The email account does not exist\r\n" : "250 OK\r\n");
+        else if (line === "DATA") { mode = "data"; say("354 Go ahead\r\n"); }
+        else if (line === "RSET" || line === "QUIT") say(line === "RSET" ? "250 OK\r\n" : "221 bye\r\n");
+      }
+    } });
+    return { readable, writable, close() {} };
+  };
+  return { log, mails, sessions, connect: (addr, opts) => { sessions.push({ addr, opts }); return make(); } };
+}
+const decodePart = (raw, type) => {
+  const m = new RegExp(`Content-Type: ${type}; charset=UTF-8\\r\\nContent-Transfer-Encoding: base64\\r\\n\\r\\n([A-Za-z0-9+/=\\r\\n]+)`).exec(raw);
+  return m ? Buffer.from(m[1].replace(/\r\n/g, ""), "base64").toString("utf8") : "";
+};
+{
+  const { smtpSend, encodeHeader } = await imp("lib/smtp.js");
+  const smtpEnv = { SMTP_USER: "infonscard@gmail.com", SMTP_PASS: "abcd efgh ijkl mnop" };
+  let f = fakeSmtp();
+  let r = await smtpSend(smtpEnv, "NS Card <infonscard@gmail.com>", [
+    { to: "vevo@example.com", subject: "Rendelés visszaigazolás – NSC-1", html: "<p>Köszönjük!</p>", text: "Köszönjük!", replyTo: "infonscard@gmail.com" },
+    { to: "bad@example.com", subject: "x", html: "<p>x</p>", text: "x" },
+    { to: "Teszt Elek <masik@example.com>", subject: "Árvíztűrő tükörfúrógép ".repeat(4), html: "<p>.pont a sor elején</p>\n.\nvége", text: ".\nvége" }
+  ], { connectFn: f.connect });
+  assert.equal(r.sent, 2); assert.equal(r.results[1].ok, false); assert.match(r.results[1].error, /550/);
+  assert.equal(f.sessions.length, 1); assert.deepEqual(f.sessions[0].addr, { hostname: "smtp.gmail.com", port: 465 }); assert.equal(f.sessions[0].opts.secureTransport, "on");
+  assert.ok(f.log.includes(`AUTH PLAIN ${Buffer.from("\0infonscard@gmail.com\0abcdefghijklmnop").toString("base64")}`), "a szóközöket az alkalmazásjelszóból eltávolítja");
+  assert.equal(f.log.filter(l => l === "MAIL FROM:<infonscard@gmail.com>").length, 3); assert.ok(f.log.includes("RSET")); assert.ok(f.log.includes("RCPT TO:<masik@example.com>"));
+  assert.equal(f.mails.length, 2);
+  assert.match(f.mails[0], /^From: NS Card <infonscard@gmail\.com>\r\nTo: <vevo@example\.com>\r\nReply-To: <infonscard@gmail\.com>\r\nSubject: =\?UTF-8\?B\?/);
+  assert.equal(decodePart(f.mails[0], "text/html"), "<p>Köszönjük!</p>"); assert.equal(decodePart(f.mails[0], "text/plain"), "Köszönjük!");
+  assert.match(f.mails[1], /To: =\?UTF-8\?B\?[^\r]+\?= <masik@example\.com>|To: Teszt Elek <masik@example\.com>/);
+  assert.ok(!/\r\n\.\r\n[^]/.test(f.mails[1].slice(0, -5)), "pont-duplázás: a levél közepén nincs magányos pont sor");
+  const subj = /Subject: ([^]*?)\r\n(?!\s)/.exec(f.mails[1])[1];
+  assert.equal(subj.split(/\r\n /).map(w => Buffer.from(w.replace(/^=\?UTF-8\?B\?|\?=$/g, ""), "base64").toString("utf8")).join(""), "Árvíztűrő tükörfúrógép ".repeat(4));
+  assert.equal(encodeHeader("NS Card"), "NS Card");
+  // hibás alkalmazásjelszó: érthető hiba
+  f = fakeSmtp({ failAuth: true });
+  r = await smtpSend(smtpEnv, "NS Card <infonscard@gmail.com>", [{ to: "vevo@example.com", subject: "x", html: "x" }], { connectFn: f.connect });
+  assert.equal(r.ok, false); assert.match(r.error, /alkalmazásjelszó/);
+
+  // a webshop levelei Gmailen: rendelés → vásárló + bolt egy kapcsolaton, a feladó a Gmail cím
+  f = fakeSmtp();
+  const saved = { RESEND_API_KEY: env.RESEND_API_KEY };
+  delete env.RESEND_API_KEY;
+  Object.assign(env, smtpEnv, { __smtpConnect: f.connect });
+  r = await call("functions/api/orders.js", "onRequestPost", req("/api/orders", { method: "POST", headers: { "CF-Connecting-IP": "5.5.5.5" }, body: { items: [{ id: 3, qty: 1 }], customer: { ...customer, email: "gmailes@example.com" }, shipping: "home", pay: "transfer" } }));
+  assert.equal(r.status, 200, JSON.stringify(r.data)); assert.equal(r.data.emailed, true);
+  assert.equal(f.sessions.length, 1); assert.equal(f.mails.length, 2);
+  assert.ok(f.log.includes("RCPT TO:<gmailes@example.com>") && f.log.includes("RCPT TO:<bolt@example.com>"));
+  const conf = decodePart(f.mails[0], "text/html"), confText = decodePart(f.mails[0], "text/plain");
+  assert.match(conf, /Köszönjük a rendelést/); assert.match(conf, /Utalási adatok/); assert.match(conf, /Mi történik ezután\?/); assert.match(conf, /Rendelés követése/);
+  assert.match(confText, /Utalási adatok/); assert.doesNotMatch(confText, /<td|<table/); assert.match(confText, /Rendelés követése \(https:\/\/nscard-webshop\.pages\.dev\/rendeles\?id=/);
+  assert.match(decodePart(f.mails[1], "text/html"), /Új rendelés/); assert.match(f.mails[1], /Reply-To: <gmailes@example\.com>/);
+  // próbalevél az adminból (adatbázis nélkül is)
+  f = fakeSmtp(); env.__smtpConnect = f.connect;
+  r = await call("functions/api/admin/[[path]].js", "onRequest", req("/api/admin/test-mail", { method: "POST", headers: ADMIN, body: { to: "bence@example.com" } }), { path: ["test-mail"] });
+  assert.equal(r.status, 200, JSON.stringify(r.data)); assert.equal(r.data.from, "NS Card <infonscard@gmail.com>");
+  assert.match(decodePart(f.mails[0], "text/html"), /A levelezés működik/);
+  r = await call("functions/api/admin/[[path]].js", "onRequest", req("/api/admin/integrations", { headers: ADMIN }), { path: ["integrations"] });
+  assert.equal(r.data.mailTransport, "gmail"); assert.equal(r.data.mailFrom, "NS Card <infonscard@gmail.com>"); assert.equal(r.data.adminEmail, "bolt@example.com");
+  // hírlevél részletekben: aki megkapta, annak nem megy újra
+  for (const [i, em] of ["h1@example.com", "h2@example.com", "h3@example.com"].entries()) await env.DB.prepare("INSERT INTO subscribers (email, token, confirmed, unsubscribed, created_at) VALUES (?, ?, 1, 0, ?)").bind(em, String(i).repeat(32), new Date().toISOString()).run().catch(e => { throw e; });
+  f = fakeSmtp(); env.__smtpConnect = f.connect;
+  const nl = { subject: "Új szett érkezik", body: "## Hamarosan\nElőrendelhető az új ETB." };
+  r = await call("functions/api/admin/[[path]].js", "onRequest", req("/api/admin/newsletter", { method: "POST", headers: ADMIN, body: nl }), { path: ["newsletter"] });
+  assert.equal(r.status, 200, JSON.stringify(r.data)); assert.ok(r.data.sent >= 3); assert.equal(r.data.left, 0);
+  assert.match(f.mails[0], /List-Unsubscribe: <https:\/\/nscard-webshop\.pages\.dev\/api\/newsletter\?unsubscribe=/);
+  r = await call("functions/api/admin/[[path]].js", "onRequest", req("/api/admin/newsletter", { method: "POST", headers: ADMIN, body: nl }), { path: ["newsletter"] });
+  assert.equal(r.data.done, true);
+  delete env.SMTP_USER; delete env.SMTP_PASS; delete env.__smtpConnect; Object.assign(env, saved);
+}
 
 // szerveres belépés és publikálás (ADMIN_PASSWORD + GITHUB_TOKEN a Cloudflare-ben)
 {

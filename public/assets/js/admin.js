@@ -346,6 +346,45 @@
     return Math.max(n, orderChanged ? 1 : 0);
   }
 
+  /* Háromutas összefésülés: ha a bolt közben máshonnan frissült (másik eszköz, új cikkek, beállítások),
+   * a piszkozatban NEM módosított termékek és beállítások a friss változatot kapják, a módosítottak a piszkozatét.
+   * base: amiből a piszkozat indult (régi piszkozatnál nincs meg – ilyenkor óvatos szabályok). */
+  const same = (a, b) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+  const isEmpty = v => v == null || v === "" || (Array.isArray(v) && !v.length) || (typeof v === "object" && !Array.isArray(v) && !Object.keys(v).length);
+  function mergeLists(b, r, d, key) {
+    const bm = new Map((b || []).map(x => [x[key], x])), rm = new Map((r || []).map(x => [x[key], x]));
+    const out = [];
+    for (const x of d || []) {
+      const k = x[key], rx = rm.get(k), bx = bm.get(k);
+      if (rx) out.push(b ? (same(x, bx) ? rx : x) : rx);         /* régi piszkozatnál a friss változat nyer */
+      else if (!b || !bx || !same(x, bx)) out.push(x);             /* új, vagy módosított (máshol törölt) elem */
+    }
+    for (const rx of r || []) if (!out.some(x => x[key] === rx[key]) && !(b && bm.has(rx[key]))) out.push(rx);
+    return out;
+  }
+  function mergeCatalog(base, remote, draft) {
+    const bp = base ? new Map(base.products.map(x => [x.id, x])) : null;
+    const rp = new Map(remote.products.map(x => [x.id, x]));
+    const products = [];
+    for (const x of draft.products) {
+      const rx = rp.get(x.id), bx = bp?.get(x.id);
+      if (rx) products.push(bp && bx && same(x, bx) ? rx : x);
+      else if (!bp || !bx || !same(x, bx)) products.push(x);
+    }
+    for (const rx of remote.products) if (!products.some(x => x.id === rx.id) && !(bp && bp.has(rx.id))) products.push(rx);
+    const settings = {};
+    const keys = new Set([...Object.keys(remote.settings || {}), ...Object.keys(draft.settings || {})]);
+    for (const k of keys) {
+      const d = draft.settings?.[k], r = remote.settings?.[k], b = base?.settings?.[k];
+      if (k === "posts") settings[k] = mergeLists(base?.settings?.posts, r, d, "slug");
+      else if (k === "releases") settings[k] = mergeLists(base?.settings?.releases, r, d, "id");
+      else if (k === "stockSyncedAt") settings[k] = r ?? d;
+      else if (base) settings[k] = same(d, b) ? r : d;
+      else settings[k] = isEmpty(d) && !isEmpty(r) ? r : d === undefined ? r : d;
+    }
+    return { products, settings };
+  }
+
   async function loadLive() {
     const live = await N.fetchPublished({ fresh: true });
     state.live = { products: live.products, settings: live.settings, updatedAt: live.updatedAt, source: live.source };
@@ -353,6 +392,12 @@
     const clean = saved ? N.sanitizePayload(saved) : null;
     state.draft = clean ? { products: clean.products, settings: clean.settings } : N.clone({ products: state.live.products, settings: state.live.settings });
     state.draftBase = saved?.base || null;
+    /* a piszkozat egy régebbi boltállapotra épül: összefésüljük a frisssel, hogy publikáláskor semmi ne vesszen el */
+    if (clean && live.source === "remote" && saved.base !== live.updatedAt) {
+      const baseSnap = saved.baseSnap && saved.baseSnap.updatedAt === saved.base ? N.sanitizePayload(saved.baseSnap) : null;
+      state.draft = N.sanitizePayload(mergeCatalog(baseSnap, state.live, state.draft)) || state.draft;
+      state.merged = true;
+    }
   }
 
   let publishTimer = 0;
@@ -360,7 +405,7 @@
     if (!isDirty()) {
       N.store.del(N.KEYS.draft);
     } else {
-      const ok = N.store.set(N.KEYS.draft, { version: N.VERSION, products: state.draft.products, settings: state.draft.settings, base: state.live.updatedAt, savedAt: new Date().toISOString() });
+      const ok = N.store.set(N.KEYS.draft, { version: N.VERSION, products: state.draft.products, settings: state.draft.settings, base: state.live.updatedAt, baseSnap: { products: state.live.products, settings: state.live.settings, updatedAt: state.live.updatedAt }, savedAt: new Date().toISOString() });
       if (!ok) toast("A böngésző tárhelye megtelt (sok új kép). Publikálj most, hogy a képek feltöltődjenek.", true);
     }
     renderStatus();
@@ -441,6 +486,17 @@
         setProgress(`Képek feltöltése (${done}/${pending.length})`, 5 + Math.round(done / pending.length * 75));
       }
       setProgress("Katalógus mentése", 85);
+      /* ha a bolt közben máshonnan frissült, előbb összefésülünk, hogy ne írjuk felül a másik változtatást */
+      try {
+        const cur = await gh(`/contents/${encPath(g.path)}?ref=${encodeURIComponent(g.branch)}`, { allow404: true });
+        if (cur?.content) {
+          const remote = N.sanitizePayload(JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(cur.content.replace(/\s/g, "")), c => c.charCodeAt(0)))));
+          if (remote?.updatedAt && state.live?.updatedAt && remote.updatedAt !== state.live.updatedAt) {
+            state.draft = N.sanitizePayload(mergeCatalog({ products: state.live.products, settings: state.live.settings }, remote, state.draft)) || state.draft;
+            toast("A bolt közben máshonnan is frissült – a változtatásokat összefésültük.");
+          }
+        }
+      } catch (e) { if (e.status === 401) throw e; }
       const before = state.live?.products || [];
       const payload = N.buildPayload(state.draft.products, state.draft.settings, { updatedBy: "NS Card admin" });
       await putFile(g.path, b64FromString(JSON.stringify(payload, null, 2)), `Katalógus frissítése – ${new Date().toLocaleString("hu-HU")}`);
@@ -2007,6 +2063,7 @@ A termék átvételétől számított 14 napon belül indoklás nélkül elállh
     renderStatus();
     if (hasAuth()) syncStock();
     window.NSCAdminOps?.start();
+    if (state.merged && isDirty()) setTimeout(() => toast("A bolt közben frissült – a nem publikált módosításaidat összefésültük a friss változattal."), 600);
     if (hasAuth()) verifyGh().then(() => { renderGhPill(); if (state.view === "attekintes") renderDashboard(); });
     else state.ghState = "none";
   }

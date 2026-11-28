@@ -97,3 +97,16 @@ Ha a Cloudflare-ben (nscard-webshop → Settings → Variables and Secrets, Prod
 - jelszócsere: az `ADMIN_PASSWORD` értékének cseréje + Retry deployment; ekkor minden munkamenet lejár.
 
 Beállítás nélkül minden a régi módon működik (böngészőnként beillesztett GitHub token).
+
+### 5.3: levelezés Gmailen (infonscard@gmail.com)
+A webshop levelei a bolt Gmail címéről mennek (Gmail SMTP, `smtp.gmail.com:465`), így a feladó és a válaszcím is a Gmail cím, és az elküldött levelek a Gmail „Elküldött” mappájában is megjelennek.
+
+| Név | Típus | Érték |
+|---|---|---|
+| `SMTP_USER` | Text | `infonscard@gmail.com` |
+| `SMTP_PASS` | Secret | Gmail **alkalmazásjelszó** (Google-fiók → Biztonság → kétlépcsős azonosítás → Alkalmazásjelszavak) |
+
+Levelek: rendelés visszaigazolás (utalási adatokkal, tételek képpel, szállítás/számlázás, „mi történik ezután”), új rendelés értesítő a boltnak, fizetés beérkezett, csomagolva, feladva (csomagkövetéssel), teljesítve (értékelés kérés), lemondva, újra kapható, feliratkozás megerősítés + üdvözlő levél, hírlevél (List-Unsubscribe), kapcsolat űrlap (értesítő + automatikus válasz), új vélemény. Mindegyik HTML + szöveges változatban.
+A Gmail napi korlátja kb. 500 címzett: a hírlevél egyszerre legfeljebb 80 címzettnek megy ki, az újbóli Küldés a hátralévőknek folytatja.
+Próbalevél: admin → Beállítások → Szolgáltatások → E-mail küldés → Próbalevél küldése.
+Resend továbbra is használható (`RESEND_API_KEY`), ha nincs SMTP beállítva.

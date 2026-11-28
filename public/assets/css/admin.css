@@ -967,3 +967,5 @@ em.ok { font-style: normal; color: var(--clover); }
 [hidden] { display: none !important; }
 .notice { padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255, 255, 255, .04); margin: 10px 0 14px; line-height: 1.5; }
 .notice.warn { border-color: color-mix(in srgb, #ffd23f 45%, transparent); background: rgba(255, 210, 63, .07); }
+.test-mail { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 4px; }
+.test-mail .input { flex: 1 1 220px; min-width: 0; }

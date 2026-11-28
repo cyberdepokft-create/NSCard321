@@ -498,7 +498,7 @@
     box.innerHTML = `<div class="int-list">
       ${row(i.adminAuth && i.github ? true : i.adminAuth || i.github ? "warn" : false, "Belépés és publikálás a szerveren", i.adminAuth && i.github ? "A jelszó és a GitHub token a Cloudflare-ben van – bármelyik eszközről belépve publikálhatsz." : "A jelszó és a GitHub token a Cloudflare-ben, a kódból nem kiolvasható helyen.", i.adminAuth && i.github ? "" : `<ol class="howto">${i.adminAuth ? "" : `<li>${cfSecret("ADMIN_PASSWORD")} – az új admin jelszó. Felhasználónév: <code>ADMIN_USER</code> (Text, alapból NSadmin).</li>`}${i.github ? "" : `<li>${cfSecret("GITHUB_TOKEN")} – a Publikálás oldalon lévő „Token létrehozása” gombbal készítsd el.</li>`}<li>${retry}</li></ol>`)}
       ${row(i.db, "Rendelések adatbázisa (D1)", "Rendelések, készletfoglalás, vélemények, hírlevél, értesítők.", i.db ? "" : `<ol class="howto"><li>Cloudflare → <strong>Storage &amp; Databases → D1 SQL Database → Create</strong>, név: <code>nscard</code>.</li><li>nscard-webshop → <strong>Settings → Bindings → Add → D1 database</strong>, Variable name: <code>DB</code>.</li><li>${retry}</li></ol>`)}
-      ${row(i.mail, "E-mail küldés (Resend)", i.mail ? `Feladó: ${esc(i.mailFrom || "NS Card <rendeles@nscard.hu>")}` : "Visszaigazolások, feladási értesítő, hírlevél, „újra kapható” levelek.", i.mail ? "" : `<ol class="howto"><li>Regisztrálj a <a class="link" href="https://resend.com/signup" target="_blank" rel="noopener">resend.com</a> oldalon (havi 3000 levél ingyenes).</li><li>Resend → <strong>Domains → Add domain</strong>: <code>nscard.hu</code>. A megadott DNS rekordokat vedd fel a Cloudflare DNS-ben (a domain aktiválása után).</li><li>Resend → <strong>API Keys → Create</strong>, majd ${cfSecret("RESEND_API_KEY")}.</li><li>Nem kötelező: <code>MAIL_FROM</code> (pl. <code>NS Card &lt;rendeles@nscard.hu&gt;</code>) és <code>ADMIN_EMAIL</code> (ide jön az új rendelés értesítő; alapból a bolt e-mail címe).</li><li>${retry}</li></ol>`)}
+      ${row(i.mail, "E-mail küldés", i.mail ? `Feladó: <strong>${esc(i.mailFrom)}</strong>${i.mailTransport === "gmail" ? " (Gmail)" : i.mailTransport === "resend" ? " (Resend)" : ""}. Az új rendelések és üzenetek ide érkeznek: <strong>${esc(i.adminEmail || "–")}</strong>.` : "Rendelés visszaigazolás, fizetés és feladás értesítő, „újra kapható” levél, hírlevél, kapcsolat űrlap.", i.mail ? `<form class="test-mail" data-test-mail><input class="input" type="email" name="to" placeholder="${esc(i.adminEmail || "cimzett@example.com")}" aria-label="Próbalevél címzettje"><button class="btn btn-ghost btn-sm" type="submit">Próbalevél küldése</button></form>${i.mailTransport === "gmail" ? '<p class="hint">A Gmail naponta kb. 500 címzettnek enged levelet küldeni; a hírlevél ezért részletekben, egyszerre legfeljebb 80 címzettnek megy ki.</p>' : ""}` : `<ol class="howto"><li>Lépj be a bolt Gmail fiókjába (pl. <code>infonscard@gmail.com</code>), és kapcsold be a <strong>kétlépcsős azonosítást</strong>: <a class="link" href="https://myaccount.google.com/signinoptions/twosv" target="_blank" rel="noopener">Google-fiók → Biztonság</a>.</li><li>Készíts <strong>alkalmazásjelszót</strong>: <a class="link" href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener">myaccount.google.com/apppasswords</a>, név: <code>NS Card webshop</code>. A 16 karakteres kódot másold ki.</li><li>Cloudflare → nscard-webshop → Settings → Variables and Secrets: <code>SMTP_USER</code> (Text) = a Gmail cím, <code>SMTP_PASS</code> (Secret) = az alkalmazásjelszó.</li><li>${retry} Utána itt küldj próbalevelet.</li></ol>`)}
       ${row(i.stripe ? (i.webhook ? true : "warn") : false, "Kártyás fizetés (Stripe)", i.stripe ? (i.webhook ? "Kulcs és webhook rendben." : "A kulcs megvan. A webhook ajánlott, hogy a fizetés akkor is rögzüljön, ha a vásárló bezárja az ablakot.") : "A kulcs beállítását a Fizetési módoknál találod.", i.webhook ? "" : `<ol class="howto"><li>Stripe → <strong>Developers → Webhooks → Add endpoint</strong>: <code>${esc(origin)}/api/stripe-webhook</code></li><li>Események: <code>checkout.session.completed</code>, <code>checkout.session.async_payment_succeeded</code>, <code>checkout.session.expired</code>.</li><li>A „Signing secret” (<code>whsec_…</code>): ${cfSecret("STRIPE_WEBHOOK_SECRET")}. ${retry}</li></ol>`)}
       ${row(i.billingo?.ok ? true : false, "Számlázás (Billingo)", i.billingo?.ok ? `${i.billingo.blocks.length} számlatömb elérhető.` : i.billingo?.configured ? esc(i.billingo.error || "A kulcs nem működik.") : "Számla egy kattintással vagy automatikusan fizetéskor.", i.billingo?.ok ? "" : `<ol class="howto"><li>Billingo → <strong>Beállítások → API</strong> (vagy Integrációk → API) → új API kulcs (az API használatához megfelelő előfizetés kell).</li><li>${cfSecret("BILLINGO_API_KEY")}. ${retry}</li><li>Fent a „Számlázás – Billingo” résznél állítsd be az ÁFA-t és a számlatömböt.</li></ol>`)}
       <details class="int-row"><summary><span class="pill in">Kész</span><b>Termék feedek</b><small>Google Shopping, Árukereső, ÁrGép – élő készlettel, 15 percenként frissül.</small></summary>
@@ -647,6 +647,15 @@
     if (el.matches("[data-copy]")) { try { await navigator.clipboard.writeText(el.dataset.copy); toast("Vágólapra másolva."); } catch { toast(el.dataset.copy); } }
   });
   document.addEventListener("submit", async e => {
+    if (e.target.matches("[data-test-mail]")) {
+      e.preventDefault();
+      const f = e.target, b = $("button", f);
+      b.disabled = true;
+      try { const r = await api("test-mail", { method: "POST", body: JSON.stringify({ to: f.to.value.trim() }) }); toast(`Próbalevél elküldve: ${r.to}. Nézd meg a beérkezett leveleket (és a Spam mappát).`); }
+      catch (err) { toast(err.message, true); }
+      b.disabled = false;
+      return;
+    }
     const f = e.target;
     if (f.matches("[data-op-ship]")) {
       e.preventDefault();
@@ -659,7 +668,12 @@
       if (!f.subject.value.trim() || f.body.value.trim().length < 10) { toast("Adj meg tárgyat és szöveget.", true); return; }
       const n = ops.community?.subStats?.active || 0;
       if (!(await confirmDialog({ title: "Elküldöd a hírlevelet?", text: `${n} feliratkozó kapja meg. Ezt nem lehet visszavonni.`, yes: "Küldés", danger: false }))) return;
-      try { const r = await api("newsletter", { method: "POST", body: JSON.stringify({ subject: f.subject.value, body: f.body.value }) }); toast(`Hírlevél elküldve ${r.sent} címzettnek.`); f.reset(); } catch (err) { toast(err.message, true); }
+      try {
+        const r = await api("newsletter", { method: "POST", body: JSON.stringify({ subject: f.subject.value, body: f.body.value }) });
+        if (r.done) toast("Ezt a hírlevelet már mindenki megkapta.");
+        else if (r.left > 0) toast(`${r.sent} címzettnek elküldve, ${r.left} még hátravan. A Gmail korlát miatt kicsit később nyomd meg újra a Küldést – aki már megkapta, annak nem megy újra.`);
+        else { toast(`Hírlevél elküldve ${r.sent} címzettnek.`); f.reset(); }
+      } catch (err) { toast(err.message, true); }
       return;
     }
     if (f.matches("[data-post-form]")) {

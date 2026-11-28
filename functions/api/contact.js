@@ -1,7 +1,7 @@
 /* POST /api/contact – üzenet a kapcsolat űrlapról. Az admin Közösség → Üzenetek fülén jelenik meg, és e-mailben is értesít. */
 import { json, readJson, clientIp, clean, cleanText, validEmail, nowIso, loadCatalog, originOf } from "../../lib/core.js";
 import { getDb, rateLimit } from "../../lib/db.js";
-import { sendMail, contactAdminEmail, contactAutoReply, mailReady } from "../../lib/mail.js";
+import { sendMany, contactAdminEmail, contactAutoReply, mailReady, shopEmail } from "../../lib/mail.js";
 
 export async function onRequestPost({ request, env }) {
   const DB = await getDb(env).catch(() => null);
@@ -21,9 +21,13 @@ export async function onRequestPost({ request, env }) {
   const base = originOf(request);
   const pname = m.productId ? catalog.products.find(p => Number(p.id) === m.productId)?.name || "" : "";
   let mailed = false;
-  const to = env.ADMIN_EMAIL || s.email;
-  if (to && mailReady(env)) mailed = (await sendMail(env, s, { to, ...contactAdminEmail(s, base, m, pname), replyTo: m.email })).ok;
-  if (mailReady(env)) await sendMail(env, s, { to: m.email, ...contactAutoReply(s, base, m) });
+  if (mailReady(env)) {
+    const to = shopEmail(env, s);
+    const msgs = [{ to: m.email, ...contactAutoReply(s, base, m) }];
+    if (to) msgs.unshift({ to, ...contactAdminEmail(s, base, m, pname), replyTo: m.email });
+    const r = await sendMany(env, s, msgs);
+    mailed = to ? !!r.results[0]?.ok : false;
+  }
   return json({ ok: true, mailed });
 }
 

@@ -18,11 +18,11 @@
  * GET    github                            a bolt repója (a szerver GITHUB_TOKEN-jével)
  * GET|PUT github/contents/PATH             katalógus és képek olvasása/írása – csak a katalógus mappájában
  */
-import { json, readJson, loadCatalog, originOf, nowIso, clean, cleanText, validEmail, absUrl, remoteConfig } from "../../../lib/core.js";
+import { json, readJson, loadCatalog, originOf, nowIso, clean, cleanText, validEmail, absUrl, remoteConfig, sha256Hex } from "../../../lib/core.js";
 import { getDb, soldSince } from "../../../lib/db.js";
 import { isAdmin, serverAuthReady } from "../../../lib/auth.js";
 import { STATUS, CARRIERS, getOrder, rowToOrder, saveOrder, setStatus } from "../../../lib/orders.js";
-import { sendMail, sendBatch, mailReady, shippedEmail, statusEmail, orderConfirmation, backInStockEmail, newsletterEmail } from "../../../lib/mail.js";
+import { sendMail, sendMany, sendBatch, BATCH_LIMIT, mailReady, mailTransport, fromOf, shopEmail, testEmail, shippedEmail, statusEmail, orderConfirmation, backInStockEmail, newsletterEmail } from "../../../lib/mail.js";
 import { maybeInvoice } from "../../../lib/flow.js";
 import { billingoReady, billingoBlocks, createInvoice } from "../../../lib/billingo.js";
 
@@ -106,11 +106,24 @@ export async function onRequest({ request, env, params }) {
       try { billingo.blocks = await billingoBlocks(env); billingo.ok = true; }
       catch (e) { billingo.ok = false; billingo.error = e.message; }
     }
+    const cat = await loadCatalog(request, env).catch(() => ({ settings: {} }));
     return json({
-      db: !!env.DB, mail: mailReady(env), mailFrom: env.MAIL_FROM || "", adminEmail: env.ADMIN_EMAIL || "",
+      db: !!env.DB, mail: mailReady(env), mailTransport: mailTransport(env), mailFrom: mailReady(env) ? fromOf(env, cat.settings || {}) : "", adminEmail: shopEmail(env, cat.settings || {}),
       adminAuth: serverAuthReady(env), github: !!env.GITHUB_TOKEN,
       stripe: !!env.STRIPE_SECRET_KEY, webhook: !!env.STRIPE_WEBHOOK_SECRET, billingo
     });
+  }
+
+  /* próbalevél a beállított levelezéssel (adatbázis nélkül is) */
+  if (head === "test-mail" && method === "POST") {
+    if (!mailReady(env)) return json({ error: "A levelezés még nincs beállítva (SMTP_USER + SMTP_PASS vagy RESEND_API_KEY)." }, 400);
+    const b = await readJson(request, 2000) || {};
+    const cat = await loadCatalog(request, env, { fresh: true }).catch(() => ({ settings: {} }));
+    const s = cat.settings || {};
+    const to = validEmail(String(b.to || "").trim()) ? String(b.to).trim() : shopEmail(env, s);
+    if (!to) return json({ error: "Adj meg címzettet." }, 400);
+    const r = await sendMail(env, s, { to, ...testEmail(s, base, env) });
+    return r.ok ? json({ ok: true, to, from: fromOf(env, s) }) : json({ error: r.error || "A küldés nem sikerült." }, 502);
   }
 
   const DB = await getDb(env).catch(() => null);
@@ -216,7 +229,7 @@ export async function onRequest({ request, env, params }) {
     }
 
     if (method === "POST" && action === "resend") {
-      if (!mailReady(env)) return json({ error: "Az e-mail küldés nincs beállítva (RESEND_API_KEY)." }, 503);
+      if (!mailReady(env)) return json({ error: "Az e-mail küldés nincs beállítva (Gmail: SMTP_USER + SMTP_PASS)." }, 503);
       const r = await sendMail(env, s, { to: o.email, ...orderConfirmation(s, base, o) });
       if (!r.ok) return json({ error: r.error }, 502);
       o.data.emailed = { ...(o.data.emailed || {}), customer: nowIso() };
@@ -274,7 +287,7 @@ export async function onRequest({ request, env, params }) {
   }
 
   if (head === "newsletter" && method === "POST") {
-    if (!mailReady(env)) return json({ error: "Az e-mail küldés nincs beállítva (RESEND_API_KEY)." }, 503);
+    if (!mailReady(env)) return json({ error: "Az e-mail küldés nincs beállítva (Gmail: SMTP_USER + SMTP_PASS)." }, 503);
     const b = await readJson(request, 60000) || {};
     const subject = clean(b.subject, 140);
     const body = cleanText(b.body, 30000);
@@ -285,11 +298,19 @@ export async function onRequest({ request, env, params }) {
       const r = await sendMail(env, s, { to: b.test, ...m });
       return r.ok ? json({ ok: true, sent: 1, test: true }) : json({ error: r.error }, 502);
     }
-    const { results } = await DB.prepare("SELECT email, token FROM subscribers WHERE confirmed = 1 AND unsubscribed = 0").all();
-    if (!results?.length) return json({ error: "Még nincs megerősített feliratkozó." }, 400);
+    /* egy hírlevél = tárgy + szöveg; aki már megkapta, annak nem megy újra – így a Gmail korlát miatt részletekben is küldhető */
+    const campaign = (await sha256Hex(`${subject}\n${body}`)).slice(0, 24);
+    const { results } = await DB.prepare("SELECT s.email, s.token FROM subscribers s WHERE s.confirmed = 1 AND s.unsubscribed = 0 AND NOT EXISTS (SELECT 1 FROM newsletter_sends n WHERE n.campaign = ? AND n.email = s.email)").bind(campaign).all();
+    if (!results?.length) {
+      const total = (await DB.prepare("SELECT COUNT(*) AS n FROM subscribers WHERE confirmed = 1 AND unsubscribed = 0").first())?.n || 0;
+      return total ? json({ ok: true, sent: 0, left: 0, done: true }) : json({ error: "Még nincs megerősített feliratkozó." }, 400);
+    }
     const msgs = results.map(r => ({ to: r.email, ...newsletterEmail(s, base, { subject, body }, r.token) }));
-    const r = await sendBatch(env, s, msgs);
-    return r.ok ? json({ ok: true, sent: r.sent }) : json({ error: r.error, sent: r.sent }, 502);
+    const r = await sendMany(env, s, msgs.slice(0, BATCH_LIMIT));
+    const ok = msgs.slice(0, BATCH_LIMIT).filter((m, i) => r.results[i]?.ok);
+    if (ok.length) await DB.batch(ok.map(m => DB.prepare("INSERT OR IGNORE INTO newsletter_sends (campaign, email, sent_at) VALUES (?, ?, ?)").bind(campaign, m.to, nowIso())));
+    const left = results.length - ok.length;
+    return ok.length || !r.error ? json({ ok: true, sent: ok.length, left, error: r.error || "" }) : json({ error: r.error, sent: 0, left }, 502);
   }
 
   if (head === "notify" && method === "POST") {

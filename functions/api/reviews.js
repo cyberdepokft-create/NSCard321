@@ -1,7 +1,7 @@
 /* GET /api/reviews?product=ID | ?latest=6 – jóváhagyott vélemények; POST – új vélemény (moderálás után jelenik meg). */
 import { json, readJson, clientIp, clean, cleanText, validEmail, nowIso, loadCatalog, originOf } from "../../lib/core.js";
 import { getDb, rateLimit } from "../../lib/db.js";
-import { sendMail, reviewAdminEmail } from "../../lib/mail.js";
+import { sendMail, reviewAdminEmail, shopEmail } from "../../lib/mail.js";
 
 const pub = r => ({ id: r.id, productId: r.product_id, name: r.name, rating: r.rating, title: r.title || "", body: r.body || "", verified: !!r.verified, date: r.created_at, reply: r.reply || "" });
 
@@ -51,7 +51,7 @@ export async function onRequestPost({ request, env }) {
   await DB.prepare("INSERT INTO reviews (product_id, name, rating, title, body, email, order_id, verified, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?)")
     .bind(r.product_id, r.name, r.rating, r.title, r.body, r.email, r.order_id, r.verified, r.created_at).run();
   const s = catalog.settings || {};
-  const to = env.ADMIN_EMAIL || s.email;
+  const to = shopEmail(env, s);
   if (to) { try { await sendMail(env, s, { to, ...reviewAdminEmail(s, originOf(request), r, p.name) }); } catch {} }
   return json({ ok: true, verified: !!verified });
 }

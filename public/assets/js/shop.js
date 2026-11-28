@@ -2007,6 +2007,8 @@
       revState.loading = true;
       fetch(`/api/reviews?product=${p.id}`).then(r => r.ok ? r.json() : { reviews: [] }).catch(() => ({ reviews: [] })).then(d => {
         revState.loading = false; revState.data = d; paintReviews(p);
+        /* e-mailes „Értékelem” link: a vélemények betöltése után odagörgetünk, és megnyitjuk az űrlapot */
+        if (location.hash === "#velemenyek") requestAnimationFrame(() => { box.scrollIntoView({ block: "start" }); box.querySelector("[data-rev-write]")?.click(); });
       });
       return;
     }
