@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T14:08:27.369Z",
+  "updatedAt": "2026-11-28T14:08:31.046Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -418,32 +418,6 @@
       ],
       "images": [
         "img/products/14-1.webp"
-      ],
-      "hidden": false,
-      "releaseDate": "",
-      "condition": "",
-      "lang": "",
-      "cardNo": "",
-      "rarity": "",
-      "grade": "",
-      "ean": "",
-      "maxPerOrder": 0
-    },
-    {
-      "id": 15,
-      "category": "tinek",
-      "name": "Pokémon TCG: Poké Ball Tin 2025",
-      "set": "",
-      "line": "",
-      "description": "",
-      "price": 6990,
-      "oldPrice": null,
-      "stock": 6,
-      "availability": "in_stock",
-      "badge": "",
-      "flags": [],
-      "images": [
-        "img/products/15-1.webp"
       ],
       "hidden": false,
       "releaseDate": "",
