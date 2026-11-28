@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T20:03:55.660Z",
+  "updatedAt": "2026-11-28T20:06:35.923Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -31,7 +31,7 @@
     "dispatchCutoff": 14,
     "deliveryText": "1–3 munkanap",
     "bankDetails": "",
-    "stockSyncedAt": "2026-11-28T20:03:42.963Z",
+    "stockSyncedAt": "2026-11-28T20:04:43.024Z",
     "lockerMap": true,
     "vatRate": "27%",
     "invoiceAuto": false,
@@ -373,6 +373,32 @@
     }
   },
   "products": [
+    {
+      "id": 27,
+      "category": "booster",
+      "name": "Perfect Order Booster",
+      "set": "Perfect Order",
+      "line": "",
+      "description": "1db Perfect Order Booster",
+      "price": 1890,
+      "oldPrice": null,
+      "stock": 36,
+      "availability": "in_stock",
+      "badge": "",
+      "flags": [],
+      "images": [
+        "https://cdn.jsdelivr.net/gh/cyberdepokft-create/NSCard321@40189ddf16c5793d910a48eee82b3d26ea67d422/public/store/images/27-mx0ucdg2-nbuh0e.png"
+      ],
+      "hidden": false,
+      "releaseDate": "",
+      "condition": "",
+      "lang": "",
+      "cardNo": "",
+      "rarity": "",
+      "grade": "",
+      "ean": "",
+      "maxPerOrder": 5
+    },
     {
       "id": 26,
       "category": "booster",
