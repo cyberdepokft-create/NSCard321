@@ -1,6 +1,6 @@
 {
   "version": 3,
-  "updatedAt": "2026-11-28T14:08:50.300Z",
+  "updatedAt": "2026-11-28T14:08:58.592Z",
   "updatedBy": "NS Card admin",
   "settings": {
     "shopName": "NS Card",
@@ -390,32 +390,6 @@
       ],
       "images": [
         "img/products/14-1.webp"
-      ],
-      "hidden": false,
-      "releaseDate": "",
-      "condition": "",
-      "lang": "",
-      "cardNo": "",
-      "rarity": "",
-      "grade": "",
-      "ean": "",
-      "maxPerOrder": 0
-    },
-    {
-      "id": 16,
-      "category": "tinek",
-      "name": "Pokémon TCG: Team Rocket Tin Persian Ex",
-      "set": "",
-      "line": "",
-      "description": "",
-      "price": 11990,
-      "oldPrice": null,
-      "stock": 2,
-      "availability": "in_stock",
-      "badge": "",
-      "flags": [],
-      "images": [
-        "img/products/16-1.webp"
       ],
       "hidden": false,
       "releaseDate": "",
